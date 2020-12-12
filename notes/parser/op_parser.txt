@@ -1,0 +1,183 @@
+Operation Parser
+
+
+== API ==
+
+// Given a stream of key presses or program steps, the operation parser
+// generates a stream of operations, each one with its operator and arguments.
+// Note that not all sequences of key presses produce an operation and therefore
+// some operations may remain incomplete.
+OperationParser
+  Operation operations[]   // An ever growing array. Last/current may be empty.
+
+  bool sec                 // 2nd modifier for operator or argument
+
+  // Updates the parser after the key (row, col) has been pressed.
+  // EVAL and LRN modes.
+  // 1 <= row <= 9, 1 <= col <= 5.
+  void keyPressed(int row, int col)
+
+  // Updates the parser after the step has been handled.
+  // RUN and SST modes.
+  // 0 <= step <= 99.
+  void handleStep(int step)
+
+Operation
+  ParserState parse_state  // enum: OPERATOR ARG_TYPE LAST_DD LAST_D COMPLETE
+  Operator operator
+  Arg args[]               // A growing array of length 0, 1 or 2
+
+Operator
+  bool inv
+  int code                 // -99 to 99
+
+Arg
+  ArgType arg_type         // enum: UNK IND LBL D DD DDD
+  int value                // 0 to 99: opcode for label or address or register..
+
+
+== Helper functions ==
+
+// From key to operator.
+// Not all combinations of inv/sec/step/key are operators:
+// - modifiers (2nd, INV, Ind) are not operators
+// - modifiers 2n', IN' (RUN mode) are not operators
+// - NOP is not an operator
+// - SST is not an operator in RUN mode
+// Everything else in an operator:
+// - we consider 2nd CLR as an operator identical to CLR
+// - we consider all straight operators to have an inv version
+//   (possibly identical to the straight one)
+
+// EVAL mode.
+bool is_sec(int row, int col)            // 21
+bool is_inv(int row, int col)            // 22
+bool is_ind(bool sec, int row, int col)  // 2nd 45
+bool is_nop(bool sec, int row, int col)  // 2nd 63
+bool is_dig(bool sec, int row, int col)  // !2nd 62,63,64,72,73,74,82,83,84,92
+int get_code(bool sec, int row, int col)
+int get_digit(int row, int col)
+
+// RUN mode.
+bool is_sec(int step)                    // 21
+bool is_sec2(int step)                   // 26
+bool is_inv(int step)                    // 22
+bool is_inv2(int step)                   // 27
+bool is_ind(int step)                    // 40
+bool is_nop(int step)                    // 68
+
+// Possible argument types for a given operator.
+int arg_count(Opr operator)  // 0, 1 or 2
+bool arg_may_be_label(Opr operator, int argIndex)
+bool arg_may_be_ind(Opr operator, int argIndex)
+int arg_may_be_d(Opr operator, int argIndex)
+bool arg_may_be_dd(Opr operator, int argIndex)
+bool arg_may_be_ddd(Opr operator, int argIndex)
+
+void cancel_operation()
+  add new empty operation   // Previous operation remains incomplete
+  requeue current key       // Preserving sec, row and col
+
+void go_next_arg()
+  if operation has additional args
+    add new arg
+  else
+    mark parse_state of current operation as COMPLETE
+    add new empty operation
+
+void go_next_arg_requeue()
+  go_next_arg()
+  handleStep(step) or keyPressed(row, col)  // Preserving sec
+
+
+== Implementation ==
+
+void keyPressed(int row, int col)
+  assert row >= 1 && row <= 9 && col >= 1 && col <= 5
+  opn = operations[-1]  // last/current operation
+  opr = opn.operator
+  assert opn.parse_state != COMPLETE
+  is_sec(rw): sec = !sec; return
+  case opn.parse_state:
+    OPERATOR:  // Determine operator
+      is_inv(srw): opr.inv = !opr.inv; return
+      is_noop = is_ind(.) || is_nop(.)
+      is_noop: return                   // ignore
+      opr.code = get_code(srw)
+      opn.sec = false
+      go_next_arg()
+    ARG_TYPE:  // Determine the type of the current argument
+      arg_type == UNK:
+        is_ind(.) && arg_may_be_ind(.): arg_type = IND; sec = false; return
+        is_dig(.) && arg_may_be_some_d(.):
+          value = get_digit(.)
+          arg_may_be_d(): arg_type = D; go_next_arg()
+          arg_may_be_dd(): arg_type = DD; opn.parse_state = LAST_D; return
+          arg_may_be_ddd(): arg_type = DDD; opn.parse_state = LAST_DD; return
+        arg_may_be_label(.):
+            arg_type = LBL; value = get_code(sec, row, col); sec = false;
+            go_next_arg()
+        cancel_operation()
+      arg_type == IND:
+        is_ind(.): arg_type = UNK; sec = false; return
+        is_dig(.): value = get_digit(.); opn.parse_state = LAST_D; return
+        cancel_operation()
+    LAST_DD:   // Determine the second digit for arg type DDD
+      is_dig(.): value = value * 10 + get_digit(.); opn.parse_state = LAST_D; return
+      else: go_next_arg_requeue();
+    LAST_D:    // Determine the last digit for arg type DD, DDD or *DD
+      is_dig(.): value = value * 10 + get_digit(.); go_next_arg()
+      else: go_next_arg_requeue();
+
+
+void handleStep(int step)
+  assert step >= 0 && step <= 99
+  opn = operations[-1]  // last/current operation
+  opr = opn.operator
+  assert opn.parse_state != COMPLETE
+  case opn.parse_state:
+    OPERATOR:  // Determine operator
+      is_inv(.) || is_inv2(): opr.inv = !opr.inv; return
+      is_noop = is_sec(.) || is_sec2(.) || is_ind(.) || is_nop(.) || is_sst(.)
+      is_noop: return                   // ignore
+      opr.code = step
+      go_next_arg()
+    ARG_TYPE:  // Determine the type of the current argument
+      arg_type == UNK:
+        is_ind(.) and arg_may_be_ind(.): arg_type = IND; return
+        arg_may_be_d(.): arg_type = D; value = step % 10; go_next_arg()
+        arg_may_be_dd(.): arg_type = DD; value = step; go_next_arg()
+        arg_may_be_ddd(.) && step < 10:
+          arg_type = DDD
+          value = step
+          opn.parse_state = LAST_DD
+        arg_may_be_label(.):
+          arg_type = LBL
+          value = step
+          go_next_arg()
+        assert(false)
+      arg_type == IND:
+        value = step
+        go_next_arg()
+    LAST_DD:  // Determine the last 2 digits for arg type DDD
+      value = value * 100 + step
+      go_next_arg();
+    LAST_D:
+      go_next_arg_requeue();
+
+
+== Types of Operators ==
+
+Arguments
+  NONE
+  D       = *DD or D
+  DD      = *DD or DD
+  ADDRESS = *DD or DDD or Label
+
+Examples
+      CLR    25
+      x=t    72 ADDRESS
+      Dsz    82 ADDRESS
+      STO    42 DD
+      StFlg  56 D
+  INV Lnx   -23
