@@ -1,44 +1,92 @@
-Operation Parser
+Parser
 
 
 == API ==
 
-// Given a stream of key presses or program steps, the operation parser
-// generates a stream of operations, each one with its operator and arguments.
-// Note that not all sequences of key presses produce an operation and therefore
-// some operations may remain incomplete.
-OperationParser
+// Given a stream of key presses and program steps, the parser generates a
+// stream of operations, each one with its operator and arguments. In addition,
+// the parser provides information about those keys and steps.
+// The parser is used by the engine to carry out those operations. It can also
+// be used for logging, to map key strokes to steps in LRN mode and to show the
+// structure of a program.
+Parser
   Operation operations[]   // An ever growing array. Last/current may be empty.
 
   bool sec                 // 2nd modifier for operator or argument
 
-  // Updates the parser after the key (row, col) has been pressed.
-  // EVAL and LRN modes.
-  // 1 <= row <= 9, 1 <= col <= 5.
-  void keyPressed(int row, int col)
+  // Updates the parser after the key (row, col) has been pressed, in EVAL or
+  // LRN modes.
+  // Params: 1 <= row <= 9, 1 <= col <= 5.
+  // Returns the type of key that has been pressed, taking into account the
+  // 2nd modifier.
+  Key keyPressed(int row, int col)
 
-  // Updates the parser after the step has been handled.
-  // RUN and SST modes.
-  // 0 <= step <= 99.
-  void handleStep(int step)
+  // Updates the parser after the step has been handled, in RUN or SST modes.
+  // Param: 0 <= code <= 99.
+  // Returns the type of step.
+  Code handleStep(int code)
+
+Code
+  KeyType type
+  int value
+
+KeyType
+  enum:
+    // OPERATOR
+    KEY_MOD_INV
+    KEY_OP
+
+    // ARGUMENT
+    KEY_MOD_IND
+    KEY_ARG_NUM
+    KEY_ARG_LBL
+
+    // MISC
+    KEY_LBL_BEG
+    KEY_LBL_ARG
+    KEY_IGNORED  // 2ND, 2N', IND, NOP, LBL or SST
 
 Operation
-  ParserState parse_state  // enum: OPERATOR ARG_TYPE LAST_DD LAST_D COMPLETE
+  ParseState parse_state
   Operator operator
-  Arg args[]               // A growing array of length 0, 1 or 2
+  Arg args[]      // A growing array of length 0, 1 or 2
+
+ParseState
+  enum:
+    OPERATOR      // Operator hasn't been determined yet
+    ARG_UNK       //
+    ARG_IND       //
+    SKIP_LBL      //
+    LAST_DD       //  
+    LAST_D        //  
+    ADDRESS       //
+    COMPLETE      // Operators and arguments have been fully determined
 
 Operator
   bool inv
-  int code                 // -99 to 99
+  int code        // 0 to 99
 
 Arg
-  ArgType arg_type         // enum: UNK IND LBL D DD DDD
-  int value                // 0 to 99: opcode for label or address or register..
+  ArgType type    // Indicates how to interpret the argument value
+  int value       // 0 to 999: opcode for label or address or register...
 
+ArgType
+  enum:
+    UNK           // Type so far unknown. Value doesn't have any meaning
+    IND           // Value is the indirect register
+    LBL           // Value is the code of a label
+    NUM           // Value is the index of a register, flag or step
+
+ArgKind
+  enum:
+    ARG_KIND_ADDRESS  // DDD, *DD or LBL
+    ARG_KIND_D        // D or *DD
+    ARG_KIND_DD       // DD (or *DD in EVAL/LRN modes)
+    ARG_KIND_SBR      // usr or SBR address
 
 == Helper functions ==
 
-// From key to operator.
+// From key/step to operator.
 // Not all combinations of inv/sec/step/key are operators:
 // - modifiers (2nd, INV, Ind) are not operators
 // - modifiers 2n', IN' (RUN mode) are not operators
@@ -50,120 +98,127 @@ Arg
 //   (possibly identical to the straight one)
 
 // EVAL mode.
-bool is_sec(int row, int col)            // 21
-bool is_inv(int row, int col)            // 22
-bool is_ind(bool sec, int row, int col)  // 2nd 45
-bool is_nop(bool sec, int row, int col)  // 2nd 63
 bool is_dig(bool sec, int row, int col)  // !2nd 62,63,64,72,73,74,82,83,84,92
 int get_code(bool sec, int row, int col)
-int get_digit(int row, int col)
+int get_dig(int row, int col)
 
 // RUN mode.
-bool is_sec(int step)                    // 21
-bool is_sec2(int step)                   // 26
-bool is_inv(int step)                    // 22
-bool is_inv2(int step)                   // 27
-bool is_ind(int step)                    // 40
-bool is_nop(int step)                    // 68
+bool is_usr(int step)                    // 10 to 19
 
 // Possible argument types for a given operator.
-int arg_count(Opr operator)  // 0, 1 or 2
-bool arg_may_be_label(Opr operator, int argIndex)
-bool arg_may_be_ind(Opr operator, int argIndex)
-int arg_may_be_d(Opr operator, int argIndex)
-bool arg_may_be_dd(Opr operator, int argIndex)
-bool arg_may_be_ddd(Opr operator, int argIndex)
+int arg_count(Operator operator)  // 0, 1 or 2
 
 void cancel_operation()
   add new empty operation   // Previous operation remains incomplete
-  requeue current key       // Preserving sec, row and col
+  keyPressed(row, col)      // Preserving sec
 
-void go_next_arg()
-  if operation has additional args
+void done_arg()
+  if current operation has additional args
     add new arg
   else
-    mark parse_state of current operation as COMPLETE
+    current_operation.parse_state = COMPLETE
     add new empty operation
 
-void go_next_arg_requeue()
-  go_next_arg()
+void done_arg_requeue()
+  done_arg()
   handleStep(step) or keyPressed(row, col)  // Preserving sec
 
 
 == Implementation ==
 
-void keyPressed(int row, int col)
-  assert row >= 1 && row <= 9 && col >= 1 && col <= 5
-  opn = operations[-1]  // last/current operation
-  opr = opn.operator
-  assert opn.parse_state != COMPLETE
-  is_sec(rw): sec = !sec; return
-  case opn.parse_state:
-    OPERATOR:  // Determine operator
-      is_inv(srw): opr.inv = !opr.inv; return
-      is_noop = is_ind(.) || is_nop(.)
-      is_noop: return                   // ignore
-      opr.code = get_code(srw)
-      opn.sec = false
-      go_next_arg()
-    ARG_TYPE:  // Determine the type of the current argument
-      arg_type == UNK:
-        is_ind(.) && arg_may_be_ind(.): arg_type = IND; sec = false; return
-        is_dig(.) && arg_may_be_some_d(.):
-          value = get_digit(.)
-          arg_may_be_d(): arg_type = D; go_next_arg()
-          arg_may_be_dd(): arg_type = DD; opn.parse_state = LAST_D; return
-          arg_may_be_ddd(): arg_type = DDD; opn.parse_state = LAST_DD; return
-        arg_may_be_label(.):
-            arg_type = LBL; value = get_code(sec, row, col); sec = false;
-            go_next_arg()
-        cancel_operation()
-      arg_type == IND:
-        is_ind(.): arg_type = UNK; sec = false; return
-        is_dig(.): value = get_digit(.); opn.parse_state = LAST_D; return
-        cancel_operation()
-    LAST_DD:   // Determine the second digit for arg type DDD
-      is_dig(.): value = value * 10 + get_digit(.); opn.parse_state = LAST_D; return
-      else: go_next_arg_requeue();
-    LAST_D:    // Determine the last digit for arg type DD, DDD or *DD
-      is_dig(.): value = value * 10 + get_digit(.); go_next_arg()
-      else: go_next_arg_requeue();
+KeyType keyPressed(int row, int col)
+  assert row in 1..9 && col in 1..5
 
-
-void handleStep(int step)
-  assert step >= 0 && step <= 99
-  opn = operations[-1]  // last/current operation
+  // Some definitions
+  opn = operations.last
   opr = opn.operator
-  assert opn.parse_state != COMPLETE
+
+  is(2nd): ~opn.sec                                                 KEY_MOD_2ND
+
   case opn.parse_state:
-    OPERATOR:  // Determine operator
-      is_inv(.) || is_inv2(): opr.inv = !opr.inv; return
-      is_noop = is_sec(.) || is_sec2(.) || is_ind(.) || is_nop(.) || is_sst(.)
-      is_noop: return                   // ignore
-      opr.code = step
-      go_next_arg()
-    ARG_TYPE:  // Determine the type of the current argument
-      arg_type == UNK:
-        is_ind(.) and arg_may_be_ind(.): arg_type = IND; return
-        arg_may_be_d(.): arg_type = D; value = step % 10; go_next_arg()
-        arg_may_be_dd(.): arg_type = DD; value = step; go_next_arg()
-        arg_may_be_ddd(.) && step < 10:
-          arg_type = DDD
-          value = step
-          opn.parse_state = LAST_DD
-        arg_may_be_label(.):
-          arg_type = LBL
-          value = step
-          go_next_arg()
-        assert(false)
-      arg_type == IND:
-        value = step
-        go_next_arg()
-    LAST_DD:  // Determine the last 2 digits for arg type DDD
-      value = value * 100 + step
-      go_next_arg();
+    COMPLETE:
+      assert(false)
+    OPERATOR:
+
+    // Condition             new inv|code            new state      ret_value
+
+      is(INV):               ~inv|.                  .              KEY_MOD_INV
+      is_op(.):              .|get_code(.)           [ DONE_OPR ]   KEY_OP
+      is(LBL):                                       SKIP_LBL       KEY_LBL_BEG
+      else:  // Skip Ind, Nop                                       KEY_IGNORED
+    SKIP_LBL:                                        OPERATOR       KEY_LBL_ARG
+
+    // Condition             new type|value          new state      ret_value
+
+    ARG_UNK:
+      is(Ind):               IND|.                   ARG_IND        KEY_MOD_IND
+      is_dig(.):
+        kind_is(ADDRESS):    NUM|get_dig(.)          LAST_DD        KEY_ARG_NUM
+        kind_is(DD):         NUM|get_dig(.)          LAST_D         KEY_ARG_NUM
+        kind_is(D):          NUM|get_dig(.)          [ DONE_ARG ]   KEY_ARG_NUM
+      is_label(.) &&
+          kind_is(ADDRESS):  LBL|get_code(.)         [ DONE_ARG ]   KEY_ARG_LBL
+      else:                                          [ CANC_OPN ]   [ RE_KEY ]
+    ARG_IND:
+      is(Ind):               UNK|.                   ARG_UNK        KEY_MOD_IND
+      is_dig(.):             .|get_dig(.)            LAST_D         KEY_ARG_NUM
+      else:                                          [ CANC_OPN ]   [ RE_KEY ]
+    LAST_DD:
+      is_dig(.):             .|val*10 + get_dig(.)   LAST_D         KEY_ARG_NUM
+      else:                                          [ DONE_ARG ]   [ RE_KEY ]
     LAST_D:
-      go_next_arg_requeue();
+      is_dig(.):             .|val*10 + get_dig(.)   [ DONE_ARG ]   KEY_ARG_NUM
+      else:                                          [ DONE_ARG ]   [ RE_KEY ]
+
+    // Dangling from RUN/SST
+    ADDRESS: SKIP_LBL:                               [ CANC_OPN ]   [ RE_KEY ]
+
+
+KeyType handleStep(int step)
+  assert step in 0..99
+
+  // Some definitions
+  opn = operations.last
+  opr = opn.operator
+
+  case opn.parse_state:
+    COMPLETE:
+      assert(false)
+    OPERATOR:
+
+    // Condition                  new inv|code        new state     ret_value
+
+      is(INV) || is(INV2):        ~opr.inv|.          .             KEY_MOD_INV
+      is_op(.):                   .|step              [ DONE_OPR ]  KEY_OP
+      is(LBL):                                        SKIP_LBL      KEY_LBL_BEG
+      else:  // Skip 2nd, 2nd', SST, Nop, Ind                       KEY_IGNORED
+    SKIP_LBL:                                         OPERATOR      KEY_LBL_ARG
+
+    // Condition                  type|value          state         ret_value
+
+    ARG_UNK:
+      case arg_kind(.):
+        ARG_KIND_ADDRESS:         .|.                 ADDRESS       [ RE_HNDL ]
+        ARG_KIND_DD():            NUM|step            [ DONE_ARG ]  KEY_ARG_NUM
+        ARG_KIND_D:
+          is(Ind):                IND|.               ARG_IND       KEY_MOD_IND
+          else:                   NUM|step            [ DONE_ARG ]  KEY_ARG_NUM
+        ARG_KIND_SBR:
+          is_usr(.):              LBL|step            [ DONE_ARG ]  KEY_ARG_LBL
+          is(SBR):                .|.                 ADDRESS       KEY_PGM_SBR
+          is(2nd) || is(SST):                                       KEY_IGNORED
+          else:                                       [ CANC_OPN ]  [ RE_HNDL ]
+    ARG_IND:                      .|step              [ DONE_ARG ]  KEY_ARG_NUM
+    ADDRESS:
+      is(Ind):                    IND|.               LAST_DD       KEY_MOD_IND
+      is_dig(.):                  NUM|step            LAST_DD       KEY_ARG_NUM
+      is_label(.):                LBL|step            [ DONE_ARG ]  KEY_ARG_LBL
+      is_op(.):                                       [ CANC_OPN ]  [ RE_HNDL ]
+      else: return  // Skip 2nd, 2n', SST                           KEY_IGNORED
+    LAST_DD:                      .|val*100 + step    [DONE_ARG]    KEY_ARG_NUM
+    LAST_D:   // Should happen rarely, going from EVAL to SST
+                                  .|val*10 + step/10  [DONE_ARG]    KEY_ARG_NUM
+                                  handleStep(step % 10)
 
 
 == Types of Operators ==
@@ -173,6 +228,7 @@ Arguments
   D       = *DD or D
   DD      = *DD or DD
   ADDRESS = *DD or DDD or Label
+  SBR     = USR or SBR ADDRESS
 
 Examples
       CLR    25
@@ -181,3 +237,18 @@ Examples
       STO    42 DD
       StFlg  56 D
   INV Lnx   -23
+      Pgm    36 DD SBR    (RUN mode, straight DD)
+
+
+== Test cases ==
+
+x^2
+INV Lnx
+STO 00
+STO *00
+STO 0 Lnx
+Stflg 0
+Lbl A
+INV SBR
+x=t 123
+
