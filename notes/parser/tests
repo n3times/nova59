@@ -1,0 +1,63 @@
+== No param           EVAL                RUN
+
+lnx                   lnx                 lnx
+inv lnx               inv lnx             lnx
+sec lnx               log                 lnx
+sec sec lnx           lnx                 lnx
+inv inv lnx           lnx                 lnx  
+inv sec lnx           inv log             inv lnx
+sec inv lnx           inv log             inv lnx
+in' lnx               n/a                 inv lnx
+
+== DD
+
+sum dd                sum dd
+sum *dd               sum *dd
+sum lnx               sum : lnx
+
+== D
+
+fix d                 fix d
+fix *dd               fix *dd
+fix lnx               fix : lnx
+
+== Address
+
+gto ddd               gto ddd
+gto *dd               gto *dd
+gto lnx               gto lnx
+gto del               gto : del
+
+== D address
+
+stf d lnx             stf d lnx
+stf d lnx             stf d ddd
+stf d lnx             stf d *dd
+stf d del             stf d : del
+
+== Pgm SBR            RUN                 EVAL
+
+pgm dd A              pgm dd A            pgm dd : A
+pgm dd SBR DDD        pgm dd ddd          pgm dd : sbr ddd
+pgm dd SBR *DD        pgm dd *dd          pgm dd : sbr *dd
+pgm dd SBR lnx        pgm dd lnx          pgm dd : sbr lnx
+pgm dd SBR del        pgm dd sbr : del    pgm dd : sbr : del
+pgm dd lnx            pgm dd : lnx        pgm dd : lnx
+
+== Auto complete
+
+sto d lnx             sto 0d : lnx
+gto dd lnx            gto 0dd : lnx
+gto d lnx             gto 00d : lnx
+gto *d lnx            gto *0d : lnx
+
+== Edge cases
+
+inv lbl A lnx         inv lnx
+inv nop lnx           inv lnx
+inv ind lnx           inv lnx
+inv 2nd lnx           inv lnx
+inv 2n' lnx           inv lnx
+inv del lnx           inv del : lnx
+inv sst lnx           inv lnx (RUN) and inv sst : lnx (EVAL)
+

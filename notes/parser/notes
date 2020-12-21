@@ -2,14 +2,14 @@ FAITHFULNESS
 * Parser should support all modes EVAL LRN RUN SST
 * Nail RUN mode
 * Treat RUN and SST identically for consistency
-* EVAL and LRN should be good but don't need to be super faithful if changes
-  improve quality or simplify design
+* Treat EVAL and LRN identically if it simplifies design
+* In EVAL and LRN mode, prioritize quality/simplicity over faithfulness
 
 
 USES
 * Program listing in RUN mode
 * Logging in RUN and EVAL modes
-* Have single state so we can transition between modes
+* State change in any mode, including LRN
 
 
 DIFFICULTIES
