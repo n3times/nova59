@@ -1,0 +1,241 @@
+Parser
+
+
+== API ==
+
+// Given a stream of key presses and program steps, the parser generates a
+// stream of structured operations.
+Parser
+  Operation operations[]   // An ever growing array. Last/current may be empty.
+
+  bool sec  // 2nd key is pressed (EVAL/LRN modes).
+
+  // Updates the parser after a key has been pressed (EVAL/LRN modes).
+  // Params: row in 1..9, col in 1..5.
+  // Returns the code and type of key that has been pressed.
+  Key handleKey(Mode mode, int row, int col)
+
+  // Updates the parser after the code has been handled (RUN mode).
+  // Param: code in 1..99.
+  // Returns the code and type for the code.
+  Key handleCode(int code)
+
+Mode - Enum
+  MODE_LRN MODE_EVAL MODE_RUN
+
+Key
+  KeyType type
+  int value
+
+KeyType - enum
+  KEY_MOD_SEC  // 2nd in EVAL/LRN
+  KEY_OPR_INV  // INV or INV2 modifier key
+  KEY_OPR_COD  // Operator code
+  KEY_OPD_IND  // Ind modifier key
+  KEY_OPD_DIG  // 1 or 2 digits used as part of the operand
+  KEY_OPD_LBL  // A label used as operand
+  KEY_SKIP     // Can be 2ND, 2N', IND, NOP, LBL or SST
+  KEY_LBL_BEG  // Beginning of label ("Lbl" in "Lbl STO")
+  KEY_LBL_END  // End of label ("STO" in "Lbl STO")
+  KEY_EVL_SST  // SST has been pressed in EVAL mode
+
+Operation
+  ParseState parse_state
+  Operator operator
+  Operand operands[]      // A growing array of length 0, 1 or 2
+
+ParseState - enum
+  OPR LBL_END                             // OPERATOR
+  OPD_UNK OPD_IND LAST_DD LAST_D ADDRESS  // OPERAND
+  COMPLETE
+
+Operator
+  bool inv
+  int code        // 0 to 99
+
+Operand
+  OperandType type  // Indicates how to interpret the operand value
+  int value         // 0 to 999: opcode for label or address or register...
+
+OperandType - enum
+  UNK IND LBL NUM
+
+OperandKind - enum
+  OPD_KIND_ADDRESS  // DDD, *DD or LBL
+  OPD_KIND_D        // D or *DD
+  OPD_KIND_DD       // DD in RUN and DD or *DD in EVAL/LRN
+  OPD_KIND_SBR      // <usr> or SBR <address>
+
+OperatorKind - enum
+  OPR_KIND_NO_PARAM
+  OPR_KIND_D
+  OPR_KIND_DD
+  OPR_KIND_ADDRESS
+  OPR_KIND_D_ADDRESS
+  OPR_NONE
+
+== Data ==
+
+int get_code(bool sec, int row, int col)  // code in 0..99
+
+// Depends on inv only for "SBR" and "Fix".
+// Depends on mode only for "Pgm".
+OperatorKind operator_kind(bool inv, int opr_code, Mode mode)
+
+// For debugging.
+String stringForCode(int opr_code)
+
+// All codes are ops except 2nd INV Ind 2n' IN' NOP Lbl.
+// SST is an op in LRN mode but not in RUN and EVAL modes.
+bool is_operator(bool inv, int opr_code, Mode mode)
+// All codes are labels except 0..9, 2nd, 2n', Ind, LRN, SST, BST, Del, Ins.
+bool is_label(int code)
+
+== Helper functions ==
+
+int operand_count(bool inv, int opr_code, Mode mode):
+  kind = operator_kind(inv, opr_code, mode)
+  case kind:
+    OPR_KIND_NO_PARAM:  return 0
+    OPR_KIND_D_ADDRESS: return 2
+    default:            return 1
+
+OperandKind operand_kind(Mode mode, bool inv, int opr_code, int opd_index)
+   opr_kind = operator_kind(inv, opr_code, mode)
+   case opr_kind:
+     OPR_KIND_NO_PARAM: assert(false)
+     OPR_KIND_D: assert(opd_index == 0); return D
+     OPR_KIND_DD: assert(opd_index == 0); return DD
+     OPR_KIND_ADDRESS: assert(opd_index == 0); return ADDRESS
+     OPR_KIND_D_ADDRESS:
+       opd_index:
+         0: return D
+         1: return ADDRESS
+         2: assert(false)
+
+bool is_dig(bool sec, int row, int col) = get_code(.) in 0..9
+bool is_usr(int code) = code in 10..19 // A-E and A'-E'
+
+[ CANC_OPN ]
+  add new operation  // Previous operation remains incomplete
+    parse_state = OPR
+    operator = (false, -1)
+    operands = []
+
+[ DONE_OPR ]
+  Same as DONE_OPD
+
+[ DONE_OPD ]
+  if current operation has additional operands
+    add new operand (UNK, -1)
+    current_operation.parse_state = OPD_UNK
+  else
+    current_operation.parse_state = COMPLETE
+    add empty operation
+      parse_state = OPR
+      operator = (false, -1)
+      operands = []
+
+[ RE_KEY ]
+  handleKey(mode, row, col)  // Preserving sec
+
+[ RE_HNDL ]
+  handleCode(code)
+
+== Implementation ==
+
+KeyType handleKey(Mode mode, int row, int col)
+  assert row in 1..9 && col in 1..5
+
+  mode == MODE_EVAL && self.mode == MODE_LRN: cancelOperationIfPending()
+  self.mode = mode
+
+  opn = operations.last
+  opr = opn.operator
+
+  is(2nd): ~opn.sec                                                 KEY_MOD_SEC
+  is(SST) && mode == MODE_EVAL:                                     KEY_EVL_SST
+
+  code = get_code(opn.sec, row, col)
+
+  case opn.parse_state:
+    COMPLETE: assert(false)
+
+    // Condition             opr inv|code            new state      ret_value
+    OPERATOR:
+      is(INV):               ~opr.inv|.              .              KEY_OPR_INV
+      is_operator(.):        .|code                  [ DONE_OPR ]   KEY_OPR_COD
+      is(LBL):                                       LBL_END        KEY_LBL_BEG
+      else:  // Skip Ind, Nop                                       KEY_SKIP
+    LBL_END:                                         OPERATOR       KEY_LBL_END
+
+    // Condition             opd type|value          new state      ret_value
+    OPD_UNK:
+      is(Ind):               IND|.                   OPD_IND        KEY_OPD_IND
+      is_dig(.):
+        case operand_kind(.):
+          OPD_KIND_ADDRESS:  NUM|code                LAST_DD        KEY_OPD_DIG
+          OPD_KIND_DD:       NUM|code                LAST_D         KEY_OPD_DIG
+          OPD_KIND_D:        NUM|code                [ DONE_OPD ]   KEY_OPD_DIG
+      is_label(.) && operand_kind(.) == OP_KIND_ADDRESS:
+                             LBL|code                [ DONE_OPD ]   KEY_OPD_LBL
+      else:  // Program editing                      [ CANC_OPN ]   [ RE_KEY ]
+    OPD_IND:
+      is(Ind):               UNK|.                   OPD_UNK        KEY_OPD_IND
+      is_dig(.):             .|code                  LAST_D         KEY_OPD_DIG
+      else:                                          [ CANC_OPN ]   [ RE_KEY ]
+    LAST_DD:
+      is_dig(.):             .|val*10 + code         LAST_D         KEY_OPD_DIG
+      else:                                          [ DONE_OPD ]   [ RE_KEY ]
+    LAST_D:
+      is_dig(.):             .|val*10 + code         [ DONE_OPD ]   KEY_OPD_DIG
+      else:                                          [ DONE_OPD ]   [ RE_KEY ]
+
+    // Dangling from RUN
+    ADDRESS:                                         [ CANC_OPN ]   [ RE_KEY ]
+
+
+KeyType handleCode(int code)
+  assert code in 0..99
+
+  // Some definitions
+  opn = operations.last
+  opr = opn.operator
+
+  case opn.parse_state:
+    COMPLETE: assert(false)
+
+    // Condition                  opr inv|code        new state     ret_value
+    OPERATOR:
+      is(INV) || is(INV2):        ~opr.inv|.          .             KEY_OPR_INV
+      is_operator(.):             .|code              [ DONE_OPR ]  KEY_OPR_COD
+      is(LBL):                                        LBL_END       KEY_LBL_BEG
+      else:  // Skip 2nd, 2nd', SST, Nop, Ind                       KEY_SKIP
+    LBL_END:                                          OPERATOR      KEY_LBL_END
+
+    // Condition                  opd type|value      state         ret_value
+    OPD_UNK:
+      case operand_kind(.):
+        OPD_KIND_ADDRESS:         .|.                 ADDRESS       [ RE_HNDL ]
+        OPD_KIND_DD:              NUM|code            [ DONE_OPD ]  KEY_OPD_DIG
+        OPD_KIND_D:
+          is(Ind):                IND|.               OPD_IND       KEY_OPD_IND
+          else:                   NUM|code            [ DONE_OPD ]  KEY_OPD_DIG
+        OPD_KIND_SBR:
+          is_usr(.):              LBL|code            [ DONE_OPD ]  KEY_OPD_LBL
+          is(SBR):                .|.                 ADDRESS       KEY_PGM_SBR
+          is(2nd) || is(SST):                                       KEY_SKIP
+          else:                                       [ CANC_OPN ]  [ RE_HNDL ]
+    OPD_IND:                      .|code              [ DONE_OPD ]  KEY_OPD_DIG
+    ADDRESS:
+      is(Ind):                    IND|.               LAST_DD       KEY_OPD_IND
+      is_dig(.):                  NUM|code            LAST_DD       KEY_OPD_DIG
+      is_label(.):                LBL|code            [ DONE_OPD ]  KEY_OPD_LBL
+      is_operator(.):                                 [ CANC_OPN ]  [ RE_HNDL ]
+      else:  // 2nd, 2n', SST                                       KEY_SKIP
+    LAST_DD:                      .|val*100 + code    [ DONE_OPD ]  KEY_OPD_DIG
+    LAST_D:  // Dangling EVAL to RUN (w/SST)          [ DONE_OPD ]  [ RE_HNDL ]
+    ///LAST_D:   // Should happen rarely, going from EVAL to RUN(SST)
+    ///                           .|val*10 + code/10  [DONE_OPD]    KEY_OPD_DIG
+    ///                           handleCode(code % 10)
+
