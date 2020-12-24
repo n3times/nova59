@@ -13,18 +13,15 @@ Parser
   // Updates the parser after a physical key, from the keyboard, has been
   // pressed (EVAL/LRN modes).
   // Params: row in 1..9, col in 1..5.
-  // Returns the key that has been pressed and its context.
-  KeyPressed handleKey(Mode mode, int row, int col)
+  // Returns the key that has been handled and its context.
+  KeyHandled handleKeyPressed(Mode mode, int row, int col)
 
-  // Updates the parser after the key has been handled (EVAL/LRN modes).
-  // Note: Key should be different from 2nd 2n' and INV2.
-  KeyPressed handleKey(Mode mode, Key key)
-
-  // Updates the parser after the step has been handled (RUN mode).
-  // The step can stand for a key (possibly synthesized) or for 2 digits.
-  // Param: step in 1..99.
-  // Returns the context of the step.
-  StepContext handleStep(int step)
+  // Updates the parser after val has been handled.
+  // In MODE_EVAL and MODE_LRN, val is a key.
+  // In MODE_RUN and MODE_SST, val is a step.
+  // Param: val in 0..99.
+  // Returns the key that has been handled and its context.
+  KeyHandled handle(Mode mode, int val)
 
 Mode - enum
   MODE_LRN MODE_EVAL MODE_RUN
@@ -34,32 +31,23 @@ Key - enum
   K_EE K_A K_B ...
   ...
 
-KeyPressed
+KeyHandled
   KeyContext context
   Key key
 
 KeyContext - enum
-  KEY_MOD_SEC  // 2nd
+  KEY_MOD_SEC  // 2nd has been selected
+  KEY_MOD_SE2  // 2nd has been unselected
   KEY_OPR_INV  // INV
   KEY_OPR_COD  // Operator code
   KEY_OPD_IND  // Ind modifier key
   KEY_OPD_DIG  // Digit used as part of the operand
+  KEY_OPD_DI2  // 2 digits used as part of the operand
   KEY_OPD_LBL  // A label used as operand
   KEY_SKIP     // Can be IND, NOP
   KEY_LBL_BEG  // Beginning of label ("Lbl" in "Lbl STO")
   KEY_LBL_END  // End of label ("STO" in "Lbl STO")
   KEY_EVL_SST  // SST has been pressed in EVAL mode
-
-StepContext - enum
-  STP_OPR_INV  // INV or INV2 modifier
-  STP_OPR_COD  // Operator
-  STP_OPD_IND  // Ind modifier
-  STP_OPD_DIG  // 1 digit used as part of the operand
-  STP_OPD_DI2  // 2 digits used as part of the operand
-  STP_OPD_LBL  // A label used as operand
-  STP_SKIP     // Can be 2ND, 2N', IND, NOP or SST
-  STP_LBL_BEG  // Beginning of label ("Lbl" in "Lbl STO")
-  STP_LBL_END  // End of label ("STO" in "Lbl STO")
 
 Operation
   ParseState parse_state
@@ -85,13 +73,15 @@ OperandType - enum
 OperandKind - enum
   OPD_KIND_ADDRESS  // DDD, *DD or LBL
   OPD_KIND_D        // D or *DD
-  OPD_KIND_DD       // DD in RUN and DD or *DD in EVAL/LRN
+  OPD_KIND_DD       // DD or *DD
+  OPD_KIND_DD_ONLY  // DD
   OPD_KIND_SBR      // <usr> or SBR <address>
 
 OperatorKind - enum
   OPR_KIND_NO_PARAM
   OPR_KIND_D
   OPR_KIND_DD
+  OPR_KIND_DD_ONLY
   OPR_KIND_ADDRESS
   OPR_KIND_D_ADDRESS
   OPR_KIND_NONE
@@ -159,33 +149,31 @@ done_opd()
       operator = (false, -1)
       operands = []
 
-re_key()
-  handleKey(mode, row, col)  // Preserving sec
-
-re_hndl()
-  handleStep(step)
-
 
 == Implementation ==
 
-KeyPressed handleKey(Mode mode, int row, int col)
+KeyHandled handleKeyPressed(Mode mode, int row, int col)
+  assert mode == MODE_KEY
   assert row in 1..9 && col in 1..5
-  key = get_key(sec, row, col)
-  sec = false
-  return handleKey(mode, key)
+  return handleKey(mode, get_key(false, row, col))
 
-KeyPressed handleKey(Mode mode, Key key)
-  is(2nd): ~sec                                                     KEY_MOD_SEC
-  is(2n'):                                                          KEY_SKIP
-  key = get_key(sec, key)
-  sec = false
-  parse_state == PRE_OPR && key == IN':
-    key = INV
-    sec = true
+KeyHandled handle(Mode mode, int val)
+  assert val in 0..99
+
+  // Handle 2nd modifier.
+  mode == MODE_KEY:
+    is(2nd): ~sec                                                   KEY_MOD_SEC
+    is(2n'):                                                        KEY_SKIP
+    key = get_key(sec, key)
+    sec = false
+    parse_state == PRE_OPR && key == IN':
+      key = INV
+      sec = true
 
   mode == MODE_EVAL && self.mode == MODE_LRN: cancelOperationIfPending()
   self.mode = mode
 
+  // Some definitions
   opn = operations.last
   opr = opn.operator
 
@@ -194,76 +182,53 @@ KeyPressed handleKey(Mode mode, Key key)
   case opn.parse_state:
     COMPLETE: assert(false)
 
-    // Condition             opr inv|key             new state      ret_value
-    PRE_OPR:
-      is(INV):               ~opr.inv|.              .              KEY_OPR_INV
-      is_opr(.):             .|key                   done_opr()     KEY_OPR_COD
-      is(LBL) && mode == LRN:                        LBL_END        KEY_LBL_BEG
-      else:  /* Skip Ind, Nop */                                    KEY_SKIP
-    LBL_END:                                         PRE_OPR        KEY_LBL_END
-
-    // Condition             opd type|value          new state      ret_value
-    OPD_UNK:
-      is(Ind):               IND|.                   OPD_IND        KEY_OPD_IND
-      is_dig(.):
-        case operand_kind(.):
-          OPD_KIND_ADDRESS:  NUM|key                 LAST_DD        KEY_OPD_DIG
-          OPD_KIND_DD:       NUM|key                 LAST_D         KEY_OPD_DIG
-          OPD_KIND_D:        NUM|key                 done_opd()     KEY_OPD_DIG
-      is_lbl(.) && operand_kind(.) == OP_KIND_ADDRESS:
-                             LBL|key                 done_opd()     KEY_OPD_LBL
-      else:  /* Program editing */                   canc_opn()     re_key()
-    OPD_IND:
-      is(Ind):               UNK|.                   OPD_UNK        KEY_OPD_IND
-      is_dig(.):             .|key                   LAST_D         KEY_OPD_DIG
-      else:                                          canc_opn()     re_key()
-    LAST_DD:
-      is_dig(.):             .|val*10 + key          LAST_D         KEY_OPD_DIG
-      else:                                          done_opd()     re_key()
-    LAST_D:
-      is_dig(.):             .|val*10 + key          done_opd()     KEY_OPD_DIG
-      else:                                          done_opd()     re_key()
-    ADDRESS:  /* Danging from RUN */                 canc_opn()     re_key()
-
-StepContext handleStep(int step)
-  assert step in 0..99
-
-  // Some definitions
-  opn = operations.last
-  opr = opn.operator
-
-  case opn.parse_state:
-    COMPLETE: assert(false)
-
     // Condition                  opr inv|key         new state     ret_value
     PRE_OPR:
-      is(INV) || is(INV2):        ~opr.inv|.          .             STP_OPR_INV
-      is_opr(.):                  .|step              done_opr()    STP_OPR_COD
-      is(LBL):                                        LBL_END       STP_LBL_BEG
-      else:  /* Skip 2nd, 2nd', SST, Nop, Ind */                    STP_SKIP
-    LBL_END:                                          PRE_OPR       STP_LBL_END
+      is(INV) || is(INV2):        ~opr.inv|.          .             KEY_OPR_INV
+      is_opr(.):                  .|val               done_opr()    KEY_OPR_COD
+      is(LBL) && mode != EVAL:                        LBL_END       KEY_LBL_BEG
+      else:  /* Skip 2nd, 2nd', Nop, Ind, maybe Lbl, SST */         KEY_SKIP
+    LBL_END:                                          PRE_OPR       KEY_LBL_END
 
     // Condition                  opd type|value      state         ret_value
     OPD_UNK:
       case operand_kind(.):
-        OPD_KIND_ADDRESS:         .|.                 ADDRESS       re_hndl()
-        OPD_KIND_DD:              NUM|step            done_opd()    STP_OPD_DI2
+        OPD_KIND_ADDRESS:         .|.                 ADDRESS       handle(.)
+        OPD_KIND_DD:
+          is(Ind):                IND|.               OPD_IND       KEY_OPD_IND
+          // fall through
+        OPD_KIND_DD_ONLY:
+          MODE_STEP:              NUM|val             done_opd()    KEY_OPD_DI2
+          is_dig(.):              NUM|val             LAST_D        KEY_OPD_DIG
+          else:                                       canc_opn()    handle(.)
         OPD_KIND_D:
-          is(Ind):                IND|.               OPD_IND       STP_OPD_IND
-          else:                   NUM|step            done_opd()    STP_OPD_DIG
+          is(Ind):                IND|.               OPD_IND       KEY_OPD_IND
+          MODE_STEP:              NUM|val%10          done_opd()    KEY_OPD_DIG
+          is_dig(.):              NUM|val             done_opd()    KEY_OPD_DIG
+          else:                                       canc_opn()    handle(.)
         OPD_KIND_SBR:
-          is_usr(.):              LBL|step            done_opd()    STP_OPD_LBL
-          is(SBR):                .|.                 ADDRESS       STP_PGM_SBR
-          is(2nd) || is(SST):                                       STP_SKIP
-          else:                                       canc_opn()    re_hndl()
-    OPD_IND:                      .|step              done_opd()    STP_OPD_DI2
+          is_usr(.):              LBL|val             done_opd()    KEY_OPD_LBL
+          is(SBR):                .|.                 ADDRESS       KEY_PGM_SBR
+          is(2nd) || is(SST):                                       KEY_SKIP
+          else:                                       canc_opn()    handle(.)
+    OPD_IND:
+      MODE_STEP:                  .|val               done_opd()    KEY_OPD_DI2
+      is(Ind):                    UNK|.               OPD_UNK       KEY_OPD_IND
+      is_dig(.):                  .|key               LAST_D        KEY_OPD_DIG
+      else:                                           canc_opn()    handle(.)
     ADDRESS:
-      is(Ind):                    IND|.               OPD_IND       STP_OPD_IND
-      is_dig(.):                  NUM|step            LAST_DD       STP_OPD_DIG
-      is_lbl(.):                  LBL|step            done_opd()    STP_OPD_LBL
-      is_opr(.):                                      canc_opn()    re_hndl()
-      else:  /* 2nd, 2n', SST */                                    STP_SKIP
-    LAST_DD:                      .|val*100 + step    done_opd()    STP_OPD_DI2
-    LAST_D:  // Dangling EVAL to RUN (w/SST)          done_opd()    re_hndl()
-    // In a real TI-59, LAST_D is treated as a digit completing the operand,
+      is(Ind):                    IND|.               OPD_IND       KEY_OPD_IND
+      is_dig(.):                  NUM|val             LAST_DD       KEY_OPD_DIG
+      is_lbl(.):                  LBL|val             done_opd()    KEY_OPD_LBL
+      is_opr(.):                                      canc_opn()    handle(.)
+      else:  /* 2nd, 2n', maybe SST */                              KEY_SKIP
+    LAST_DD:
+      MODE_STEP:                  .|value*100 + val   done_opd()     KEY_OPD_DI2
+      is_dig(.):                  .|value*10 + val    LAST_D         KEY_OPD_DIG
+      else:                                           done_opd()     handle(.)
+    LAST_D:
+      is_dig(.):                  .|value*10 + val    done_opd()     KEY_OPD_DIG
+      else:                                           done_opd()     handle(.)
+    // In MODE_STEP, LAST_D only appears as dangling from MODE_EVAL to MODE_SST.
+    // In a real TI-59, it is treated as a digit completing the operand,
     // followed by another digit.
