@@ -1,19 +1,17 @@
 FAITHFULNESS
-* Parser should support all modes EVAL LRN RUN SST
+* Parser should support all modes: EVAL LRN RUN SST
 * Nail RUN mode
 * Treat RUN and SST identically for consistency
 * Treat EVAL and LRN similarly if it simplifies design
 * In EVAL and LRN mode, prioritize common sense and simplicity over faithfulness
-
 
 USES
 * Executing operations, change state in any mode
 * Program listing
 * Logging in RUN and EVAL modes
 
-
 DIFFICULTIES
-* Some keys/step are sometimes ignored: Nop, SST, Ind, 2nd, 2n'
+* Some keys/steps are sometimes ignored: Nop, SST, Ind, 2nd, 2n'
 * Lbl is not an operator but can be inside an operator: Ind Lbl A Lnx
 * Pgm XX SBR address in RUN/SST modes
 * SBR and inv SBR have different number of arguments. Same for Fix
@@ -21,3 +19,8 @@ DIFFICULTIES
 * SST is its own beast: ignored or highest precedence
 * Transitions between modes can be difficult
 * What happens beyond last program step
+
+DESIGN
+* Share state among modes.
+* Share logic, one main parse function, among modes.
+* Have unit tests for every path/case.

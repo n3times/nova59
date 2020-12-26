@@ -1,4 +1,4 @@
-== No param           EVAL                RUN
+== Opr Modifiers      EVAL                RUN
 
 lnx                   lnx                 lnx
 inv lnx               inv lnx             lnx
@@ -7,57 +7,133 @@ sec sec lnx           lnx                 lnx
 inv inv lnx           lnx                 lnx  
 inv sec lnx           inv log             inv lnx
 sec inv lnx           inv log             inv lnx
-in' lnx               n/a                 inv lnx
-
-== DD
-
-sum dd                sum dd
-sum *dd               sum *dd
-sum lnx               sum : lnx
+in' lnx               inv log             inv lnx
 
 == D
 
-fix d                 fix d
-fix *dd               fix *dd
-fix lnx               fix : lnx
+fix 1                 fix 1               fix 1
+fix lnx               fix : lnx           fix 3
+fix * 12              fix *12             fix * 12
+fix * 1 lnx           fix *1 : lnx        fix *1 : lnx
+fix * lnx             fix *' : lnx        fix *23
 
-== Address
+== DD
 
-gto ddd               gto ddd
-gto *dd               gto *dd
-gto lnx               gto lnx
-gto del               gto : del
+sto 12                sto 12              sto 12
+sto 1 lnx             sto 1 : lnx         sto 1 : lnx
+sto lnx               sto' : lnx          sto 23
+sto * 12              sto *12             sto 40 : C
+sto * 1 lnx           sto *1 : lnx        sto 40 : 1 : lnx
+sto * lnx             sto *' : lnx        sto 40 : lnx
 
-== D address
+== DD_ONLY
 
-stf d lnx             stf d lnx
-stf d lnx             stf d ddd
-stf d lnx             stf d *dd
-stf d del             stf d : del
+st* 12                st* 12              st* 12
+st* 1 lnx             st* 1 : lnx         st* 1 : lnx
+st* lnx               st*' : lnx          st* 23
+st* * 12              st*' : 1 : 2        st* 40 : C
+st* * 1 lnx           st*' : 1 : lnx      st* 40 : 1 : lnx
+st* * lnx             st*' : lnx          st* 40 : lnx
 
-== Pgm SBR            RUN                 EVAL
+== ADDRESS
 
-pgm dd A              pgm dd A            pgm dd : A
-pgm dd SBR DDD        pgm dd ddd          pgm dd : sbr ddd
-pgm dd SBR *DD        pgm dd *dd          pgm dd : sbr *dd
-pgm dd SBR lnx        pgm dd lnx          pgm dd : sbr lnx
-pgm dd SBR del        pgm dd sbr : del    pgm dd : sbr : del
-pgm dd lnx            pgm dd : lnx        pgm dd : lnx
+gto 123               gto 123             gto 123
+gto 12 lnx            gto 12 : lnx        gto 12 : lnx
+gto 1 lnx             gto 1 : lnx         gto 1 : lnx
+gto lnx               gto lnx             gto lnx
+gto * 12              gto *12             gto *12
+gto * 1 lnx           gto *1 : lnx        gto *1 : lnx
+gto * lnx             gto *' : lnx        gto *23
 
-== Auto complete
+== ADDRESS +
 
-sto d lnx             sto 0d : lnx
-gto dd lnx            gto 0dd : lnx
-gto d lnx             gto 00d : lnx
-gto *d lnx            gto *0d : lnx
+gto 2nd lnx           gto log             gto lnx
+gto 2n' lnx           gto lnx             gto lnx
+gto sst lnx           gto lnx             gto lnx
 
-== Edge cases
+== Labels vs non labels
 
-inv lbl A lnx         inv lnx
+gto 0                 gto 0'              gto 0'
+gto 2nd               gto'                gto'
+gto inv               gto inv             gto inv
+gto 2n'               gto'                gto'
+gto in'               gto in'             gto in'
+gto lrn               gto : lrn           gto : lrn
+gto ind               gto *'              gto *'
+gto sst               gto'                gto'
+gto ins               gto : ins           gto : ins 
+gto bst               gto : bst           gto : bst   
+gto del               gto : del           gto : del
+gto nop               gto nop             gto nop
+gto lbl               gto lbl             gto lbl
+
+gto A                 gto A               gto A
+gto gto               gto gto             gto gto
+
+== D ADDRESS
+
+stf 1 lnx             stf 1 lnx
+stf 1 234             stf 1 234
+stf 1 *23             stf 1 *23
+stf *12 lnx           stf *12 lnx
+stf *12 345           stf *12 345
+stf *12 *34           stf *12 *35
+stf *1 *2 lnx         stf *1 *2 : lnx
+stf 1 2nd lnx         stf 1 lnx
+stf 1 2n' lnx         stf 1 lnx
+stf 1 SST lnx         stf 1 lnx
+stf 1 del lnx         stf 1' : del : lnx
+
+== Pgm SBR
+
+pgm 12 A              pgm 12 : A          pgm dd A
+pgm *12 A
+pgm *1 A
+pgm * A
+pgm A
+pgm 12 sbr 345        pgm 12 : sbr 345    pgm 12 sbr 345
+pgm 12 sbr *34        pgm 12 : sbr *34    pgm 12 sbr *12
+pgm 12 sbr lnx        pgm 12 : sbr lnx    pgm 12 sbr lnx
+pgm 12 sbr del        pgm dd sbr : del    pgm 12 sbr del
+pgm 12 lnx            pgm dd : lnx        pgm dd : lnx
+
+== Skip
+
+inv lbl A lnx         inv : A : lnx       inv lnx
 inv nop lnx           inv lnx
 inv ind lnx           inv lnx
 inv 2nd lnx           inv lnx
 inv 2n' lnx           inv lnx
 inv del lnx           inv del : lnx
-inv sst lnx           inv lnx (RUN) and inv sst : lnx (EVAL)
+inv sst lnx           inv : lnx           inv lnx
 
+== Fix vs INV Fix
+
+fix 1                 fix 1               fix 1
+inv fix 1             inv fix : 1         inv fix : 1
+
+== SBR vs INV SBR
+
+sbr lnx               sbr lnx             sbr lnx
+inv sbr lnx           inv sbr : lnx       inv sbr : lnx
+
+== RTN vs INV RTN
+
+rtn lnx               rtn : lnx           rtn : lnx
+inv rtn lnx           inv rtn : lnx       inv rtn : lnx
+
+== Lbl in EVAL vs RUN
+
+lbl 0                 empty               0
+lbl A                 empty               A
+lbl lnx               empty               lnx
+lbl 2nd lnx           log                 lnx
+lbl inv lnx           inv lnx             lnx
+
+== INV
+
+inv 0                 inv 0               inv 0
+inv A                 inv A               inv A
+inv sto 12            inv sto 12          inv sto 12
+inv sum 12            inv sum 12          inv sum 12
+in' 0                 inv dsz             in' 0
