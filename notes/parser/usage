@@ -1,0 +1,154 @@
+OperationLog operationLog          // Unlimited list of complete operations.
+CurrentOperation currentOperation  // Current operation.
+
+Parser parser = new_parser()
+
+
+== EVAL/SST/RUN modes
+
+int last_evaled_index = -1
+
+// EVAL
+void on_key_pressed(int i, int j):
+  parser.handle_key_pressed(MODE_EVAL, i, j)
+  eval_ops()
+
+// SST / RUN
+void on_handle_step(Mode mode, int step):
+  parser.handle(mode, step)
+  eval_ops()
+
+void eval_ops()
+  for (i = last_evaled_index + 1; i <= parser.operations.last_index; i++)
+    opn = parser.operations[i]
+    opr = opn.operator
+    do_eval_display = 
+      state.is_display_edit &&
+      opr != KEY_UNK &&
+      opr.does_eval_display
+    do_eval_display: 
+      state.display.eval()
+    opn.parse_state == COMPLETE:
+      opn.eval()
+      operationLog.add(opn)
+  last_evaled_index = parser.operations.last_index - 1
+  currentOperation.set(parser.operations.last)
+
+
+== LRN
+
+int num = 0
+int count = 0
+lastKeyHandled = KEY_HANDLED_NONE
+
+void on_key_pressed(int i, int j):
+  KeyHandled keyHandled = parser.handle_key_pressed(MODE_LRN, i, j)
+
+  keyHandled.context != lastKeyHandled.context:
+    if lastKeyHandled._context == KEY_OPD_DDD:
+      count < 3:
+        rub()
+        0
+        num
+    num = 0
+    count = 0
+
+  key = keyHandled.key
+  context = keyHandled.context
+
+  case context:
+    KEY_MOD_SEC: KEY_MOD_NOSEC:
+      // nothing
+    KEY_EVL_SST: DBL_OPD_DD: DBL_OPD_DDD:
+      assert(false)
+    KEY_OPR_INV: KEY_OPD_LBL: KEY_SKIP: KEY_LBL_BEG: KEY_LBL_END: KEY_OPD_D:
+    KEY_PGM_SBR:
+      key
+    KEY_OPR_NOINV:
+      rub()
+    KEY_OPR_KEY:
+      key == SBR and lastKeyHandled.context == KEY_OPR_INV:
+        rub()
+        RTN
+      else: key
+    KEY_OPD_IND:
+      lastKey = lastKeyHandled.key
+      lastContext = lastKeyHandled.context
+      lastContext == KEY_OPR_KEY && has_synthesized_ind(lastKey):
+        synthesized_key = synthesize_ind(lastKey)
+        rub()
+        synthesised_key
+      else: key
+    KEY_OPD_NOIND:
+      lastKey = lastKeyHandled.key
+      lastContext = lastKeyHandled.context
+      lastContext == KEY_OPD_IND && has_unsynthesized_ind(lastKey):
+        unsynthesized_key = unsynthesize_ind(lastKey)
+        rub()
+        unsynthesised_key
+      else: key
+    KEY_OPD_DD:
+      count += 1
+      count == 1:
+        num = key
+      count == 2:
+        num = 10 * num + key
+        rub()
+      num
+    KEY_OPD_DDD:
+      count += 1
+      count == 1:
+        num = key
+        num
+      count == 2:
+        num = 10 * num + key
+      count == 3:
+        num = 10 * num + key
+        num % 100
+
+  lastKeyHandled = keyHandled
+    
+
+== PROGRAM LISTING
+
+void basic_program_listing(int steps[])
+  Parser parser = new parser()
+
+  for (int i = 0; i < steps.length; i++):
+    keyHandled = parser.handle(MODE_RUN, step)
+    step = steps[i]
+    context = keyHandled.context
+    context in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }
+      print "%03d %02d\n", i, step
+    else:
+      print "%03d %s\n", i, key_data[step].as_string
+
+void complex_program_listing
+  Parser parser = new parser()
+
+  for (int i = 0; i < steps.length; i++):
+    KeyHandled keyHandled = parser.handle(MODE_RUN, step)
+    int step = steps[i]
+    keyContext.context:
+      KEY_MOD_SEC: assert(false)
+      KEY_MOD_NOSEC: assert(false)
+      KEY_OPR_INV: nl_key() 
+      KEY_OPR_NOINV: nl_key() 
+      KEY_OPR_KEY:
+        previous_context == KEY_OPR_INV:
+          sp_key()
+        else:
+          nl_key()
+      KEY_OPD_IND: sp_key()
+      KEY_OPD_NOIND: assert(false)
+      KEY_OPD_D: sp_key()
+      KEY_OPD_DD: assert(false)
+      KEY_OPD_DDD: sp_key()
+      DBL_OPD_DD: sp_dbl()
+      DBL_OPD_DDD: dbl()
+      KEY_OPD_LBL: sp_key()
+      KEY_SKIP: nl_key()
+      KEY_LBL_BEG: nl_key()
+      KEY_LBL_END: sp_key()
+      KEY_EVL_SST: assert(false)
+      KEY_PGM_SBR: sp_key()

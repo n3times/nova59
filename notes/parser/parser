@@ -31,17 +31,24 @@ Key - enum
   ...
 
 KeyContext - enum
-  KEY_MOD_SEC  // 2nd key
-  KEY_OPR_INV  // Operator inv has been modified
-  KEY_OPR_KEY  // Operator key has been set
-  KEY_OPD_IND  // Operand ind has been modified
-  KEY_OPD_DIG  // Digit used as part of the operand
-  KEY_OPD_DI2  // 2 digits used as part of the operand
-  KEY_OPD_LBL  // A label used as operand
-  KEY_SKIP     // Key does not affect operation
-  KEY_LBL_BEG  // Beginning of label ("Lbl" in "Lbl STO")
-  KEY_LBL_END  // End of label ("STO" in "Lbl STO")
-  KEY_EVL_SST  // SST key in EVAL mode
+  KEY_MOD_SEC    // 2nd key has been selected
+  KEY_MOD_NOSEC  // 2nd key has been deselected
+  KEY_OPR_INV    // Operator modifier inv has been selected
+  KEY_OPR_NOINV  // Operator modifier inv has been deselected
+  KEY_OPR_KEY    // Operator key has been set
+  KEY_OPD_IND    // Operand ind modifier has been selected
+  KEY_OPD_NOIND  // Operand ind modifier has been deselected
+  KEY_OPD_D      // Digit as part of a D operand
+  KEY_OPD_DD     // Digit as part of a DD operand
+  KEY_OPD_DDD    // Digit as part of a DDD operand
+  DBL_OPD_DD     // 2 digits as part of a DD operand
+  DBL_OPD_DDD    // 2 digits as part of a DDD operand
+  KEY_OPD_LBL    // A label used as operand
+  KEY_SKIP       // Key does not affect operation
+  KEY_LBL_BEG    // Beginning of label ("Lbl" in "Lbl STO")
+  KEY_LBL_END    // End of label ("STO" in "Lbl STO")
+  KEY_EVL_SST    // SST key in EVAL mode
+  KEY_PGM_SBR    // SBR in Pgm xx SBR xxx
 
 KeyHandled
   KeyContext context
@@ -53,8 +60,8 @@ Operation
   Operand operands[]      // A growing array of length 0, 1 or 2
 
 ParseState - enum
-  PRE_OPR LBL_END                         // Operator
-  OPD_UNK OPD_IND LAST_DD LAST_D ADDRESS  // Operand
+  PRE_OPR LBL_END                            // Operator
+  OPD_UNK OPD_IND DD_2 DDD_23 DDD_3 ADDRESS  // Operand
   COMPLETE
 
 Operator
@@ -66,12 +73,12 @@ Operand
   int value         // 0 to 999: opcode for label or address or register...
 
 OperandType - enum
-  UNK IND LBL NUM
+  UNK IND LBL D DD DDD
 
 OperandKind - enum
-  OPD_KIND_ADDRESS  // DDD, *DD or LBL
-  OPD_KIND_D        // D or *DD
-  OPD_KIND_DD       // DD or *DD
+  OPD_KIND_ADDRESS  // DDD, IND or LBL
+  OPD_KIND_D        // D or IND
+  OPD_KIND_DD       // DD or IND
   OPD_KIND_DD_ONLY  // DD
   OPD_KIND_SBR      // <usr> or SBR <address>
 
@@ -173,8 +180,10 @@ KeyHandled handle(Mode mode, int val)
 
   // Handle 2nd modifier.
   mode_key:
-    is(val, 2nd): ~opn.sec                                          KEY_MOD_SEC
-    is(val, 2n'):                                                   KEY_SKIP
+    is(val, 2nd):
+      opn.sec: ~opn.sec                                            KEY_MOD_NOSEC
+      else: ~opn.sec                                               KEY_MOD_SEC
+    is(val, 2n'):                                                  KEY_SKIP
     opn.sec:
       val = get_sec(val)
       opn.sec = false
@@ -187,58 +196,60 @@ KeyHandled handle(Mode mode, int val)
 
   self.mode = mode
 
-  is(val, SST) && mode == MODE_EVAL:                                KEY_EVL_SST
+  is(val, SST) && mode == MODE_EVAL:                              KEY_EVL_SST
 
   case opn.parse_state:
     COMPLETE: assert(false)
 
-    // Condition                  opr inv|key         new state     ret_value
+    // Condition                  opr inv|key        new state    ret_value
     PRE_OPR:
-      is(val, INV)||is(val, IN'): ~opr.inv|.          PRE_OPR       KEY_OPR_INV
-      is_opr(val, mode, opr.inv): .|val               done_opr()    KEY_OPR_KEY
-      is(val, Lbl) && mode != EVAL:                   LBL_END       KEY_LBL_BEG
-      else:  /* Skip 2nd, 2nd', Nop, Ind, maybe Lbl, SST */         KEY_SKIP
-    LBL_END:                                          PRE_OPR       KEY_LBL_END
+      is(val, INV)||is(val, IN'):
+        opr.inv:                  ~opr.inv|.         PRE_OPR      KEY_OPR_NOINV
+        else   :                  ~opr.inv|.         PRE_OPR      KEY_OPR_INV
+      is_opr(val, mode, opr.inv): .|val              done_opr()   KEY_OPR_KEY
+      is(val, Lbl) && mode != EVAL:                  LBL_END      KEY_LBL_BEG
+      else:  /* Skip 2nd, 2nd', Nop, Ind, maybe Lbl, SST */       KEY_SKIP
+    LBL_END:                                         PRE_OPR      KEY_LBL_END
 
-    // Condition                  opd type|value      state         ret_value
+    // Condition                  opd type|value     state        ret_value
     OPD_UNK:
       case operand_kind(.):
-        OPD_KIND_ADDRESS:         .|.                 ADDRESS       handle(.)
+        OPD_KIND_ADDRESS:         .|.                ADDRESS      handle(.)
         OPD_KIND_DD:
-          is(val, Ind):           IND|.               OPD_IND       KEY_OPD_IND
+          is(val, Ind):           IND|.              OPD_IND      KEY_OPD_IND
           // fall through:
         OPD_KIND_DD_ONLY:
-          mode_step:              NUM|val             done_opd()    KEY_OPD_DI2
-          is_dig(val):            NUM|val             LAST_D        KEY_OPD_DIG
-          else:                                       cancel_opn()  handle(.)
+          mode_step:              DD|val             done_opd()   DBL_OPD_DD
+          is_dig(val):            DD|val             DD_2         KEY_OPD_DD
+          else:                                      cancel_opn() handle(.)
         OPD_KIND_D:
-          is(val, Ind):           IND|.               OPD_IND       KEY_OPD_IND
-          mode_step:              NUM|val%10          done_opd()    KEY_OPD_DIG
-          is_dig(val):            NUM|val             done_opd()    KEY_OPD_DIG
-          else:                                       cancel_opn()  handle(.)
+          is(val, Ind):           IND|.              OPD_IND      KEY_OPD_IND
+          mode_step:              D|val%10           done_opd()   KEY_OPD_D
+          is_dig(val):            D|val              done_opd()   KEY_OPD_D
+          else:                                      cancel_opn() handle(.)
         OPD_KIND_SBR:
-          is_usr(val):            LBL|val             done_opd()    KEY_OPD_LBL
-          is(val, SBR):           .|.                 ADDRESS       KEY_PGM_SBR
-          is(val, 2nd) || is(val, SST):                             KEY_SKIP
-          else:                                       cancel_opn()  handle(.)
+          is_usr(val):            LBL|val            done_opd()   KEY_OPD_LBL
+          is(val, SBR):           .|.                ADDRESS      KEY_PGM_SBR
+          is(val, 2nd) || is(val, SST):                           KEY_SKIP
+          else:                                      cancel_opn() handle(.)
     OPD_IND:
-      mode_step:                  .|val               done_opd()    KEY_OPD_DI2
-      is(val, Ind):               UNK|.               OPD_UNK       KEY_OPD_IND
-      is_dig(val):                .|val               LAST_D        KEY_OPD_DIG
-      else:                                           cancel_opn()  handle(.)
+      mode_step:                  .|val              done_opd()   DBL_OPD_DD
+      is(val, Ind):               UNK|.              OPD_UNK      KEY_OPD_NOIND
+      is_dig(val):                .|val              DD_2         KEY_OPD_DD
+      else:                                          cancel_opn() handle(.)
     ADDRESS:
-      is(val, Ind):               IND|.               OPD_IND       KEY_OPD_IND
-      is_dig(val):                NUM|val             LAST_DD       KEY_OPD_DIG
-      is_lbl(val):                LBL|val             done_opd()    KEY_OPD_LBL
-      is_opr(val, mode, opr.inv):                     cancel_opn()  handle(.)
-      else:  /* 2nd, 2n', maybe SST */                              KEY_SKIP
-    LAST_DD:
-      mode_step:                  .|value*100 + val   done_opd()    KEY_OPD_DI2
-      is_dig(val):                .|value*10 + val    LAST_D        KEY_OPD_DIG
-      else:                                           done_opd()    handle(.)
-    LAST_D:
-      is_dig(val):                .|value*10 + val    done_opd()    KEY_OPD_DIG
-      else:                                           done_opd()    handle(.)
-    // In mode_step, LAST_D only appears as dangling from MODE_EVAL to MODE_SST.
-    // In a real TI-59, it is treated as a digit completing the operand,
-    // followed by another digit.
+      is(val, Ind):               IND|.              OPD_IND      KEY_OPD_IND
+      is_dig(val):                DDD|val            DDD_23       KEY_OPD_DDD
+      is_lbl(val):                LBL|val            done_opd()   KEY_OPD_LBL
+      is_opr(val, mode, opr.inv):                    cancel_opn() handle(.)
+      else:  /* 2nd, 2n', maybe SST */                            KEY_SKIP
+    DDD_23:
+      mode_step:                  .|value*100 + val  done_opd()   DBL_OPD_DDD
+      is_dig(val):                .|value*10 + val   DDD_3        KEY_OPD_DDD
+      else:                                          done_opd()   handle(.)
+    DDD_3:
+      is_dig(val):                .|value*10 + val   done_opd()   KEY_OPD_DDD
+      else:                                          done_opd()   handle(.)
+    DD_2:
+      is_dig(val):                .|value*10 + val   done_opd()   KEY_OPD_DD
+      else:                                          done_opd()   handle(.)
