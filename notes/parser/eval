@@ -1,0 +1,35 @@
+OperationLog operationLog          // Unlimited list of complete operations.
+CurrentOperation currentOperation  // Current operation.
+
+Parser parser = new_parser()
+
+
+== OPERATION EVALUATION IN EVAL/SST/RUN MODES
+
+int last_evaled_index = -1
+
+// EVAL
+void on_key_pressed(int i, int j):
+  parser.handle_key_pressed(MODE_EVAL, i, j)
+  eval_ops()
+
+// SST / RUN
+void on_handle_step(Mode mode, int step):
+  parser.handle(mode, step)
+  eval_ops()
+
+void eval_ops()
+  for i = last_evaled_index + 1; i <= parser.operations.last_index; i++:
+    opn = parser.operations[i]
+    opr = opn.operator
+    do_eval_display = 
+      state.is_display_edit &&
+      opr != KEY_UNK &&
+      opr.does_eval_display
+    do_eval_display: 
+      state.display.eval()
+    opn.parse_state == COMPLETE:
+      opn.eval()
+      operationLog.add(opn)
+  last_evaled_index = parser.operations.last_index - 1
+  currentOperation.set(parser.operations.last)

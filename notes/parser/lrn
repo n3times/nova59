@@ -4,7 +4,7 @@ Parser parser = new_parser()
 
 State
   int steps[1000]
-  int index
+  int pgm_index
   int opn_index
   int opd_index
 
@@ -14,61 +14,42 @@ State
 void edit_lrn() = MODE_EVAL
 
 void edit_sst()
-  index < 999: index += 1
+  pgm_index < 999: pgm_index += 1
   else: MODE_EVAL
 
-void edit_bst() = index > 0: index -= 1
+void edit_bst() = pgm_index > 0: pgm_index -= 1
 
 void edit_ins()
-  for i = 999; i >= index + 1; i--: step[i] = step[i - 1]
-  step[index] = 0
+  for i = 999; i >= pgm_index + 1; i--: steps[i] = steps[i - 1]
+  steps[pgm_index] = 0
 
 void edit_del()
-  for i = index; i < 999; i++: step[i] = step[i + 1]
-  step[999] = 0
+  for i = pgm_index; i < 999; i++: steps[i] = steps[i + 1]
+  steps[999] = 0
 
 
 == Helper functions ==
 
 void key(int key)
-  steps[index] = key
-  index == 999:
+  steps[pgm_index] = key
+  pgm_index == 999:
     MODE_EVAL
   else:
-    index += 1
+    pgm_index += 1
 
-void rub() = steps[index - 1] = 0
+void rub() = steps[pgm_index - 1] = 0
 
-void eval_ind()
-  opr = step[index]
-  is_synthesized_ind_opr(...):
-    synthesized_ind_opr = ...
-    rub()
-    key(synthesized_ind_opr)
-  else:
-    key(Ind)
-  num >= 0:
-    key(num)
+bool is_inv() = return parser.operations.last.operator.inv
 
-void eval_dd()
-  key(num)
-
-void eval_ddd()
-  key(num / 100)
-  key(num % 100)
-
-bool is_inv()
-  ...
-
-void eval_operand(Operator opn, int index)
+void eval_operand(Operator opn, int opd_index)
   opr = opn.operator
-  opd = opn.operands[index]
+  opd = opn.operands[opd_index]
   type = opd.type
   value = opd.value
   case type:
     LBL: D: DD: key(value)
     IND:
-      index == 0 && opr has synthesized ind:
+      opd_index == 0 && opr has synthesized ind:
         rub()
         key(synthesized_key)
       lse:
@@ -82,28 +63,27 @@ void eval_operand(Operator opn, int index)
 
 bool next()
   opn = parser.operations[opn_index]
-  max_opd_index = opn.operands.length - 1
-  opd_index < max_opd_index:
+  opd_index < opn.operands.length - 1:
     opd_index += 1
     return true
-  max_opn_index = opn.operations.length - 1
-  opn_index < max_opn_index:
+  opn_index < parser.operations.length - 1:
     opn_index += 1
     opd_index = -1
     return true
   return false
 
 bool has_next()
-  return opn_index < opn.operations.length - 1 ||
-         opd_index < opn.operands.length - 1
+  opn = parser.operations[opn_index]
+  return opn_index < opn.operands.length - 1 ||
+         opd_index < parser.operations.last.operands.length - 1
 
 
 == Implementation ==
 
 void on_key_pressed(int i, int j):
-  KeyHandled keyHandled = parser.handle_key_pressed(MODE_LRN, i, j)
+  keyHandled = parser.handle_key_pressed(MODE_LRN, i, j)
 
-  // Eval operands that were pending but are now fully determined.
+  // Evaluate pending operands.
   while has_next():
     opd_index > 0:
       opn = parser.operations[opn_index]
@@ -120,8 +100,8 @@ void on_key_pressed(int i, int j):
       // Maybe change colors.
       return
     KEY_OPD_LBL: KEY_OPD_D: KEY_OPD_DD: KEY_OPD_DDD:
-    KEY_OPR_IND: KEY_OPR_NOIND:
-      // Already treated or postponed.
+    KEY_OPD_IND: KEY_OPD_NOIND:
+      // Pending operands.
       return
     KEY_SKIP: KEY_LBL_BEG: KEY_LBL_END: KEY_PGM_SBR:
     KEY_OPR_INV: KEY_OPR_NOINV:
@@ -132,7 +112,7 @@ void on_key_pressed(int i, int j):
       key == BST: edit_bst()
       key == Ins: edit_ins()
       key == Del: edit_del()
-      key == SBR && is_inv() && steps[index - 1] == INV:
+      key == SBR && is_inv() && steps[pgm_index - 1] == INV:
         rub()
         key(RTN)
       else:

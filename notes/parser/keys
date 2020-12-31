@@ -1,13 +1,20 @@
+Cancel: add "!"
+No need to use "return"
+Most ops have 2 keys
+synthesized: $ + 2 keys
+1 key for very common: 0-9 +-*/^ ()=~._
+1 key for goto or pause and for r/s 
+
 
   A  B  C  D  E
-  se '' ln ce kk
-  ?  xt x2 vx x1
+  se ~ ln ce kk
+  lr xt x2 vx x1
   >  st rc su ^
   <  ee (  )  /
   gt 7  8  9  *
   sb 4  5  6  -  
   rs 1  2  3  + 
-     0  .  ~  =   
+  v  0  .  _  = 
 
 
   vA vB vC vD vE
@@ -21,15 +28,15 @@
   wr ds ad pr li
 
 
-hi = hir
-rt = rtn
-
-indirect:
-  @st
-  @rc
-  @su
-  @pr
-  @ex
-  @pg
-  @gt
-  @op
+Synthesized keys:
+  $hi = hir
+  $rt = rtn
+  indirect:
+    $st
+    $rc
+    $su
+    $pr
+    $ex
+    $pg
+    $gt
+    $op
