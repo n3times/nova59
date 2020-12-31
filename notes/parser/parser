@@ -39,9 +39,9 @@ KeyContext - enum
   KEY_OPD_IND    // Operand ind modifier has been selected
   KEY_OPD_NOIND  // Operand ind modifier has been deselected
   KEY_OPD_D      // Digit as part of a D operand
-  KEY_OPD_DD     // Digit as part of a DD operand
+  KEY_OPD_DD     // Digit as part of a DD or Ind operand
   KEY_OPD_DDD    // Digit as part of a DDD operand
-  DBL_OPD_DD     // 2 digits as part of a DD operand
+  DBL_OPD_DD     // 2 digits as part of a DD or Ind operand
   DBL_OPD_DDD    // 2 digits as part of a DDD operand
   KEY_OPD_LBL    // A label used as operand
   KEY_SKIP       // Key does not affect operation
@@ -60,9 +60,19 @@ Operation
   Operand operands[]      // A growing array of length 0, 1 or 2
 
 ParseState - enum
-  PRE_OPR LBL_END                            // Operator
-  OPD_UNK OPD_IND DD_2 DDD_23 DDD_3 ADDRESS  // Operand
-  COMPLETE
+  PRE_OPR  // Nothing about the operator except its "inv" value.
+  LBL_END  // Waiting for the end of a label: "STO" in "Lbl STO".
+           // Can happen between "inv" and operator.
+
+  OPD_UNK  // There is an operand but is type is unknown.
+           // Its kind can be determined from inv, opr and mode.
+  OPD_IND  // It is an "ind" operand so far.
+  DD_2     // It a DD or Ind operand. The 1st but not 2nd digit is known.
+  DDD_23   // It is a DDD operand. Only the 1st digit is known.
+  DDD_3    // It is a DDD operand. The 1st and 2nd digit are known.
+  ADDRESS  // It is an address, possibly in "Pgm xx SBR address".
+
+  COMPLETE // Operator and operands are fully determined.
 
 Operator
   bool inv

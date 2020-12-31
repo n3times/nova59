@@ -1,0 +1,139 @@
+CurrentOperation currentOperation  // Current operation.
+
+Parser parser = new_parser()
+
+State
+  int steps[1000]
+  int index
+  int opn_index
+  int opd_index
+
+
+== Edit Keys ==
+
+void edit_lrn() = MODE_EVAL
+
+void edit_sst()
+  index < 999: index += 1
+  else: MODE_EVAL
+
+void edit_bst() = index > 0: index -= 1
+
+void edit_ins()
+  for i = 999; i >= index + 1; i--: step[i] = step[i - 1]
+  step[index] = 0
+
+void edit_del()
+  for i = index; i < 999; i++: step[i] = step[i + 1]
+  step[999] = 0
+
+
+== Helper functions ==
+
+void key(int key)
+  steps[index] = key
+  index == 999:
+    MODE_EVAL
+  else:
+    index += 1
+
+void rub() = steps[index - 1] = 0
+
+void eval_ind()
+  opr = step[index]
+  is_synthesized_ind_opr(...):
+    synthesized_ind_opr = ...
+    rub()
+    key(synthesized_ind_opr)
+  else:
+    key(Ind)
+  num >= 0:
+    key(num)
+
+void eval_dd()
+  key(num)
+
+void eval_ddd()
+  key(num / 100)
+  key(num % 100)
+
+bool is_inv()
+  ...
+
+void eval_operand(Operator opn, int index)
+  opr = opn.operator
+  opd = opn.operands[index]
+  type = opd.type
+  value = opd.value
+  case type:
+    LBL: D: DD: key(value)
+    IND:
+      index == 0 && opr has synthesized ind:
+        rub()
+        key(synthesized_key)
+      lse:
+        key(Ind)
+      value >= 0:
+        key(value)
+    DDD:
+      assert(value >= 0)
+      key(value / 100)
+      key(value % 100)
+
+bool next()
+  opn = parser.operations[opn_index]
+  max_opd_index = opn.operands.length - 1
+  opd_index < max_opd_index:
+    opd_index += 1
+    return true
+  max_opn_index = opn.operations.length - 1
+  opn_index < max_opn_index:
+    opn_index += 1
+    opd_index = -1
+    return true
+  return false
+
+bool has_next()
+  return opn_index < opn.operations.length - 1 ||
+         opd_index < opn.operands.length - 1
+
+
+== Implementation ==
+
+void on_key_pressed(int i, int j):
+  KeyHandled keyHandled = parser.handle_key_pressed(MODE_LRN, i, j)
+
+  // Eval operands that were pending but are now fully determined.
+  while has_next():
+    opd_index > 0:
+      opn = parser.operations[opn_index]
+      eval_operand(opn, opd_index)
+    next()
+
+  key = keyHandled.key
+  context = keyHandled.context
+
+  case context:
+    KEY_EVL_SST: DBL_OPD_DD: DBL_OPD_DDD:
+      assert(false)
+    KEY_MOD_SEC: KEY_MOD_NOSEC:
+      // Maybe change colors.
+      return
+    KEY_OPD_LBL: KEY_OPD_D: KEY_OPD_DD: KEY_OPD_DDD:
+    KEY_OPR_IND: KEY_OPR_NOIND:
+      // Already treated or postponed.
+      return
+    KEY_SKIP: KEY_LBL_BEG: KEY_LBL_END: KEY_PGM_SBR:
+    KEY_OPR_INV: KEY_OPR_NOINV:
+      key(key)
+    KEY_OPR_KEY:
+      key == LRN: edit_lrn()
+      key == SST: edit_sst()
+      key == BST: edit_bst()
+      key == Ins: edit_ins()
+      key == Del: edit_del()
+      key == SBR && is_inv() && steps[index - 1] == INV:
+        rub()
+        key(RTN)
+      else:
+        key(key)
