@@ -55,24 +55,28 @@ KeyHandled
   int key
 
 Operation
-  ParseState parse_state
+  private: ParseState parse_state
   Operator operator
   Operand operands[]      // A growing array of length 0, 1 or 2
+  bool is_complete = parse_state == COMPLETE
+  bool is_canceled = parse_state == CANCELED
+  bool is_pending  = !is_complete && !is_canceled
 
 ParseState - enum
-  PRE_OPR  // Nothing about the operator except its "inv" value.
-  LBL_END  // Waiting for the end of a label: "STO" in "Lbl STO".
-           // Can happen between "inv" and operator.
+  PRE_OPR   // Nothing about the operator except whether it's "inv".
+  LBL_END   // Waiting for the end of a label: "STO" in "Lbl STO".
+            // Can happen between "inv" and operator.
 
-  OPD_UNK  // There is an operand but is type is unknown.
-           // Its kind can be determined from inv, opr and mode.
-  OPD_IND  // It is an "ind" operand so far.
-  DD_2     // It a DD or Ind operand. The 1st but not 2nd digit is known.
-  DDD_23   // It is a DDD operand. Only the 1st digit is known.
-  DDD_3    // It is a DDD operand. The 1st and 2nd digit are known.
-  ADDRESS  // It is an address, possibly in "Pgm xx SBR address".
+  OPD_UNK   // There is an operand but is type is unknown.
+            // Its kind can be determined from inv, opr and mode.
+  OPD_IND   // It is an "ind" operand so far.
+  DD_2      // It a DD or Ind operand. The 1st but not 2nd digit is known.
+  DDD_23    // It is a DDD operand. Only the 1st digit is known.
+  DDD_3     // It is a DDD operand. The 1st and 2nd digit are known.
+  ADDRESS   // It is an address, possibly in "Pgm xx SBR address".
 
-  COMPLETE // Operator and operands are fully determined.
+  COMPLETE  // Operator and operands are fully determined.
+  CANCELED  //
 
 Operator
   bool inv
@@ -80,7 +84,7 @@ Operator
 
 Operand
   OperandType type  // Indicates how to interpret the operand value
-  int value         // 0 to 999: opcode for label or address or register...
+  string value      // 1 to 3 digits: opcode for label or address or register...
 
 OperandType - enum
   UNK IND LBL D DD DDD
@@ -150,6 +154,7 @@ cancel_opn()
   opn = operations.last
   opr = opn.operator
   !opr.inv && opr.key == KEY_UNKNOWN: return
+  opn.parse_state = CANCELED
   
   add new operation  // Previous operation remains incomplete
     parse_state = PRE_OPR
@@ -160,8 +165,11 @@ done_opr()
   Same as done_opd()
 
 done_opd()
+  case opd.type:
+    IND: DD: val = %02d.val
+    DDD: val = %03.d
   if current operation has additional operands
-    add new operand (UNK, -1)
+    add new operand (UNK, "")
     current_operation.parse_state = OPD_UNK
   else
     current_operation.parse_state = COMPLETE
@@ -229,7 +237,7 @@ KeyHandled handle(Mode mode, int val)
           is(val, Ind):           IND|.              OPD_IND      KEY_OPD_IND
           // fall through:
         OPD_KIND_DD_ONLY:
-          mode_step:              DD|val             done_opd()   DBL_OPD_DD
+          mode_step:              DD|%02d.val        done_opd()   DBL_OPD_DD
           is_dig(val):            DD|val             DD_2         KEY_OPD_DD
           else:                                      cancel_opn() handle(.)
         OPD_KIND_D:
@@ -254,12 +262,12 @@ KeyHandled handle(Mode mode, int val)
       is_opr(val, mode, opr.inv):                    cancel_opn() handle(.)
       else:  /* 2nd, 2n', maybe SST */                            KEY_SKIP
     DDD_23:
-      mode_step:                  .|value*100 + val  done_opd()   DBL_OPD_DDD
-      is_dig(val):                .|value*10 + val   DDD_3        KEY_OPD_DDD
+      mode_step:                  .|value.%02d.val   done_opd()   DBL_OPD_DDD
+      is_dig(val):                .|value.val        DDD_3        KEY_OPD_DDD
       else:                                          done_opd()   handle(.)
     DDD_3:
-      is_dig(val):                .|value*10 + val   done_opd()   KEY_OPD_DDD
+      is_dig(val):                .|value.val        done_opd()   KEY_OPD_DDD
       else:                                          done_opd()   handle(.)
     DD_2:
-      is_dig(val):                .|value*10 + val   done_opd()   KEY_OPD_DD
+      is_dig(val):                .|value.val        done_opd()   KEY_OPD_DD
       else:                                          done_opd()   handle(.)

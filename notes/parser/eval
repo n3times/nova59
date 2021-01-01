@@ -1,55 +1,24 @@
 == OPERATION PRINTING ==
 
-string print_operand(Operation[] opns, int opn_index, opd_index)
-  opn = opns[opn_index]
-  opd = opn.operands[opd_index]
+string print_operand(Operand opd)
+  opd.type == LBL: return key_data[int(opd.value)].as_string
+  else:            return (opd.type == IND ? "*" : "") + opd.value
 
-  // If there is no additional operand or operation, the operand is pending.
-  is_pending = opn_index == opns.len - 1 && opd_index == opn.operands.len - 1
-
-  // These cases do not involve digits.
-  opd.type == OPD_UNK: return "_"
-  is_pending && parse_state == IND: return "*_"
-  opd.type == LBL: return key_data[opd.value].as_string
-
-  format = ""
-  is_pending:
-    case opd.type:
-      UNK: LBL: assert(false)
-      parse_state == DDD_3: format = "%02d"
-      else: format = "%d"
-  else:
-    case opd.type:
-      UNK: LBL: assert(false)
-      D: format = "%d"
-      DD: IND: format = "%02d"
-      DDD: format = "%03d"
-
+string print_operation(Operation opn)
   str = ""
-  opd.type == IND: str += "*"
-  str += format(format, opd.value)
-  is_pending: str += "_"
-  return str
-
-string print_operation(Operation[] opns, int opn_index)
-  str = ""
-  opn = opns[ops_index]
 
   // Operator.
   opr = opn.operator
   opr.inv: str += "INV "
-  opr.key == KEY_UNK:
-    str += "_"
-    return str
-  str += key_data[opr.key].as_string
+  opr.key != KEY_UNK: str += key_data[opr.key].as_string
 
   // Operands.
-  opr.operands.length > 0: str += " " + print_operand(opns, opn_index, 0)
-  opr.operands.length > 1: str += " " + print_operand(opns, opn_index, 1)
+  opr.operands.length > 0: str += " " + print_operand(opn.operands[0])
+  opr.operands.length > 1: str += " " + print_operand(opn.operands[1])
 
-  // Canceled.
-  canceled = opn.parse_state != COMPLETE && opn_index != opns.len - 1
-  canceled: str += " [X]"
+  opn.is_complete: return str
+  opn.is_canceled: return str + " X"
+  opn.is_pending:  return str + "_"
 
 
 == OPERATION EVALUATION IN EVAL/SST/RUN MODES ==
@@ -85,12 +54,12 @@ void eval_opns()
     do_eval_display: state.display.eval()
 
     // Eval operation.
-    opn.parse_state == COMPLETE:
+    opn.is_complete:
       opn.eval()
       last_evaled_index = opn_index;
 
     // Log operation.
-    printed_opn = print_operation(opns, opn_index)
-    opn.parse_state == COMPLETE: completeOperationsLog.add(printed_opn)
-    i == opns.len - 1: currentOperation.set(printed_opn)
-    else: allOperationsLog.add(printed_opn)
+    printed_opn = print_operation(opn)
+    !opn.is_pending: allOperationsLog.add(printed_opn)
+    opn.is_complete: completeOperationsLog.add(printed_opn)
+    opn.is_pending: currentOperation.set(printed_opn)
