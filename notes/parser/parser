@@ -12,14 +12,14 @@ Parser
 
   // Updates the parser after a key from the keyboard has been pressed.
   // Params: mode is MODE_EVAL or MODE_LRN, row in 1..9, col in 1..5.
-  // Returns the key that has been handled and its context.
+  // Returns the key that has been handled and its type.
   KeyHandled handle_key_pressed(Mode mode, int row, int col)
 
   // Updates the parser after 'val' has been handled.
   // In MODE_EVAL and MODE_LRN, 'val' is a key.
   // In MODE_RUN and MODE_SST, 'val' is a step.
   // Param: val in 0..99.
-  // Returns the key/val that has been handled and its context.
+  // Returns the key/val that has been handled and its type.
   KeyHandled handle(Mode mode, int val)
 
 Mode - enum
@@ -30,7 +30,7 @@ Key - enum
   K_EE K_A K_B ...
   ...
 
-KeyContext - enum
+KeyType - enum
   KEY_MOD_SEC    // 2nd key has been selected
   KEY_MOD_NOSEC  // 2nd key has been deselected
   KEY_OPR_INV    // Operator modifier inv has been selected
@@ -51,7 +51,7 @@ KeyContext - enum
   KEY_PGM_SBR    // SBR in Pgm xx SBR xxx
 
 KeyHandled
-  KeyContext context
+  KeyType key_type
   int key
 
 Operation

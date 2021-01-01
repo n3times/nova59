@@ -91,9 +91,9 @@ void on_key_pressed(int i, int j):
     next()
 
   key = keyHandled.key
-  context = keyHandled.context
+  key_type = keyHandled.key_type
 
-  case context:
+  case key_type:
     KEY_EVL_SST: DBL_OPD_DD: DBL_OPD_DDD:
       assert(false)
     KEY_MOD_SEC: KEY_MOD_NOSEC:

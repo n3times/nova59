@@ -1,6 +1,6 @@
 To list a program:
-- handle each step through the parser
-- for each handled step, consider key and context
+- have parser handle each step
+- for each handled step, print according to type
 
 
 == BASIC PROGRAM LISTING ==
@@ -9,10 +9,9 @@ void basic_program_listing(int steps[])
   Parser parser = new parser()
 
   for i = 0; i < steps.length; i++:
-    keyHandled = parser.handle(MODE_RUN, step)
     step = steps[i]
-    context = keyHandled.context
-    context in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
+    keyHandled = parser.handle(MODE_RUN, step)
+    keyHandled.key_type in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
       print "%03d %02d\n", i, step
     else:
       print "%03d %s\n", i, key_data[step].as_string
@@ -25,37 +24,40 @@ void sp_key(i, key) = print " %s\n", key_data[key].as_string
 void sp_dbl(i, key) = print " %02d\n", key
 void dbl(key)       = print "%02d\n", key
 
+bool is_numeric_key(key):
+  return key in { 0, 1, ..., 9, . }
+
+// Print operations, labels and numbers in their own lines.
 void complex_program_listing(int steps[])
   Parser parser = new parser()
+  int number_line_length = 0
 
   for i = 0; i < steps.length; i++:
-    KeyHandled keyHandled = parser.handle(MODE_RUN, step)
     step = steps[i]
-    key = keyHandled.key
-    context = keyHandled.context
-    context:
-      KEY_MOD_SEC: assert(false)
-      KEY_MOD_NOSEC: assert(false)
-      KEY_OPD_NOIND: assert(false)
-      KEY_OPD_DD: assert(false)
-      KEY_EVL_SST: assert(false)
-
-      KEY_OPR_INV: nl_key(i, key) 
-      KEY_OPR_NOINV: nl_key(i, key) 
+    new_number_line_length = 0
+    KeyHandled keyHandled = parser.handle(MODE_RUN, step)
+    keyHandled.key_type:
+      KEY_MOD_SEC: KEY_MOD_NOSEC: KEY_OPD_NOIND: KEY_OPD_DD: KEY_EVL_SST:
+        assert(false)
+      // Operator.
+      KEY_OPR_INV: KEY_OPR_NOINV: nl_key(i, step)
       KEY_OPR_KEY:
-        previous_context == KEY_OPR_INV:
-          sp_key(key)
+        previous_key_type == KEY_OPR_INV: sp_key(step)
         else:
-          nl_key(i, key)
-
-      KEY_OPD_IND: sp_key(key)
-      KEY_OPD_D: sp_key(key)
-      KEY_OPD_DDD: sp_key(key)
-      DBL_OPD_DD: sp_dbl(key)
-      DBL_OPD_DDD: dbl(key)
-      KEY_OPD_LBL: sp_key(key)
-
-      KEY_SKIP: nl_key(i, key)
-      KEY_LBL_BEG: nl_key(i, key)
-      KEY_LBL_END: sp_key(key)
-      KEY_PGM_SBR: sp_key(key)
+          is_numeric_key(step):
+            number_line_length == 0: number_line_length == 10:
+              new_number_line_length == 1
+              nl_key(i, key)
+            else:
+              new_number_line_length += 1
+              key(key)
+          else:
+            nl_key(i, key)
+      // Operand.
+      KEY_OPD_IND: KEY_OPD_D: KEY_OPD_DDD: KEY_OPD_LBL: sp_key(step)
+      DBL_OPD_DD: sp_dbl(step)
+      DBL_OPD_DDD: dbl(step)
+      // Miscellaneous.
+      KEY_SKIP: KEY_LBL_BEG: nl_key(i, step)
+      KEY_LBL_END: KEY_PGM_SBR: sp_key(step)
+    number_line_length = new_number_line_length

@@ -1,35 +1,96 @@
-OperationLog operationLog          // Unlimited list of complete operations.
-CurrentOperation currentOperation  // Current operation.
+== OPERATION PRINTING ==
 
-Parser parser = new_parser()
+string print_operand(Operation[] opns, int opn_index, opd_index)
+  opn = opns[opn_index]
+  opd = opn.operands[opd_index]
+
+  // If there is no additional operand or operation, the operand is pending.
+  is_pending = opn_index == opns.len - 1 && opd_index == opn.operands.len - 1
+
+  // These cases do not involve digits.
+  opd.type == OPD_UNK: return "_"
+  is_pending && parse_state == IND: return "*_"
+  opd.type == LBL: return key_data[opd.value].as_string
+
+  format = ""
+  is_pending:
+    case opd.type:
+      UNK: LBL: assert(false)
+      parse_state == DDD_3: format = "%02d"
+      else: format = "%d"
+  else:
+    case opd.type:
+      UNK: LBL: assert(false)
+      D: format = "%d"
+      DD: IND: format = "%02d"
+      DDD: format = "%03d"
+
+  str = ""
+  opd.type == IND: str += "*"
+  str += format(format, opd.value)
+  is_pending: str += "_"
+  return str
+
+string print_operation(Operation[] opns, int opn_index)
+  str = ""
+  opn = opns[ops_index]
+
+  // Operator.
+  opr = opn.operator
+  opr.inv: str += "INV "
+  opr.key == KEY_UNK:
+    str += "_"
+    return str
+  str += key_data[opr.key].as_string
+
+  // Operands.
+  opr.operands.length > 0: str += " " + print_operand(opns, opn_index, 0)
+  opr.operands.length > 1: str += " " + print_operand(opns, opn_index, 1)
+
+  // Canceled.
+  canceled = opn.parse_state != COMPLETE && opn_index != opns.len - 1
+  canceled: str += " [X]"
 
 
-== OPERATION EVALUATION IN EVAL/SST/RUN MODES
+== OPERATION EVALUATION IN EVAL/SST/RUN MODES ==
 
-int last_evaled_index = -1
+State
+  OpnLog allOperationsLog       // Unlimited list of complete operations.
+  OpnLog completeOperationsLog  // Unlimited list of all operations.
+  CurrentOon currentOperation   // Current operation.
+  int last_evaled_index = -1
+  Parser parser = new_parser()
 
 // EVAL
 void on_key_pressed(int i, int j):
   parser.handle_key_pressed(MODE_EVAL, i, j)
-  eval_ops()
+  eval_opns()
 
 // SST / RUN
 void on_handle_step(Mode mode, int step):
+  assert mode in { MODE_RUN, MODE_SST }
   parser.handle(mode, step)
-  eval_ops()
+  eval_opns()
 
-void eval_ops()
-  for i = last_evaled_index + 1; i <= parser.operations.last_index; i++:
-    opn = parser.operations[i]
+void eval_opns()
+  opns = parser.operations
+  for opn_index = last_evaled_index+1; opn_index <= opns.length-1; opn_index++:
+    opn = opns[opn_index]
     opr = opn.operator
-    do_eval_display = 
-      state.is_display_edit &&
-      opr != KEY_UNK &&
-      opr.does_eval_display
-    do_eval_display: 
-      state.display.eval()
+
+    // Eval display.
+    do_eval_display = state.is_display_edit &&
+                      opr != KEY_UNK &&
+                      key_data[opr.key].does_eval_display
+    do_eval_display: state.display.eval()
+
+    // Eval operation.
     opn.parse_state == COMPLETE:
       opn.eval()
-      operationLog.add(opn)
-  last_evaled_index = parser.operations.last_index - 1
-  currentOperation.set(parser.operations.last)
+      last_evaled_index = opn_index;
+
+    // Log operation.
+    printed_opn = print_operation(opns, opn_index)
+    opn.parse_state == COMPLETE: completeOperationsLog.add(printed_opn)
+    i == opns.len - 1: currentOperation.set(printed_opn)
+    else: allOperationsLog.add(printed_opn)
