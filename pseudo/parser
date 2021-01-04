@@ -1,6 +1,3 @@
-Parser
-
-
 == API ==
 
 // Given a stream of keys and program steps, the parser generates a stream of
@@ -12,15 +9,13 @@ Parser
 
   // Updates the parser after a key from the keyboard has been pressed.
   // Params: mode is MODE_EVAL or MODE_LRN, row in 1..9, col in 1..5.
-  // Returns the key that has been handled and its type.
-  KeyHandled handle_key_pressed(Mode mode, int row, int col)
+  Action handle_key_pressed(Mode mode, int row, int col)
 
   // Updates the parser after 'val' has been handled.
   // In MODE_EVAL and MODE_LRN, 'val' is a key.
   // In MODE_RUN and MODE_SST, 'val' is a step.
   // Param: val in 0..99.
-  // Returns the key/val that has been handled and its type.
-  KeyHandled handle(Mode mode, int val)
+  Action handle(Mode mode, int val)
 
 Mode - enum
   MODE_LRN MODE_EVAL MODE_RUN MODE_SST
@@ -30,7 +25,7 @@ Key - enum
   K_EE K_A K_B ...
   ...
 
-KeyType - enum
+ActionType - enum
   KEY_MOD_SEC    // 2nd key has been selected
   KEY_MOD_NOSEC  // 2nd key has been deselected
   KEY_OPR_INV    // Operator modifier inv has been selected
@@ -50,14 +45,15 @@ KeyType - enum
   KEY_EVL_SST    // SST key in EVAL mode
   KEY_PGM_SBR    // SBR in Pgm xx SBR xxx
 
-KeyHandled
-  KeyType key_type
-  int key
+Action
+  ActionType type  //
+  int key          // A key, or a combination of 2 digit keys.
 
 Operation
   private: ParseState parse_state
+
   Operator operator
-  Operand operands[]      // A growing array of length 0, 1 or 2
+  Operand operands[]  // A growing array of length 0, 1 or 2.
   bool is_complete = parse_state == COMPLETE
   bool is_canceled = parse_state == CANCELED
   bool is_pending  = !is_complete && !is_canceled
@@ -76,7 +72,7 @@ ParseState - enum
   ADDRESS   // It is an address, possibly in "Pgm xx SBR address".
 
   COMPLETE  // Operator and operands are fully determined.
-  CANCELED  //
+  CANCELED  // Operation has been canceled before completion.
 
 Operator
   bool inv
@@ -162,12 +158,16 @@ cancel_opn()
     operands = []
 
 done_opr()
-  Same as done_opd()
+  done_opx()
 
 done_opd()
   case opd.type:
+    // Complete operand if necessary.
     IND: DD: val = %02d.val
     DDD: val = %03.d
+  done_opx()
+
+done_opx()
   if current operation has additional operands
     add new operand (UNK, "")
     current_operation.parse_state = OPD_UNK
@@ -181,12 +181,12 @@ done_opd()
 
 == Implementation ==
 
-KeyHandled handle_key_pressed(Mode mode, int row, int col)
+Action handle_key_pressed(Mode mode, int row, int col)
   assert mode == MODE_EVAL || mode == MODE_LRN
   assert row in 1..9 && col in 1..5
   return handleKey(mode, get_key(row, col))
 
-KeyHandled handle(Mode mode, int val)
+Action handle(Mode mode, int val)
   assert val in 0..99
 
   // Some definitions
@@ -217,7 +217,7 @@ KeyHandled handle(Mode mode, int val)
   is(val, SST) && mode == MODE_EVAL:                              KEY_EVL_SST
 
   case opn.parse_state:
-    COMPLETE: assert(false)
+    COMPLETE: CANCELED: assert(false)
 
     // Condition                  opr inv|key        new state    ret_value
     PRE_OPR:

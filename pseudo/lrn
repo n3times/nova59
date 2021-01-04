@@ -1,0 +1,99 @@
+== State ==
+
+  Parser parser = new_parser()
+  int steps[1000]
+  int step_index = 0
+  CurrentOperation currentOperation
+  int current_opn_index = 0
+  int current_opn_subindex = 0
+
+
+== Edit Keys ==
+
+void lrn()
+  MODE_EVAL
+
+void sst()
+  step_index < 999: step_index += 1
+  else: MODE_EVAL
+
+void bst()
+  step_index > 0:  step_index -= 1
+
+void ins()
+  for i = 999; i >= step_index + 1; i--: steps[i] = steps[i - 1]
+  steps[step_index] = 0
+
+void del()
+  for i = step_index; i < 999; i++: steps[i] = steps[i + 1]
+  steps[999] = 0
+
+
+== Helper functions ==
+
+void key(int key)
+  steps[step_index] = key
+  step_index == 999: MODE_EVAL
+  else: step_index += 1
+
+void eval_operand(Operator opn, int opd_index)
+  opr = opn.operator
+  opd = opn.operands[opd_index]
+  opd.type == IND:
+    opd_index == 0 && opr has synthesized_ind:
+      steps[step_index - 1] = synthesized_ind
+    else:
+      key(Ind)
+  value = opd.value
+  value.len in { 1, 2 }: key(value)
+  value.len == 3:
+    key(value[0])
+    key(value[1..2])
+
+
+== Implementation ==
+
+void on_key_pressed(int i, int j):
+  action = parser.handle_key_pressed(MODE_LRN, i, j)
+
+  // Evaluate operands that are not pending any longer.
+  // For example "IFF *1" => "IFF *1 A", evaluate "*1" and "A"
+  opns = parser.operations
+  last_opn_index = opns.len - 1
+  last_opn_subindex = opns[last_opn_index].operands.len
+  while (current_opn_index != last_opn_subindex ||
+         current_opn_subindex != last_opn_subindex):
+    current_opn_subindex > 0:
+      eval_operand(opns[current_opn_index], current_opn_subindex - 1)
+    current_opn_subindex < opns[current_opn_index].operands.len - 1:
+      current_opn_subindex += 1
+    else:
+      current_opn_index += 1
+
+  key = action.key
+
+  case action.type:
+    KEY_EVL_SST: DBL_OPD_DD: DBL_OPD_DDD:
+      assert(false)
+    KEY_MOD_SEC: KEY_MOD_NOSEC:
+      // Maybe change colors.
+      return
+    KEY_OPD_LBL: KEY_OPD_D: KEY_OPD_DD: KEY_OPD_DDD:
+    KEY_OPD_IND: KEY_OPD_NOIND:
+      // Pending operands.
+      return
+    KEY_SKIP: KEY_LBL_BEG: KEY_LBL_END: KEY_PGM_SBR:
+    KEY_OPR_INV: KEY_OPR_NOINV:
+      key(key)
+    KEY_OPR_KEY:
+      key == LRN: lrn()
+      key == SST: sst()
+      key == BST: bst()
+      key == Ins: ins()
+      key == Del: del()
+      key == SBR && opns[last_opn_index]operator.inv && steps[step_index - 1] == INV:
+        steps[step_index - 1] = RTN
+      else:
+        key(key)
+
+  update_current_operation()

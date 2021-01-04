@@ -1,0 +1,121 @@
+== OPERATION PRINTING ==
+
+string print_operand(Operand opd)
+  case opd.type:
+    LBL:
+      assert opd.value.len > 0
+      return key_data[opd.value].as_string
+    D: DD: DDD:
+      assert opd.value.len > 0
+      return opd.value
+    IND:
+      return "*" + opd.value
+    UNK:
+      return ""
+
+string print_operation(Operation opn)
+  str = ""
+
+  // Operator.
+  opr = opn.operator
+  opr.inv: str += "INV "
+  opr.key != KEY_UNK: str += key_data[opr.key].as_string
+
+  // Operands.
+  opr.operands.len > 0: str += " " + print_operand(opn.operands[0])
+  opr.operands.len > 1: str += " " + print_operand(opn.operands[1])
+
+  opn.is_canceled: str += " X"
+  opn.is_pending:  str += "_"
+
+  return str
+
+
+== OPERATION EVALUATION IN EVAL/SST/RUN MODES ==
+
+State
+  Parser parser = new_parser()
+  int last_resolved_opn_index = -1
+  Log log
+  CurrentOperation current_opn
+  int current_opn_index = 0
+
+// EVAL
+void on_key_pressed(int i, int j):
+  parser.handle_key_pressed(MODE_EVAL, i, j)
+  eval_completed_operations()
+  update_current_operation()
+
+// SST / RUN
+void on_handle_step(Mode mode, int step):
+  assert mode in { MODE_RUN, MODE_SST }
+  parser.handle(mode, step)
+  eval_completed_operations()
+
+bool is_logging_mode(mode)
+  return mode in { EVAL, SST } || mode == RUN && is_trace
+
+void log_operation(opn, pre_mode, post_mode)
+  assert opn.parse_state == COMPLETE
+
+  is_numeric_opn = key_data[opn.opr.key] in { 0, ..., 9, +/-, EE, INV EE }
+  is_numeric_opn:
+    pending_display_log = true
+    return
+
+  is_program_edit_opn = key_data[opn.opr.key] in { LRN, SST, BST, INS, DEL }
+  is_program_edit_opn: return
+
+  // Always log "Pause" in RUN mode.
+  opn.opr == K_PSE && mode == RUN && !is_trace:
+    printed_opn = print_operation(opn)
+    log.input(printed_opn)
+    log.output(state.display)
+    return
+
+  is_logging_mode(pre_mode):
+    pending_display_log:
+      log.input(state.display)
+      log.output(state.display)
+    printed_opn = print_operation(opn)
+    log.input(printed_opn)
+
+  pending_display_log = false
+
+  is_logging_mode(post_mode):
+    log.output(state.display)
+ 
+void eval_completed_operations()
+  opns = parser.operations
+  for opn_index = last_resolved_opn_index + 1;
+      opn_index <= opns.len - 1;
+      opn_index++:
+    opn = opns[opn_index]
+    opr = opn.operator
+
+    // Eval display.
+    do_eval_display = state.is_display_edit &&
+                      opr.key != KEY_UNK &&
+                      key_data[opr.key].does_eval_display
+    do_eval_display: state.display.eval()
+
+    // Eval operation.
+    opn.is_complete:
+      pre_mode = mode
+      opn.eval()
+      post_mode = mode
+      log_operation(opn, pre_mode, post_mode)
+
+   opn.is_complete || opn.is_canceled:
+      last_resolved_opn_index = opn_index;
+
+void update_current_operation()
+  opns = parser.operations
+  int last_opn_index = opns.operations.len - 1
+  
+  // Never go backwards, even if last opn becomes empty "INV" -> "".
+  current_opn_index != last_opn_index:
+    opr = opns.operations[last_opn_index].operator
+    last_opn_empty = !opr.inv && opr.key == UNK
+    current_opn_index = last_opn_empty ? last_opn_index - 1 : last_opn_index
+  current_opn.set(print_operation(current_opn_index))
