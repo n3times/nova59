@@ -1,0 +1,79 @@
+== Principles ==
+
+Modes
+  EVAL and SST: log most user input and log result
+  LRN: log nothing
+  RUN: log pause, tracing, end final result (which is in EVAL)
+
+Log Format
+  Left: User/program Input
+  Right: Display result
+
+
+== Characters Needed ==
+
+Ideally 31 but 27 is enough.
+
+Operation:
+  15 may be needed but uncommon: INV IFF *21 CLR
+  11 would be OK: INV EXC *21
+Spacing: 2 characters
+Display: 14 characters (-8.8888888-88?)
+
+
+== Examples ==
+
+   123456789012345678901234567
+
+         Input      Output
+     Operation      Result
+
+1 + 1 =
+             1           1
+             +           1
+             1           1
+             =           2
+
+RCL 01 + RCL 02 =
+        RCL 01          12
+             +          12
+        RCL 02          23
+             =          35
+
+3 x^2 + 4 x^2 =
+             3           3
+           x^2           9
+             +           9
+             4           4
+           x^2          16
+             =          25
+
+2 deg rad 3
+             2           2
+           deg           2
+           rad           2
+            23          23
+
+2 + 18 A =  [Assume A divides display by 2]
+             2           2
+             +           2
+            18          18
+             A           9
+             =          11
+
+
+== EVAL/SST ==
+
+* Numeric ops  = 0, ..., 9, ., +/-, EE, INV EE
+* Loggable ops = every op except numeric and program editing ops
+* Log loggable ops (as input) and result display (as output).
+* Before, log display (as input and as output) if there haa been numeric
+  activity since last logged op.
+
+
+== RUN mode ==
+
+* EVAL -> RUN: log op (but not display)
+* RUN -> EVAL: log display (but not op)
+* If op is "Pause", log op followed by display
+* If trace, log the same way as in EVAL/SST

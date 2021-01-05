@@ -1,0 +1,49 @@
+Kind of Operators:
+  initiate number edit mode: 0..9 . EE     O -> O  C -> O  [INIT]            .
+  do not initiate number edit mode                 C -> C
+    preserve edit or non edit mode         O -> O  C -> C
+      number edit ops: +/- INV_EE                          [KEEP-EDIT]     +/-
+      non number edit ops: Deg A                           [KEEP-NON-EDIT] Deg
+    close edit mode: x^2 + GTO_xxx         O -> C  C -> C  [CLOSE]         x^2
+
+          num opr res
+.   | O     0   0   0
+.   | C     0   0   0
++/- | O     0   0   0
++/- | C     0   1   1
+Deg | O     1   1   1
+Deg | C     0   1   1
+x^2 | O     1   1   1
+x^2 | C     0   1   1
+
+num
+  super-numeric: nothing
+  semi-numeric: if closed, opr and res
+op
+  semi-op
+  super-op
+
+op and open:              log num
+op:                       log op
+op or (semi and closed):  log res
+
+  opr, res = log every operator that is not/act as a number edit op
+             also log display as result
+  num      = for the above case, log num too if open number that has not been
+             logged yet
+
+2 + 2 Deg Rad sin =
+
+   2
+   +   2
+   2
+ Deg   2
+ Rad   2
+ sin
+
+2 +/- +/- x^2 +/-
+
+   2
+ x^2   4
+ +/-  -4
+

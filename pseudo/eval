@@ -1,18 +1,25 @@
 == OPERATION PRINTING ==
 
+// Print operand, possibly incomplete.
 string print_operand(Operand opd)
-  case opd.type:
+  type = opd.type
+  value = opd.value
+  case type:
     LBL:
-      assert opd.value.len > 0
-      return key_data[opd.value].as_string
+      assert value.len > 0
+      return key_data[int(opd.value)].as_string
     D: DD: DDD:
-      assert opd.value.len > 0
-      return opd.value
+      assert D => value.len == 1
+      assert DD => value.len == 2
+      assert DDD => value.len == 3
+      return value
     IND:
-      return "*" + opd.value
+      assert value.len in {0, 2}
+      return "*" + value
     UNK:
       return ""
 
+// Print operation, possibly pending or canceled.
 string print_operation(Operation opn)
   str = ""
 
@@ -40,51 +47,19 @@ State
   CurrentOperation current_opn
   int current_opn_index = 0
 
-// EVAL
+// Evaluate operations resulting from key press (EVAL) and update logs.
 void on_key_pressed(int i, int j):
   parser.handle_key_pressed(MODE_EVAL, i, j)
   eval_completed_operations()
   update_current_operation()
 
-// SST / RUN
+// Evaluate operations resulting from key step (RUN?SST) and update logs.
 void on_handle_step(Mode mode, int step):
   assert mode in { MODE_RUN, MODE_SST }
   parser.handle(mode, step)
   eval_completed_operations()
 
-bool is_logging_mode(mode)
-  return mode in { EVAL, SST } || mode == RUN && is_trace
-
-void log_operation(opn, pre_mode, post_mode)
-  assert opn.parse_state == COMPLETE
-
-  is_numeric_opn = key_data[opn.opr.key] in { 0, ..., 9, +/-, EE, INV EE }
-  is_numeric_opn:
-    pending_display_log = true
-    return
-
-  is_program_edit_opn = key_data[opn.opr.key] in { LRN, SST, BST, INS, DEL }
-  is_program_edit_opn: return
-
-  // Always log "Pause" in RUN mode.
-  opn.opr == K_PSE && mode == RUN && !is_trace:
-    printed_opn = print_operation(opn)
-    log.input(printed_opn)
-    log.output(state.display)
-    return
-
-  is_logging_mode(pre_mode):
-    pending_display_log:
-      log.input(state.display)
-      log.output(state.display)
-    printed_opn = print_operation(opn)
-    log.input(printed_opn)
-
-  pending_display_log = false
-
-  is_logging_mode(post_mode):
-    log.output(state.display)
- 
+// Helper method.
 void eval_completed_operations()
   opns = parser.operations
   for opn_index = last_resolved_opn_index + 1;
@@ -109,10 +84,50 @@ void eval_completed_operations()
    opn.is_complete || opn.is_canceled:
       last_resolved_opn_index = opn_index;
 
+== Logging ==
+
+bool is_log_mode(mode)
+  return mode in { EVAL, SST } || mode == RUN && is_trace
+
+// Log operation and result of the operation as well as any pending number.
+// Example: "22 + 2 ="
+// Lines 1 and 2 are logged after "+", lines 3 and 4 after "=".
+// input  output
+//    22           [pending number]
+//     +      22
+//     2           [pending number]
+//     =      24
+void log_operation(opn, pre_mode, post_mode)
+  assert opn.parse_state == COMPLETE
+
+  // Ignore program editing operations.
+  is_program_edit_opn = key_data[opn.opr.key] in { LRN, SST, BST, INS, DEL }
+  is_program_edit_opn: return
+
+  // Always log "Pause" in RUN mode.
+  opn.opr == K_PSE && pre_mode == RUN && !is_trace:
+    log.input_opn(opn)
+    log.output_display()
+    return
+
+  // Ignore numeric keys while editing input number.
+  is_numeric_opn = key_data[opn.opr.key] in { 0, ..., 9, +/-, EE, INV EE }
+  is_numeric_opn && state.display.is_edit_mode:
+    is_log_mode(pre_mode): pending_number = state.display
+    return
+
+  // Log input number.
+  is_log_mode(pre_mode) && pending_number: log.input_number(pending_number)
+  pending_number = nil
+
+  // Log operation and result.
+  is_log_mode(pre_mode): log.input_opn(opn)
+  is_log_mode(post_mode): log.output_display()
+
 void update_current_operation()
   opns = parser.operations
   int last_opn_index = opns.operations.len - 1
-  
+
   // Never go backwards, even if last opn becomes empty "INV" -> "".
   current_opn_index != last_opn_index:
     opr = opns.operations[last_opn_index].operator
