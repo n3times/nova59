@@ -1,23 +1,24 @@
 == BASIC PROGRAM LISTING ==
 
+// Print program as it would be printed by the TI-59 printer.
 void basic_program_listing(int steps[])
   parser = new_parser()
 
   for i = 0; i < steps.length; i++:
     step = steps[i]
-    action = parser.handle(MODE_RUN, step)
+    action = parser.handle(RUN, step)
     action.type in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
-      print "%03d %02d\n", i, step
+      print "%03d  %02d\n", i, step
     else:
-      print "%03d %s\n", i, key_data[step].as_string
+      print "%03d  %s\n", i, key_data[step].as_string
 
 
 == COMPLEX PROGRAM LISTING ==
 
-void nl_key(i, key) = print "\n%03d %s\n", i, key_data[key].as_string
-void sp_key(i, key) = print " %s\n", key_data[key].as_string
-void sp_dbl(i, key) = print " %02d\n", key
-void dbl(key)       = print "%02d\n", key
+void nl_key(i, key)  =  print "\n%03d %s\n", i, key_data[key].as_string
+void sp_key(i, key)  =  print " %s\n", key_data[key].as_string
+void sp_dbl(i, key)  =  print " %02d\n", key
+void dbl(key)        =  print "%02d\n", key
 
 bool is_numeric_key(key):
   return key in { 0, 1, ..., 9, . }
@@ -31,7 +32,7 @@ void complex_program_listing(int steps[])
   for i = 0; i < steps.length; i++:
     step = steps[i]
     new_number_line_length = 0
-    action = parser.handle(MODE_RUN, step)
+    action = parser.handle(_RUN, step)
     action.type:
       KEY_MOD_SEC: KEY_MOD_NOSEC: KEY_OPD_NOIND: KEY_OPD_DD: KEY_EVL_SST:
         assert(false)

@@ -1,0 +1,42 @@
+RCL 1 + RCL 2 =
+
+RCL _
+RCL 1_
++
+RCL _
+RCL 2_
+=
+-------------------
+12 + 23 =
+
+[display]
+[display]
++
+[display]
+[display]
+=
+-------------------
+RCL 12 x^2
+
+RCL
+RCL _
+RCL 1_
+RCL 12
+x^2
+-------------------
+INV IFF *1 *23
+
+INV _
+INV IFF _
+INV IFF *_
+INV IFF *1_
+INV IFF *01 *_
+INV IFF *01 *2_
+INV IFF *01 *23
+-------------------
+INV IFF STO
+
+INV _
+INV IFF _
+STO _
+-------------------
