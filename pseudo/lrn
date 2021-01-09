@@ -1,9 +1,8 @@
-== State ==
-
-  Parser parser = new_parser()
+Evaluator
+  Parser parser
+  Log log
   int steps[1000]
   int step_index = 0
-  CurrentOperation currentOperation
   int current_opn_index = 0
   int current_opn_subindex = 0
 
@@ -11,11 +10,11 @@
 == Edit Keys ==
 
 void lrn()
-  MODE_EVAL
+  mode = EVAL
 
 void sst()
   step_index < 999: step_index += 1
-  else: MODE_EVAL
+  else: mode = EVAL
 
 void bst()
   step_index > 0:  step_index -= 1
@@ -53,9 +52,7 @@ void eval_operand(Operator opn, int opd_index)
 
 == Implementation ==
 
-void on_key_pressed(int i, int j):
-  action = parser.handle_key_pressed(MODE_LRN, i, j)
-
+void eval()
   // Evaluate operands that are not pending any longer.
   // For example "IFF *1" => "IFF *1 A", evaluate "*1" and "A"
   opns = parser.operations

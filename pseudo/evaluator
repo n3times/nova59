@@ -1,64 +1,12 @@
-== OPERATION PRINTING ==
+==  Evaluator in EVAL/SST/RUN Modes  ==
 
-// Operand, possibly incomplete.
-String operand_as_string(Operand opd)
-  type = opd.type
-  value = opd.value
-  case type:
-    LBL:
-      assert value.len > 0
-      return key_data[int(opd.value)].as_string
-    D: DD: DDD:
-      assert value.len > 0
-      return value
-    IND:
-      return "*" + value
-    UNK:
-      return ""
-
-// Operation, possibly pending or canceled.
-String operation_as_string(Operation opn)
-  str = ""
-
-  // Operator.
-  opr = opn.operator
-  opr.inv: str += "INV "
-  opr.key != KEY_UNK: str += key_data[opr.key].as_string
-
-  // Operands.
-  opr.operands.len > 0: str += " " + operand_as_string(opn.operands[0])
-  opr.operands.len > 1: str += " " + operand_as_string(opn.operands[1])
-
-  opn.is_canceled: str += " X"
-  opn.is_pending:  str += "_"
-
-  return str
-
-
-== OPERATION EVALUATION IN EVAL/SST/RUN MODES ==
-
-State
-  Parser parser = new_parser()
-  int last_resolved_opn_index = -1  // Complete or canceled.
+Evaluator
+  Parser parser
   Log log
-  CurrentOperation current_opn
+  int last_resolved_opn_index = -1  // Complete or canceled.
   int current_opn_index = 0
 
-// Evaluate operations resulting from key press (EVAL) and update logs.
-void on_key_pressed(int i, int j):
-  parser.handle_key_pressed(MODE_EVAL, i, j)
-  eval_completed_operations()
-  update_current_operation()
-
-// Evaluate operations resulting from key step (RUN/SST) and update logs.
-void on_handle_step(Mode mode, int step):
-  assert mode in { RUN, SST }
-  parser.handle(mode, step)
-  eval_completed_operations()
-  mode == SST: update_current_operation()
-
-// Helper method.
-void eval_completed_operations()
+void eval()
   opns = parser.operations
   for opn_index = last_resolved_opn_index + 1;
       opn_index <= opns.len - 1;
@@ -73,18 +21,21 @@ void eval_completed_operations()
     do_eval_display: state.display.eval()
 
     // Eval operation.
-    opn.is_complete:
+    opn.state == COMPLETE:
       pre_mode = mode
       opn.eval()
       post_mode = mode
       log_operation(opn, pre_mode, post_mode)
 
-   opn.is_complete || opn.is_canceled:
-      last_resolved_opn_index = opn_index;
+    opn.state != PENDING:
+      last_resolved_opn_index = opn_index
 
   is_log_mode(pre_mode): log.pending(get_pending_operation)
 
-== Logging ==
+  update_current_operation()
+
+
+==  Logging  ==
 
 bool is_log_mode(mode) = mode in { EVAL, SST } || mode == RUN && is_trace
 
@@ -125,7 +76,7 @@ void log_operation(opn, pre_mode, post_mode)
 
 void update_current_operation()
   state.display.is_edit:
-    current_opn.set(state.display) // or empty.
+    log.current_opn.set(state.display) // or empty.
     return
 
   opns = parser.operations
@@ -136,7 +87,7 @@ void update_current_operation()
     opr = opns.operations[last_opn_index].operator
     last_opn_empty = !opr.inv && opr.key == UNK
     current_opn_index = last_opn_empty ? last_opn_index - 1 : last_opn_index
-  current_opn.set(operation_as_string(current_opn_index))
+  log.current_opn.set(operation_as_string(current_opn_index))
 
 String get_pending_operation()
   state.display.is_edit: return state.display

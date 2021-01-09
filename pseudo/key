@@ -1,0 +1,45 @@
+Key - enum
+  K_0 K_1 ... K_9
+  K_EE K_A K_B ...
+  ...
+
+KeyData keyData[100]  // indexed by key
+
+Key get_key(int row, int col)
+Key get_sec(Key val)
+
+// All keys are operators except 2nd INV Ind 2n' IN' NOP Lbl.
+// SST is an operator in LRN mode but not in RUN, SST and EVAL modes.
+// All keys are labels except 0..9, 2nd, 2n', Ind, LRN, SST, BST, Del, Ins.
+KeyData
+  Key key
+  bool is_label
+  bool is_operator(Mode mode, bool inv)
+  OperatorKind (*opr_kind)(Mode mode, bool inv)  // Special: Pgm SBR Fix
+  char *as_string                                // For debugging
+
+int operand_count(bool inv, Key key, Mode mode):
+  kind = operator_kind(inv, key, mode)
+  assert kind != OPR_KIND_NONE
+  case kind:
+    OPR_KIND_NO_PARAM:  return 0
+    OPR_KIND_D_ADDRESS: return 2
+    default:            return 1
+
+OperandKind operand_kind(Mode mode, bool inv, Key key, int opd_index)
+   opr_kind = operator_kind(inv, key, mode)
+   case opr_kind:
+     OPR_KIND_NONE:     assert(false)
+     OPR_KIND_NO_PARAM: assert(false)
+     OPR_KIND_D:        assert(opd_index == 0); return D
+     OPR_KIND_DD:       assert(opd_index == 0); return DD
+     OPR_KIND_ADDRESS:  assert(opd_index == 0); return ADDRESS
+     OPR_KIND_D_ADDRESS:
+       opd_index:
+         0: return D
+         1: return ADDRESS
+         2: assert(false)
+
+bool is_dig(Key key)         =  key in 0..9
+bool is_usr(Key key)         =  key in 10..19 // A-E and A'-E'
+bool is(int val1, int val2)  =  val1 == val2

@@ -1,0 +1,9 @@
+
+Runtime
+  Drives engine by listening to key presses, ticks and interrupts.
+
+Parser
+  Transforms key presses and program steps into structure operations.
+
+Evaluator
+  On eval, gets new operations from the parser, evaluates and logs them.

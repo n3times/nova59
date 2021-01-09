@@ -1,0 +1,125 @@
+State
+- name
+- display
+- wait
+- State (*press_handler)(i, j)
+- State (*release_handler)()
+- State (*next_handler)()
+
+Name             Display  Wait   Next             Press           Release
+================================================================================
+EVAL_IDLE        REG      IDLE   -                eval_press()    eval_release()
+EVAL_BLINK_OFF   BLANK    400    EVAL_BLINK_ON    eval_press()    N/A
+EVAL_BLINK_ON    REG      400    EVAL_BLINK_OFF   eval_press()    N/A
+EVAL_PENDING     [REG     100    eval_next()      eval_press()    -
+
+LRN_IDLE         STEP     IDLE   -                lrn_press()     -
+LRN_PENDING      [STEP    100    lrn_next()       lrn_press()     -
+
+RUN_READY        [        100    RUN_LOOP         run_press()     run_release()
+RUN_LOOP         [        0      run_next()       run_press()     run_release()
+RUN_PRINTED      [        100*   RUN_LOOP         run_press()     run_release()
+RUN_PAUSED       REG      600    RUN_READY        run_press()     run_release()
+RUN_TRACED       REG      200    RUN_READY        run_press()     run_release()
+
+LIST_READY       [        100    LIST_LOOP        end_press()     -
+LIST_LOOP        [        0      list_next()      end_press()     -
+LIST_PRINTED     [        100    LIST_LOOP        end_press()     -
+ADVANCE          [        200    adv_next()       end_press()     adv_release()
+PROGRAM_LOAD     [        IDLE   -                end_press()     - 
+PROGRAM_SAVE     [        IDLE   -                end_press()     -
+
+
+==  Engine  ==
+
+wait_t press(i, j)
+  assert 1 <= i <= 9 && 1 <= j <= 5
+  state_data = state_data[current_state]
+  current_state = state_data.press_handler(i, j)
+  set_display(state_data.display)
+  return state_data.wait
+  
+wait_t release()
+  assert 1 <= i <= 9 && 1 <= j <= 5
+  state_data = state_data[current_state]
+  current_state = state_data.release_handler()
+  set_display(state_data.display)
+  return state_data.wait
+  
+wait_t next()
+  assert 1 <= i <= 9 && 1 <= j <= 5
+  state_data = state_data[current_state]
+  current_state = state_data.next_handler()
+  set_display(state_data.display)
+  return state_data.wait
+  
+
+==  Next handlers  ==
+
+void adv_next()
+  printer_advance()
+  ADVANCE
+
+void run_next()
+  run_evaluator.eval_next_step()
+  case mode:
+    RUN:  trace_on ? RUN_TRACED : RUN_LOOP
+    EVAL: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
+    LRN:  LRN_IDLE
+    default: assert(false)
+  
+void eval_next()
+  
+
+==  Press handlers  ==
+
+void lrn_press(i, j)
+  pending_key:
+    lrn_eval(pending_key)
+    engine_press(i, j)
+  feeback:
+    pending_key = key(i, j)
+    LRN_PENDING
+  else:
+    lrn_eval(i, j)
+
+void eval_press(i, j)
+  pending_key:
+    eval_eval(pending_key)
+    engine_press(i, j)
+  feeback:
+    pending_key = key(i, j)
+    EVAL_PENDING
+  else:
+    eval_eval(i, j)
+
+void run_press(i, j)
+  key(i, j) == R/S: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
+  key(i, j) == GTO:
+    trace_on = true
+
+void end_press(i, j)
+  key(i, j) == R/S: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
+ 
+
+==  Release handlers  ==
+
+void eval_release()
+  is_error: EVAL_BLINK_OFF
+
+void run_release()
+  trace_on:
+    trace_on = false
+    RUN_READY
+
+void adv_release()
+  is_error ? EVAL_BLINK_OFF : EVAL_IDLE
+ 
+
+
+
+void lrn_next()
+    lrn_eval(pending_key)
+  
+
+

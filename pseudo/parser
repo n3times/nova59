@@ -3,6 +3,8 @@
 // Given a stream of keys and program steps, the parser generates a stream of
 // structured operations.
 Parser
+  ParserState state
+
   Operation operations[]   // An ever growing array. Last/current may be empty.
 
   bool sec  // 2nd key is selected.
@@ -18,11 +20,6 @@ Parser
   Action handle(Mode mode, int val)
 
 Mode - enum  { LRN, EVAL, RUN, SST }
-
-Key - enum
-  K_0 K_1 ... K_9
-  K_EE K_A K_B ...
-  ...
 
 ActionType - enum
   KEY_MOD_SEC    // 2nd key has been selected
@@ -48,16 +45,6 @@ Action
   ActionType type  //
   int key          // A key, or a combination of 2 digit keys.
 
-Operation
-  private: ParseState parse_state
-
-  Operator operator
-  Operand operands[]  // A growing array of length 0, 1 or 2.
-
-  bool is_complete  =  parse_state == OPN_COMPLETE
-  bool is_canceled  =  parse_state == OPN_CANCELED
-  bool is_pending   =  !is_complete && !is_canceled
-
 ParseState - enum
   OPR_UNK       // Operation so far is "_" or "INV _".
   LBL_BEG       // Waiting for the end of a label marker: "STO" in "Lbl STO".
@@ -75,88 +62,18 @@ ParseState - enum
   OPN_COMPLETE  // Operator and operands are fully determined and cannot change.
   OPN_CANCELED  // Operation has been canceled and cannot change.
 
-Operator
-  bool inv
-  Key key
-
-Operand
-  OperandType type  // Indicates how to interpret the operand value
-  string value      // Up to 3 digits: opcode for label, address or register...
-
-OperandType - enum
-  UNK IND LBL D DD DDD
-
-OperandKind - enum
-  OPD_KIND_ADDRESS  // DDD, IND or LBL
-  OPD_KIND_D        // D or IND
-  OPD_KIND_DD       // DD or IND
-  OPD_KIND_DD_ONLY  // DD
-  OPD_KIND_SBR      // <usr> or SBR <address>
-
-OperatorKind - enum
-  OPR_KIND_NO_PARAM
-  OPR_KIND_D
-  OPR_KIND_DD
-  OPR_KIND_DD_ONLY
-  OPR_KIND_ADDRESS
-  OPR_KIND_D_ADDRESS
-  OPR_KIND_NONE       // Not an operator.
-
-
-== Data ==
-
-Key get_key(int row, int col)
-Key get_sec(Key val)
-
-// All keys are operators except 2nd INV Ind 2n' IN' NOP Lbl.
-// SST is an operator in LRN mode but not in RUN, SST and EVAL modes.
-// All keys are labels except 0..9, 2nd, 2n', Ind, LRN, SST, BST, Del, Ins.
-KeyData
-  Key key
-  bool is_label
-  bool is_operator(Mode mode, bool inv)
-  OperatorKind (*opr_kind)(Mode mode, bool inv)  // Special: Pgm SBR Fix
-  char *as_string                                // For debugging
-
-KeyData keyData[100]  // indexed by key
-
 
 == Helper functions ==
-
-int operand_count(bool inv, Key key, Mode mode):
-  kind = operator_kind(inv, key, mode)
-  assert kind != OPR_KIND_NONE
-  case kind:
-    OPR_KIND_NO_PARAM:  return 0
-    OPR_KIND_D_ADDRESS: return 2
-    default:            return 1
-
-OperandKind operand_kind(Mode mode, bool inv, Key key, int opd_index)
-   opr_kind = operator_kind(inv, key, mode)
-   case opr_kind:
-     OPR_KIND_NONE:     assert(false)
-     OPR_KIND_NO_PARAM: assert(false)
-     OPR_KIND_D:        assert(opd_index == 0); return D
-     OPR_KIND_DD:       assert(opd_index == 0); return DD
-     OPR_KIND_ADDRESS:  assert(opd_index == 0); return ADDRESS
-     OPR_KIND_D_ADDRESS:
-       opd_index:
-         0: return D
-         1: return ADDRESS
-         2: assert(false)
-
-bool is_dig(Key key)         =  key in 0..9
-bool is_usr(Key key)         =  key in 10..19 // A-E and A'-E'
-bool is(int val1, int val2)  =  val1 == val2
 
 cancel_opn()
   opn = operations.last
   opr = opn.operator
   !opr.inv && opr.key == K_UNK: return
-  opn.parse_state = CANCELED
-  
+  parser.state = OPN_CANCELED
+  opn.state = CANCELED
+
   add new operation  // Previous operation remains incomplete
-    parse_state = OPR_UNK
+    parser.state = OPR_UNK
     operator = (false, -1)
     operands = []
 
@@ -173,11 +90,12 @@ done_opd()
 done_opx()
   if current_operation has additional operands
     add new operand (UNK, "")
-    current_operation.parse_state = OPD_UNK
+    parser.state = OPD_UNK
   else
-    current_operation.parse_state = OPN_COMPLETE
+    current_operation.state = COMPLETE
+    parser.state = OPR_UNK
     add empty operation
-      parse_state = OPR_UNK
+      opn.state = PENDING
       operator = [ false, -1 ]
       operands = []
 
@@ -208,7 +126,7 @@ Action handle(Mode mode, int val)
     opn.sec:
       val = get_sec(val)
       opn.sec = false
-    parse_state == OPR_UNK && val == IN':
+    parser.state == OPR_UNK && val == IN':
       val = INV
       opn.sec = true
 
@@ -219,7 +137,7 @@ Action handle(Mode mode, int val)
 
   is(val, SST) && mode == MODE_EVAL:                              KEY_EVL_SST
 
-  case opn.parse_state:
+  case parser.state:
     OPN_COMPLETE: OPN_CANCELED: assert(false)
 
     // Condition                  opr inv|key        new state    ret_value
