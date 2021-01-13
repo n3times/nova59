@@ -1,5 +1,14 @@
+Responsibilites:
+- listening to key events including key releases.
+- forwarding key presses
+- animations
+- tracing
+- stoping
+- advancing
+- listing
+
 Principles
-- Support all modes: EVAL, LRN, RUN, LIST, ADVANCE, PROGRAM_LOAD, PROGRAM_SAVE
+- Modes: EVAL, LRN, RUN, LIST, ADVANCE, PROGRAM_LOAD, PROGRAM_SAVE
 - Support "animations": key feedback, error blinking, pause, printing, tracing
 - Be data/table based as much as possible.
 - If 2 keys are fired in a row in eval/lrn mode, neither should be ignored.
@@ -11,14 +20,15 @@ Options:
   "No" is better in practice and makes testing easier.
 
 Non supported options:
-- No error blinking for monothreaded clients.
-  Not an option as it complicates design.
-  Instead provide blinking info to clients.
-- Classic behavior with no rapid fire, no auto stop.
-  Not an option as it complicates design.
-  Rapid fire, auto stop are better behaviors. 
-- Auto-release.
+- No error blinking option for monothreaded clients.
+  Non supported as it complicates design.
+  Instead provide blinking info to clients so they can decide not to animate.
+- Classic behavior with no rapid fire, no auto stop options
+  Non supported options as they complicate design.
+  Rapid fire, auto stop are better behaviors anyway.
+- Auto-release option when pressing a key before previous one has been released.
   Not an option as it complicates design.
   Instead clients should call key pressed followed by key release.
-- Pause animation in EVAL mode.
+- Pause key animation in EVAL mode option.
   Not a feature as it complicates design.
+  Anyway this is super minor.

@@ -1,125 +1,172 @@
-State
+state_t
 - name
 - display
 - wait
-- State (*press_handler)(i, j)
-- State (*release_handler)()
-- State (*next_handler)()
+- state_t (*next_handler)()
+- state_t (*press_handler)(i, j)
+- state_t (*release_handler)()
 
-Name             Display  Wait   Next             Press           Release
-================================================================================
-EVAL_IDLE        REG      IDLE   -                eval_press()    eval_release()
-EVAL_BLINK_OFF   BLANK    400    EVAL_BLINK_ON    eval_press()    N/A
-EVAL_BLINK_ON    REG      400    EVAL_BLINK_OFF   eval_press()    N/A
-EVAL_PENDING     [REG     100    eval_next()      eval_press()    -
+Modes:
+- EVAL LRN RUN
+- LIST_STEPS LIST_REGS LIST_LBLS
+- PROGRAM_SAVE PROGRAM_LOAD
+- ADV
 
-LRN_IDLE         STEP     IDLE   -                lrn_press()     -
-LRN_PENDING      [STEP    100    lrn_next()       lrn_press()     -
+State names are 'mode.suffix'.
 
-RUN_READY        [        100    RUN_LOOP         run_press()     run_release()
-RUN_LOOP         [        0      run_next()       run_press()     run_release()
-RUN_PRINTED      [        100*   RUN_LOOP         run_press()     run_release()
-RUN_PAUSED       REG      600    RUN_READY        run_press()     run_release()
-RUN_TRACED       REG      200    RUN_READY        run_press()     run_release()
+name           | display  wait   next             press           release
+===============+===============================================================
+EVAL.IDLE      | REG      IDLE   NA()             eval_press(.)   initial(EVAL)
+EVAL.FEEDBACK  | [REG     100    initial(EVAL)    eval_press(.)   SAME()
+EVAL.BLINK_OFF | BLANK    400    EVAL.BLINK_ON    eval_press(.)   NA()
+EVAL.BLINK_ON  | REG      400    EVAL.BLINK_OFF   eval_press(.)   NA()
+---------------+---------------------------------------------------------------
+LRN.IDLE       | STEP     IDLE   NA()             lrn_press(.)    SAME()
+LRN.FEEDBACK   | [STEP    100    LRN.IDLE         lrn_press(.)    SAME()
+---------------+---------------------------------------------------------------
+RUN.READY      | [        100    RUN.LOOP         run_press(.)    SAME()
+RUN.LOOP       | [        0      run_next()       run_press(.)    SAME()
+RUN.PRINTED    | [        100*   RUN.LOOP         run_press(.)    SAME()
+RUN.PAUSED     | REG      600    RUN.READY        run_press(.)    SAME()
+RUN.TRACED     | REG      200    RUN.READY        run_press(.)    SAME()
+---------------+---------------------------------------------------------------
+PROGRAM_LOAD   | [        IDLE   NA()             stop_press(.)   SAME()
+PROGRAM_SAVE   | [        IDLE   NA()             stop_press(.)   SAME()
+---------------+---------------------------------------------------------------
+ADV.LOOP       | [        200    adv_next()       NA()            adv_release()
+---------------+---------------------------------------------------------------
+LIST_*.READY   | [        100    LIST_*.LOOP      stop_press(.)    SAME()
+LIST_*.LOOP    | [        0      list_next()      stop_press(.)   SAME()
 
-LIST_READY       [        100    LIST_LOOP        end_press()     -
-LIST_LOOP        [        0      list_next()      end_press()     -
-LIST_PRINTED     [        100    LIST_LOOP        end_press()     -
-ADVANCE          [        200    adv_next()       end_press()     adv_release()
-PROGRAM_LOAD     [        IDLE   -                end_press()     - 
-PROGRAM_SAVE     [        IDLE   -                end_press()     -
+Runtime
+  state_t state
+
+Key handlers:
+  eval.press(i, j)
+  lrn.press(i, j)
+Next handlers
+  run.next()
+  adv.next()
+  list_pgm.next()
+  list_regs.next()
+  list_lbls.next()
 
 
 ==  Engine  ==
 
-wait_t press(i, j)
+wait_t press_key(i, j)
   assert 1 <= i <= 9 && 1 <= j <= 5
-  state_data = state_data[current_state]
-  current_state = state_data.press_handler(i, j)
-  set_display(state_data.display)
-  return state_data.wait
+  is_key_pressed:
+    release_key()
+    return press_key(i, j)
+  is_key_pressed = true
+  new_state = state_data[current_state].press_handler(i, j)
+  new_state == SAME: return SAME
+  current_state = new_state
+  set_display(state_data[current_state].display)
+  return state_data[current_state].wait
   
-wait_t release()
-  assert 1 <= i <= 9 && 1 <= j <= 5
-  state_data = state_data[current_state]
-  current_state = state_data.release_handler()
-  set_display(state_data.display)
-  return state_data.wait
+wait_t release_key()
+  !is_key_pressed: return SAME
+  is_key_pressed = false
+  trace_on: trace_on = false
+  new_state = state_data[current_state].release_handler()
+  new_state == SAME: return SAME
+  current_state = new_state
+  set_display(state_data[current_state].display)
+  return state_data[current_state].wait
   
 wait_t next()
-  assert 1 <= i <= 9 && 1 <= j <= 5
-  state_data = state_data[current_state]
-  current_state = state_data.next_handler()
-  set_display(state_data.display)
-  return state_data.wait
-  
+  new_state = state_data[current_state].next_handler()
+  new_state == SAME: return SAME
+  current_state = new_state
+  set_display(state_data[current_state].display)
+  return state_data[current_state].wait
 
-==  Next handlers  ==
 
-void adv_next()
-  printer_advance()
-  ADVANCE
+==  EVAL  ==
 
-void run_next()
-  run_evaluator.eval_next_step()
-  case mode:
-    RUN:  trace_on ? RUN_TRACED : RUN_LOOP
-    EVAL: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
-    LRN:  LRN_IDLE
-    default: assert(false)
-  
-void eval_next()
-  
-
-==  Press handlers  ==
-
-void lrn_press(i, j)
-  pending_key:
-    lrn_eval(pending_key)
-    engine_press(i, j)
-  feeback:
-    pending_key = key(i, j)
-    LRN_PENDING
+state_t eval_press(i, j)
+  eval.press(i, j)
+  mode == EVAL:
+    feeback:  return EVAL_FEEDBACK
+    else:     return EVAL.IDLE
   else:
-    lrn_eval(i, j)
+    return initial(mode)
 
-void eval_press(i, j)
-  pending_key:
-    eval_eval(pending_key)
-    engine_press(i, j)
-  feeback:
-    pending_key = key(i, j)
-    EVAL_PENDING
+
+==  LRN  ==
+
+state_t lrn_press(i, j)
+  lrn.press(i, j)
+  mode == LRN:
+    feeback:  return LRN_FEEDBACK
+    else:     return LRN.IDLE
   else:
-    eval_eval(i, j)
+    return initial(mode)
 
-void run_press(i, j)
-  key(i, j) == R/S: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
+
+==  RUN  ==
+
+state_t run_next()
+  run.next()
+  mode == RUN:
+    is_paused:    return RUN.PAUSED
+    trace_on:     return RUN.TRACED
+    has_printed:  return RUN.PRINTED
+    return RUN_LOOP
+  else:
+    return initial(mode)
+
+state_t run_press(i, j)
+  key(i, j) == K_RS:
+    mode = EVAL
+    return EVAL.IDLE
   key(i, j) == GTO:
     trace_on = true
-
-void end_press(i, j)
-  key(i, j) == R/S: is_error ? EVAL_BLINK_OFF : EVAL_IDLE
- 
-
-==  Release handlers  ==
-
-void eval_release()
-  is_error: EVAL_BLINK_OFF
-
-void run_release()
-  trace_on:
-    trace_on = false
-    RUN_READY
-
-void adv_release()
-  is_error ? EVAL_BLINK_OFF : EVAL_IDLE
- 
+  return SAME
 
 
+==  ADV  ==
 
-void lrn_next()
-    lrn_eval(pending_key)
-  
+state_t adv_next()
+  adv.next()
+  return ADV.LOOP
 
+state_t adv_release()
+  mode = EVAL
+  return initial(EVAL)
+
+
+==  LIST  ==
+
+state_t list_next()
+  list.next()
+  mode == LIST_*:
+    return LIST_*.LOOP
+  else:
+    return initial(mode)
+
+
+==  Miscellaneous  ==
+
+state_t SAME()  =  return SAME
+
+state_t NA()    =  assert false
+
+state_t stop_press(i, j)
+  key(i, j) == R/S:
+    mode = EVAL
+    return EVAL.IDLE
+  return SAME
+
+state_t initial(mode):
+  case mode:
+    EVAL: return (is_error && !is_key_pressed) ? EVAL_BLINK_OFF : EVAL.IDLE
+    LRN: return LRN.IDLE
+    RUN: return RUN_READY
+    ADV: return ADV.LOOP
+    LIST_*: return LIST_*.LOOP
+    PROGRAM_LOAD: return PROGRAM_LOAD
+    PROGRAM_SAVE: return PROGRAM_SAVE
 
