@@ -35,60 +35,6 @@ void eval()
   update_current_operation()
 
 
-==  Logging  ==
-
-bool is_log_mode(mode) = mode in { EVAL, SST } || mode == RUN && is_trace
-
-// Log operation and result of the operation as well as any pending number.
-// Example: "22 + 2 ="
-// Lines 1 and 2 are logged after "+", lines 3 and 4 after "=".
-// input  output
-//    22           [pending number]
-//     +      22
-//     2           [pending number]
-//     =      24
-void log_operation(opn, pre_mode, post_mode)
-  assert opn.parse_state == COMPLETE
-
-  // Ignore program editing operations.
-  is_program_edit_opn = key_data[opn.opr.key] in { LRN, SST, BST, INS, DEL }
-  is_program_edit_opn: return
-
-  // Always log "Pause" in RUN mode.
-  opn.opr == K_PSE && pre_mode == RUN && !is_trace:
-    log.input_opn(opn)
-    log.output_display()
-    return
-
-  // Ignore numeric keys while editing input number.
-  is_numeric_opn = key_data[opn.opr.key] in { 0, ..., 9, +/-, EE, INV EE }
-  is_numeric_opn && state.display.is_edit_mode:
-    is_log_mode(pre_mode): pending_number = state.display
-    return
-
-  // Log input number.
-  is_log_mode(pre_mode) && pending_number: log.input_number(pending_number)
-  pending_number = nil
-
-  // Log operation and result.
-  is_log_mode(pre_mode): log.input_opn(opn)
-  is_log_mode(post_mode): log.output_display()
-
-void update_current_operation()
-  state.display.is_edit:
-    log.current_opn.set(state.display) // or empty.
-    return
-
-  opns = parser.operations
-  int last_opn_index = opns.operations.len - 1
-
-  // Never go backwards, even if last opn becomes empty "INV" -> "".
-  current_opn_index != last_opn_index:
-    opr = opns.operations[last_opn_index].operator
-    last_opn_empty = !opr.inv && opr.key == UNK
-    current_opn_index = last_opn_empty ? last_opn_index - 1 : last_opn_index
-  log.current_opn.set(operation_as_string(current_opn_index))
-
 String get_pending_operation()
   state.display.is_edit: return state.display
 

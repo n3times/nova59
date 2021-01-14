@@ -4,10 +4,8 @@
 // structured operations.
 Parser
   ParserState state
-
-  Operation operations[]   // An ever growing array. Last/current may be empty.
-
-  bool sec  // 2nd key is selected.
+  Operation operations[]  // An ever growing array. Last/current may be empty.
+  bool sec                // 2nd key is selected.
 
   // Updates the parser after a key from the keyboard has been pressed.
   // Params: mode is EVAL or LRN, row in 1..9, col in 1..5.

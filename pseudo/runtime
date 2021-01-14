@@ -2,13 +2,13 @@ state_t
 - name
 - display
 - wait
-- state_t (*next_handler)()
-- state_t (*press_handler)(i, j)
-- state_t (*release_handler)()
+- state_t (*next)()
+- state_t (*press)(i, j)
+- state_t (*release)()
 
 Modes:
 - EVAL LRN RUN
-- LIST_STEPS LIST_REGS LIST_LBLS
+- LIST_*: LIST_STEPS LIST_REGS LIST_LBLS
 - PROGRAM_SAVE PROGRAM_LOAD
 - ADV
 
@@ -35,24 +35,41 @@ PROGRAM_SAVE   | [        IDLE   NA()             stop_press(.)   SAME()
 ---------------+---------------------------------------------------------------
 ADV.LOOP       | [        200    adv_next()       NA()            adv_release()
 ---------------+---------------------------------------------------------------
-LIST_*.READY   | [        100    LIST_*.LOOP      stop_press(.)    SAME()
+LIST_*.READY   | [        100    LIST_*.LOOP      stop_press(.)   SAME()
 LIST_*.LOOP    | [        0      list_next()      stop_press(.)   SAME()
 
 Runtime
   state_t state
+  bool trace_on
+  bool is_key_pressed
 
-Key handlers:
-  eval.press(i, j)
-  lrn.press(i, j)
-Next handlers
-  run.next()
-  adv.next()
-  list_pgm.next()
-  list_regs.next()
-  list_lbls.next()
+Mode handlers:
+  info_t eval.press(i, j)
+  info_t lrn.press(i, j)
+  info_t run.next()
+  info_t adv.next()
+  info_t list_*.next()
+  info_t program_load.load(steps_in)
+  info_t program_save.save(steps_out)
+
+Flags
+  auto_release_flag
+  feedback_flag
+  no_blink_flag
 
 
-==  Engine  ==
+==  API  ==
+
+wait_t press_key(i, j)
+wait_t release_key()
+wait_t next()
+wait_t load_program(int steps_in[])
+wait_t save_program(int steps_out[])
+wait_t interrupt_read()
+wait_t interrupt_write()
+
+
+==  IMPLEMENTATION  ==
 
 wait_t press_key(i, j)
   assert 1 <= i <= 9 && 1 <= j <= 5
@@ -60,9 +77,12 @@ wait_t press_key(i, j)
     release_key()
     return press_key(i, j)
   is_key_pressed = true
-  new_state = state_data[current_state].press_handler(i, j)
-  new_state == SAME: return SAME
+  new_state = state_data[current_state].press(i, j)
+  new_state == SAME:
+    auto_release_flag: return release_key()
+    return SAME
   current_state = new_state
+  auto_release_flag: return release_key()
   set_display(state_data[current_state].display)
   return state_data[current_state].wait
   
@@ -70,18 +90,40 @@ wait_t release_key()
   !is_key_pressed: return SAME
   is_key_pressed = false
   trace_on: trace_on = false
-  new_state = state_data[current_state].release_handler()
+  new_state = state_data[current_state].release()
   new_state == SAME: return SAME
   current_state = new_state
   set_display(state_data[current_state].display)
   return state_data[current_state].wait
   
 wait_t next()
-  new_state = state_data[current_state].next_handler()
+  new_state = state_data[current_state].next()
   new_state == SAME: return SAME
   current_state = new_state
   set_display(state_data[current_state].display)
   return state_data[current_state].wait
+
+wait_t load_program(int steps_in[])
+  program_load.load(steps_in)
+  mode = EVAL
+  return initial(EVAL)
+
+wait_t save_program(int steps_out[])
+  program_save.save(steps_out)
+  mode = EVAL
+  return initial(EVAL)
+
+wait_t load_module(int steps_in[][])
+  module_load.load(steps_in)
+  return SAME
+
+wait_t interrupt_read()
+  mode = EVAL
+  return initial(EVAL)
+
+wait_t interrupt_write()
+  mode = EVAL
+  return initial(EVAL)
 
 
 ==  EVAL  ==
@@ -89,8 +131,8 @@ wait_t next()
 state_t eval_press(i, j)
   eval.press(i, j)
   mode == EVAL:
-    feeback:  return EVAL_FEEDBACK
-    else:     return EVAL.IDLE
+    feedback_flag:  return EVAL.FEEDBACK
+    else:           return EVAL.IDLE
   else:
     return initial(mode)
 
@@ -100,8 +142,8 @@ state_t eval_press(i, j)
 state_t lrn_press(i, j)
   lrn.press(i, j)
   mode == LRN:
-    feeback:  return LRN_FEEDBACK
-    else:     return LRN.IDLE
+    feedback_flag:  return LRN.FEEDBACK
+    else:           return LRN.IDLE
   else:
     return initial(mode)
 
@@ -109,11 +151,11 @@ state_t lrn_press(i, j)
 ==  RUN  ==
 
 state_t run_next()
-  run.next()
+  info = run.next()
   mode == RUN:
-    is_paused:    return RUN.PAUSED
+    info.is_paused:    return RUN.PAUSED
     trace_on:     return RUN.TRACED
-    has_printed:  return RUN.PRINTED
+    info.has_printed:  return RUN.PRINTED
     return RUN_LOOP
   else:
     return initial(mode)
@@ -122,7 +164,7 @@ state_t run_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
     return EVAL.IDLE
-  key(i, j) == GTO:
+  key(i, j) == K_GTO:
     trace_on = true
   return SAME
 
@@ -155,14 +197,16 @@ state_t SAME()  =  return SAME
 state_t NA()    =  assert false
 
 state_t stop_press(i, j)
-  key(i, j) == R/S:
+  key(i, j) == K_RS:
     mode = EVAL
     return EVAL.IDLE
   return SAME
 
 state_t initial(mode):
   case mode:
-    EVAL: return (is_error && !is_key_pressed) ? EVAL_BLINK_OFF : EVAL.IDLE
+    EVAL:
+      blink = is_error && !is_key_pressed && !no_blink_flag
+      return blink ? EVAL.BLINK_OFF : EVAL.IDLE
     LRN: return LRN.IDLE
     RUN: return RUN_READY
     ADV: return ADV.LOOP

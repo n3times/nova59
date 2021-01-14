@@ -1,14 +1,14 @@
 Runtime
-  Handles animations and user events and calls the appropriate mode handlers.
+  Handles "threading" and user events, calling the appropriate mode handlers.
 
 Mode Handlers
   One for each mode: RUN, EVAL, LRN, LST_* etc.
-  They handle key presses and next() calls.
+  They handle key presses and next() calls (threading).
 
 Parser
-  Used by RUN, EVAL and LRN mode handlers to transform key presses and program
-  steps into structured operations.
+  Used by RUN, EVAL and LRN handlers to transform key presses and program steps
+  into structured operations.
 
 Operation Evaluators
   One for each operation (lnx, sto, gto, ...). They transform the calculator
-  state.
+  state. Used in RUN and EVAL modes.

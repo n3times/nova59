@@ -1,11 +1,7 @@
 Responsibilites:
-- listening to key events including key releases.
-- forwarding key presses
-- animations
-- tracing
-- stoping
-- advancing
-- listing
+- listening to key press/release
+- forwarding calls to mode handlers
+- taking care of display and animations
 
 Principles
 - Modes: EVAL, LRN, RUN, LIST, ADVANCE, PROGRAM_LOAD, PROGRAM_SAVE
@@ -15,9 +11,13 @@ Principles
 - R/S should automatically stop any running program.
 
 Options:
-- key feedback: yes/no
-  "Yes" is good for nostalgia reasons.
-  "No" is better in practice and makes testing easier.
+- key feedback ("["): yes/no
+  Feedback is good for nostalgia reasons.
+  No feedback is better in practice and makes testing easier.
+- Auto-release
+  With this option, a key press is immediately followed by a key release.
+  Good for simple clients.
+  Can't do tracing though or continuous advancing of paper.
 
 Non supported options:
 - No error blinking option for monothreaded clients.
@@ -26,9 +26,6 @@ Non supported options:
 - Classic behavior with no rapid fire, no auto stop options
   Non supported options as they complicate design.
   Rapid fire, auto stop are better behaviors anyway.
-- Auto-release option when pressing a key before previous one has been released.
-  Not an option as it complicates design.
-  Instead clients should call key pressed followed by key release.
 - Pause key animation in EVAL mode option.
   Not a feature as it complicates design.
   Anyway this is super minor.
