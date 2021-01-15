@@ -43,7 +43,7 @@ Action
   ActionType type  //
   int key          // A key, or a combination of 2 digit keys.
 
-ParseState - enum
+ParserState - enum
   OPR_UNK       // Operation so far is "_" or "INV _".
   LBL_BEG       // Waiting for the end of a label marker: "STO" in "Lbl STO".
                 // Can happen between "inv" and operator.

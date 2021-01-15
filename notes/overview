@@ -1,9 +1,11 @@
+==  Main objects  ==
+
 Runtime
-  Handles "threading" and user events, calling the appropriate mode handlers.
+  Handles threading and user events, and calls the appropriate mode handlers.
 
 Mode Handlers
   One for each mode: RUN, EVAL, LRN, LST_* etc.
-  They handle key presses and next() calls (threading).
+  They handle key presses, next() for threading), and other calls.
 
 Parser
   Used by RUN, EVAL and LRN handlers to transform key presses and program steps
@@ -12,3 +14,24 @@ Parser
 Operation Evaluators
   One for each operation (lnx, sto, gto, ...). They transform the calculator
   state. Used in RUN and EVAL modes.
+
+Logger
+  logs operations and their results
+
+
+==  Example of flow  ==
+
+User presses lnx and client calls:
+    runtime.press(2, 3)
+        eval_handler.press(2, 3)        // Assuming we are in EVAL mode.
+            parser.press(2, 3)          // Get structure opn from key press.
+            eval_opns()                 // lnx is the operation.
+                lnx.eval()              // Let evaluator compute lnx of regX.
+                logger.log_operation()  // Logging.
+        display = "["  // Runtime in charge of display.
+        return 0.1     // Threading: have client call next() in 0.1s.
+
+Client calls next in 0.1s:
+    runtime.next()
+        display = regX  // Replace "[" by result of lnx.
+        return IDLE     // Assuming there is no error.

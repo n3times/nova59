@@ -1,0 +1,35 @@
+IDLE = -1
+typedef wait_t int
+
+
+==  Actions  ==
+
+// User events.
+wait_t press(i, j)
+wait_t release()
+
+// Theading.
+wait_t next()
+
+// Cards.
+wait_t load_program(int steps_in[])
+wait_t save_program(int steps_out[])
+wait_t load_registers(reg_t regs_in)
+wait_t save_registers(reg_t reg_out)
+
+// Module.
+wait_t load_module(int steps_in[][])
+
+// Misc.
+wait_t cancel()
+wait_t set_log(bool)
+wait_t clear_log()
+wait_t clear_printer()
+
+==  State  ==
+
+display_t      display()
+step_t[]       steps()
+reg_t[]        regs()
+print_line_t[] print_lines()
+log_line_t[]   log_lines()

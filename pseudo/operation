@@ -1,6 +1,11 @@
-// An operation sucb as "lnx" or "STO 12".
-//
-// Operations can be evaluated, changing the state of the calculator.
+Operations are syntactic representation of operations. They are produced by
+the parser and used by EVAL, LRN and RUN handlers.
+
+
+==  Operation as Structure  ==
+
+// An operation such as "lnx" or "STO 12".
+// Operations are meant to be  evaluated, changing the state of the calculator.
 Operation
   OperationState state
   Operator operator
@@ -37,6 +42,9 @@ OperatorKind - enum
   OPR_KIND_D_ADDRESS   // Dsz and Iff (+ Inv)
   OPR_KIND_DD_ADDRESS  // Pgm xx SBR address
   OPR_KIND_NONE        // Not an operator.
+
+
+==  Readable form  == 
 
 // Operand, possibly incomplete.
 String operand_as_string(Operand opd)

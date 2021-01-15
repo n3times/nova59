@@ -1,9 +1,9 @@
 == Principles ==
 
 Modes
-  EVAL and SST: log most user input and log result
+  EVAL and SST: log most user input and log results
   LRN: log nothing
-  RUN: log pause, tracing, end final result (which is in EVAL)
+  RUN: log pause, tracing and end final result (which is in EVAL)
 
 Log Format
   Left: User/program Input
@@ -16,9 +16,9 @@ Ideally 31 but 27 is enough.
 
 Operation:
   15 may be needed but uncommon: INV IFF *21 CLR
-  11 would be OK: INV EXC *21
-Spacing: 2 characters
-Display: 14 characters (-8.8888888-88?)
+  11 would be generally OK: INV EXC *21
+Display:                    14 characters  [ -8.8888888-88? ]
+Spacing operation/display:   2 characters
 
 
 == Examples ==
@@ -26,21 +26,21 @@ Display: 14 characters (-8.8888888-88?)
    123456789012345678901234567
 
          Input      Output
-     Operation      Result
+ [ Opn | Num ]     [ Res ]
 
-1 + 1 =
+> 1 + 1 =
              1           1
              +           1
              1           1
              =           2
 
-RCL 01 + RCL 02 =
+> RCL 01 + RCL 02 =
         RCL 01          12
              +          12
         RCL 02          23
              =          35
 
-3 x^2 + 4 x^2 =
+> 3 x^2 + 4 x^2 =
              3           3
            x^2           9
              +           9
@@ -48,13 +48,13 @@ RCL 01 + RCL 02 =
            x^2          16
              =          25
 
-2 deg rad 3
+> 2 deg rad 3
              2           2
            deg           2
            rad           2
             23          23
 
-2 + 18 A =  [Assume A divides display by 2]
+> 2 + 18 A =  [Assume A divides display by 2]
              2           2
              +           2
             18          18
@@ -74,6 +74,6 @@ RCL 01 + RCL 02 =
 == RUN mode ==
 
 * EVAL -> RUN: log op (but not display)
-* RUN -> EVAL: log display (but not op)
-* If op is "Pause", log op followed by display
+* RUN -> EVAL: log display/result (but not op)
+* If op is "Pause", log op ("Pause") followed by display
 * If trace, log the same way as in EVAL/SST
