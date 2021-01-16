@@ -1,10 +1,17 @@
 ==  Evaluator in EVAL/SST/RUN Modes  ==
 
+is_loggable_opn(opn):
+  key = opn.opr.key
+  is_program_edit_opn = key in { LRN, SST, BST, INS, DEL }
+  is_program_edit_opn: return false
+  is_numeric_opn = key in { 0, ..., 9, ., +/-, EE }
+  is_numeric_opn: return false
+  return true
+
 Evaluator
   Parser parser
   Log log
   int last_resolved_opn_index = -1  // Complete or canceled.
-  int current_opn_index = 0
 
 void eval()
   opns = parser.operations
@@ -12,32 +19,28 @@ void eval()
       opn_index <= opns.len - 1;
       opn_index++:
     opn = opns[opn_index]
-    opr = opn.operator
+    key = opn.operator.key
+
+    log_input = is_log_mode(mode)
 
     // Display may need to be evaled even if operation is not complete yet.
     do_eval_display = state.is_display_edit &&
-                      opr.key != KEY_UNK &&
-                      key_data[opr.key].does_eval_display
-    do_eval_display: state.display.eval()
+                      key != KEY_UNK &&
+                      key_data[key].does_eval_display
+    do_eval_display:
+      log_input: log.input(state.display)
+      state.display.eval()
 
     // Eval operation.
     opn.state == COMPLETE:
-      pre_mode = mode
       opn.eval()
-      post_mode = mode
-      log_operation(opn, pre_mode, post_mode)
+      log_output = is_log_mode(mode)
+      is_loggable_opn(opn):
+        log_input && state.is_display_edit: log.input(state.display)
+        log_input: log.input(opn)
+        log_output: log.output(state.display)
 
     opn.state != PENDING:
       last_resolved_opn_index = opn_index
 
-  is_log_mode(pre_mode): log.pending(get_pending_operation)
-
   update_current_operation()
-
-
-String get_pending_operation()
-  state.display.is_edit: return state.display
-
-  opns = parser.operations
-  int last_opn_index = opns.operations.len - 1
-  return operation_as_string(last_opn_index)

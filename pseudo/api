@@ -2,14 +2,22 @@ IDLE = -1
 typedef wait_t int
 
 
-==  Actions  ==
+// Flags.
+wait_t enable_key_feedback(bool)
+wait_t enable_key_auto_release(bool)
+wait_t enable_error_blinking(bool)
 
-// User events.
+==  User Input  ==
+
+// Physical key based client.
 wait_t press(i, j)
 wait_t release()
 
-// Theading.
-wait_t next()
+// Virtual key based client.
+// Note that key "2nd" is largely ignored.
+wait_t handle_key(key)  // key in 0..99
+
+==  Data  ==
 
 // Cards.
 wait_t load_program(int steps_in[])
@@ -20,10 +28,15 @@ wait_t save_registers(reg_t reg_out)
 // Module.
 wait_t load_module(int steps_in[][])
 
+// Theading.
+wait_t next()
+
+// Log.
+wait_t enable_log(bool)
+wait_t clear_log()
+
 // Misc.
 wait_t cancel()
-wait_t set_log(bool)
-wait_t clear_log()
 wait_t clear_printer()
 
 ==  State  ==

@@ -24,26 +24,26 @@ State transitions are detemined by next/press/release.
 name           | display  wait   next             press           release
 ===============+===============================================================
 EVAL.IDLE      | REG      IDLE   NA()             eval_press(.)   eval_release()
-EVAL.FEEDBACK  | [REG     100    eval_next()      eval_press(.)   SAME()
+EVAL.FEEDBACK  | [REG     100    eval_next()      eval_press(.)   SAME_STATE()
 EVAL.BLINK_OFF | BLANK    400    EVAL.BLINK_ON    eval_press(.)   NA()
 EVAL.BLINK_ON  | REG      400    EVAL.BLINK_OFF   eval_press(.)   NA()
 ---------------+---------------------------------------------------------------
-LRN.IDLE       | STEP     IDLE   NA()             lrn_press(.)    SAME()
-LRN.FEEDBACK   | [STEP    100    LRN.IDLE         lrn_press(.)    SAME()
+LRN.IDLE       | STEP     IDLE   NA()             lrn_press(.)    SAME_STATE()
+LRN.FEEDBACK   | [STEP    100    LRN.IDLE         lrn_press(.)    SAME_STATE()
 ---------------+---------------------------------------------------------------
-RUN.READY      | [        100    RUN.LOOP         run_press(.)    SAME()
-RUN.LOOP       | [        0      run_next()       run_press(.)    SAME()
-RUN.PRINTED    | [        100*   RUN.LOOP         run_press(.)    SAME()
-RUN.PAUSED     | REG      600    RUN.READY        run_press(.)    SAME()
-RUN.TRACED     | REG      200    RUN.READY        run_press(.)    SAME()
+RUN.READY      | [        100    RUN.LOOP         run_press(.)    SAME_STATE()
+RUN.LOOP       | [        0      run_next()       run_press(.)    SAME_STATE()
+RUN.PRINTED    | [        100*   RUN.LOOP         run_press(.)    SAME_STATE()
+RUN.PAUSED     | REG      600    RUN.READY        run_press(.)    SAME_STATE()
+RUN.TRACED     | REG      200    RUN.READY        run_press(.)    SAME_STATE()
 ---------------+---------------------------------------------------------------
-PROGRAM_LOAD   | [        IDLE   NA()             pgm_press(.)    SAME()
-PROGRAM_SAVE   | [        IDLE   NA()             pgm_press(.)    SAME()
+PROGRAM_LOAD   | [        IDLE   NA()             pgm_press(.)    SAME_STATE()
+PROGRAM_SAVE   | [        IDLE   NA()             pgm_press(.)    SAME_STATE()
 ---------------+---------------------------------------------------------------
 ADV.LOOP       | [        200    adv_next()       NA()            adv_release()
 ---------------+---------------------------------------------------------------
-LIST_*.READY   | [        100    LIST_*.LOOP      list_press(.)   SAME()
-LIST_*.LOOP    | [        0      list_next()      list_press(.)   SAME()
+LIST_*.READY   | [        100    LIST_*.LOOP      list_press(.)   SAME_STATE()
+LIST_*.LOOP    | [        0      list_next()      list_press(.)   SAME_STATE()
 
 Mode handlers:
   info_t eval.press(i, j)
@@ -70,36 +70,34 @@ wait_t save_program(int steps_out[])
 wait_t cancel()
 
 
-==  IMPLEMENTATION  ==
+==  API IMPLEMENTATION  ==
 
 wait_t press_key(i, j)
   assert 1 <= i <= 9 && 1 <= j <= 5
-  is_key_pressed:
-    release_key()
-    return press_key(i, j)
+  is_key_pressed: release_key()
   is_key_pressed = true
   new_state = state_data[state].press(i, j)
-  new_state == SAME:
+  new_state == SAME_STATE:
     auto_release_flag: return release_key()
-    return SAME
+    return SAME_WAIT
   state = new_state
   auto_release_flag: return release_key()
   set_display(state_data[state].display_mode)
   return state_data[state].wait
   
 wait_t release_key()
-  !is_key_pressed: return SAME
+  !is_key_pressed: return SAME_WAIT
   is_key_pressed = false
   trace_on: trace_on = false
   new_state = state_data[state].release()
-  new_state == SAME: return SAME
+  new_state == SAME_STATE: return SAME_WAIT
   state = new_state
   set_display(state_data[state].display_mode)
   return state_data[state].wait
   
 wait_t next()
   new_state = state_data[state].next()
-  new_state == SAME: return SAME
+  new_state == SAME_STATE: return SAME_WAIT
   state = new_state
   set_display(state_data[state].display_mode)
   return state_data[state].wait
@@ -116,7 +114,7 @@ wait_t save_program(int steps_out[])
 
 wait_t load_module(int steps_in[][])
   module_load.load(steps_in)
-  return SAME
+  return SAME_WAIT
 
 wait_t cancel()
   mode = EVAL
@@ -169,7 +167,7 @@ state_t run_press(i, j)
     return EVAL.IDLE
   key(i, j) == K_GTO:
     trace_on = true
-  return SAME
+  return SAME_STATE
 
 
 ==  ADV  ==
@@ -189,7 +187,7 @@ state_t pgm_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
     return EVAL.IDLE
-  return SAME
+  return SAME_STATE
 
 
 ==  LIST  ==
@@ -205,14 +203,14 @@ state_t list_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
     return EVAL.IDLE
-  return SAME
+  return SAME_STATE
 
 
 ==  Miscellaneous  ==
 
-state_t SAME()  =  return SAME
+state_t SAME_STATE()  =  return SAME_STATE
 
-state_t NA()    =  assert false
+state_t NA()          =  assert false
 
 state_t initial(mode):
   case mode:

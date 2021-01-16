@@ -100,10 +100,36 @@ done_opx()
 
 == Implementation ==
 
+int get_key_value(bool sec, int row, int col)
+  sec:  val = 10 * row + (col + 5) % 10
+  else: val = 10 * row + col
+  val == 62: val = 7
+  val == 63: val = 8
+  val == 64: val = 9
+  val == 72: val = 4
+  val == 73: val = 5
+  val == 74: val = 6
+  val == 82: val = 1
+  val == 83: val = 2
+  val == 84: val = 3
+  val == 92: val = 0
+  return val
+
 Action handle_key_pressed(Mode mode, int row, int col)
   assert mode == MODE_EVAL || mode == MODE_LRN
   assert row in 1..9 && col in 1..5
-  return handle(mode, get_key(row, col))
+
+  // Handle 2nd modifier.
+  is(key(row, col), 2nd):
+    ~opn.sec
+    return opn.sec ? KEY_MOD_SEC : KEY_MOD_NOSEC
+  val = get_key_value(opn.sec, row, col)
+  opn.sec: opn.sec = false
+  parser.state == OPR_UNK && val == IN':
+    val = INV
+    opn.sec = true
+
+  return handle(mode, val)
 
 Action handle(Mode mode, int val)
   assert val in 0..99
@@ -114,19 +140,6 @@ Action handle(Mode mode, int val)
   opd = opn.operands.last
   mode_step = mode == MODE_RUN || mode == MODE_SST
   mode_key = mode == MODE_EVAL || mode == MODE_LRN
-
-  // Handle 2nd modifier.
-  mode_key:
-    is(val, 2nd):
-      opn.sec: ~opn.sec                                            KEY_MOD_NOSEC
-      else: ~opn.sec                                               KEY_MOD_SEC
-    is(val, 2n'):                                                  KEY_SKIP
-    opn.sec:
-      val = get_sec(val)
-      opn.sec = false
-    parser.state == OPR_UNK && val == IN':
-      val = INV
-      opn.sec = true
 
   // Cancel operation if we exit LRN mode by going beyond the last program step.
   mode == MODE_EVAL && self.mode == MODE_LRN: cancel_opn()
