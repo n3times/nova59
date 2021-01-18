@@ -1,79 +1,104 @@
-== Principles ==
+==  Principles  ==
+
+Log Types
+  Trace  [ a full list of user/program input and output ]
+    (NUM? (OPN RES))* (NUM_|OPN_)?
+    Completed Input
+      NUM: number                       [ 123    ]
+      OPN: operation                    [ STO 45 ]
+    Output
+      RES: result from operation        [ 123.   ]
+    Pending Input  (1 at most)
+      NUM_: numbers in edit mode        [ 12     ]
+      OPN_: pending operations [        [ STO 4_ ]
+  EVAL Info [Also for SST | Trace]
+    case last trace type:
+      RES: last OPN
+      OPN_: OPN_
+      NUM_:
+        AOS stack has no ops: n/a
+        else: last OPN
+  LRN Info
+
 
 Modes
   EVAL and SST: log most user input and log results
   LRN: log nothing
   RUN: log pause, tracing and end final result (which is in EVAL)
 
-Log Format
-  Left: User/program Input
-  Right: Display result
 
-
-== Characters Needed ==
+==  Characters Needed for Tracing  ==
 
 Ideally 31 but 27 is enough.
 
 Operation:
   15 may be needed but uncommon: INV IFF *21 CLR
   11 would be generally OK: INV EXC *21
-Display:                    14 characters  [ -8.8888888-88? ]
-Spacing operation/display:   2 characters
+Display:
+  14 characters  [ -8.8888888-88? ]
+Spacing operation/display:
+  2 characters
 
 
-== Examples ==
+==  Examples  ==
 
    123456789012345678901234567
 
-         Input      Output
+         Input      Output          AOS
  [ Opn | Num ]     [ Res ]
 
 > 1 + 1 =
-             1           1
-             +           1
-             1           1
-             =           2
+             1
+             +           1          +
+             1                      +
+             =           2          =
 
 > RCL 01 + RCL 02 =
-        RCL 01          12
-             +          12
-        RCL 02          23
-             =          35
+        RCL 01          12          RCL 01
+             +          12          +
+        RCL 02          23          RCL 02
+             =          35          =
 
-> 3 x^2 + 4 x^2 =
+> 3 x^2 + 4 x^2 = 3 x^2
+             3
+           x^2           9          x^2
+             +           9          +
+             4                      +
+           x^2          16          x^2
+             =          25          =
              3           3
-           x^2           9
-             +           9
-             4           4
-           x^2          16
-             =          25
+           x^2           9          x^2
 
 > 2 deg rad 3
-             2           2
-           deg           2
-           rad           2
-            23          23
+             2
+           deg           2          deg
+             2
+           rad           2          rad
+            23
 
 > 2 + 18 A =  [Assume A divides display by 2]
-             2           2
-             +           2
-            18          18
-             A           9
-             =          11
+             2
+             +           2          +
+            18                      +
+             A           9          A
+             =          11          =
 
 
-== EVAL/SST ==
+==  EVAL/SST  ==
 
-* Numeric ops  = 0, ..., 9, ., +/-, EE, INV EE
+* Numeric ops  =
+  always:    0 - 9, .
+  sometimes: +/-, EE, INV EE
 * Loggable ops = every op except numeric and program editing ops
-* Log loggable ops (as input) and result display (as output).
-* Before, log display (as input and as output) if there haa been numeric
-  activity since last logged op.
+* For loggable ops
+  input: display if display in edit mode before operation
+  input: operation
+  output: display after operation
 
 
-== RUN mode ==
+==  RUN mode  ==
 
 * EVAL -> RUN: log op (but not display)
 * RUN -> EVAL: log display/result (but not op)
-* If op is "Pause", log op ("Pause") followed by display
+* If op is "Pause", log op ("PSE") followed by display
 * If trace, log the same way as in EVAL/SST

@@ -7,11 +7,11 @@ Parser
   Operation operations[]  // An ever growing array. Last/current may be empty.
   bool sec                // 2nd key is selected.
 
-  // Updates the parser after a key from the keyboard has been pressed.
+  // Updates the parser state after a key from the keyboard has been pressed.
   // Params: mode is EVAL or LRN, row in 1..9, col in 1..5.
   Action handle_key_pressed(Mode mode, int row, int col)
 
-  // Updates the parser after 'val' has been handled.
+  // Updates the parser state after 'val' has been handled.
   // In EVAL and LRN, 'val' is a key.
   // In RUN and SST, 'val' is a step.
   // Param: val in 0..99.
@@ -97,6 +97,15 @@ done_opx()
       operator = [ false, -1 ]
       operands = []
 
+2ND = 21
+INV = 22
+IN' = 27
+Ind = 40
+SST = 41
+SBR = 71
+Lbl = 76
+
+bool is_dig(val)  =  val in 0..9
 
 == Implementation ==
 
@@ -121,13 +130,13 @@ Action handle_key_pressed(Mode mode, int row, int col)
 
   // Handle 2nd modifier.
   is(key(row, col), 2nd):
-    ~opn.sec
-    return opn.sec ? KEY_MOD_SEC : KEY_MOD_NOSEC
-  val = get_key_value(opn.sec, row, col)
-  opn.sec: opn.sec = false
+    ~parse.sec
+    return parser.sec ? KEY_MOD_SEC : KEY_MOD_NOSEC
+  val = get_key_value(parser.sec, row, col)
+  parser.sec: parser.sec = false
   parser.state == OPR_UNK && val == IN':
     val = INV
-    opn.sec = true
+    parser.sec = true
 
   return handle(mode, val)
 

@@ -1,16 +1,16 @@
 ==  Main objects  ==
 
 Runtime
-  Acts as intermediary between the client and the different mode handlers.
-  Eventually in charge of the display and of threading.
+  Intermediary between the client and the different mode handlers.
+  Also, in charge of the display and of threading.
 
 Mode Handlers
   One for each mode: RUN, EVAL, LRN, LST_* etc.
-  They handle key presses, next() for threading, and other client calls.
+  They handle, for a given mode,  key presses, next(), and other client calls.
 
 Parser
   Used by RUN, EVAL and LRN handlers to transform key presses and program steps
-  into structured operations.
+  into structured operations. These operations can later be evaluated.
 
 Evaluators
   One for each operation (lnx, sto, gto, ...). They transform the calculator

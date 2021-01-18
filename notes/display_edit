@@ -38,8 +38,9 @@ op or (semi and closed):  log res
    +   2
    2
  Deg   2
+   2
  Rad   2
- sin
+ sin   <res>
 
 2 +/- +/- x^2 +/-
 

@@ -4,7 +4,7 @@
 void basic_program_listing(int steps[])
   parser = new_parser()
 
-  for i = 0; i < steps.length; i++:
+  for i = 0; i < steps.len; i++:
     step = steps[i]
     action = parser.handle(RUN, step)
     action.type in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
@@ -26,12 +26,12 @@ bool is_numeric_key(key):
 // Print operations, labels and numbers in their own lines.
 void complex_program_listing(int steps[])
   parser = new_parser()
-  int number_line_length = 0
+  int number_line_len = 0
   Action previousAction = ACTION_UNK
 
-  for i = 0; i < steps.length; i++:
+  for i = 0; i < steps.len; i++:
     step = steps[i]
-    new_number_line_length = 0
+    new_number_line_len = 0
     action = parser.handle(_RUN, step)
     action.type:
       KEY_MOD_SEC: KEY_MOD_NOSEC: KEY_OPD_NOIND: KEY_OPD_DD: KEY_EVL_SST:
@@ -43,11 +43,11 @@ void complex_program_listing(int steps[])
         previousAction.type == KEY_OPR_INV: sp_key(step)
         else:
           is_numeric_key(step):
-            number_line_length == 0: number_line_length == 10:
-              new_number_line_length == 1
+            number_line_len == 0: number_line_len == 10:
+              new_number_line_len == 1
               nl_key(i, key)
             else:
-              new_number_line_length += 1
+              new_number_line_len += 1
               key(key)
           else:
             nl_key(i, key)
@@ -60,5 +60,5 @@ void complex_program_listing(int steps[])
       // Miscellaneous.
       KEY_SKIP: KEY_LBL_BEG: nl_key(i, step)
       KEY_LBL_END: KEY_PGM_SBR: sp_key(step)
-    number_line_length = new_number_line_length
+    number_line_len = new_number_line_len
     previousAction = action

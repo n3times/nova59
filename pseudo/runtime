@@ -1,22 +1,22 @@
 Runtime
   runtime_state_t state        // Initially EVAL.IDLE.
-  bool trace_on                // In RUN mode with K_GTO pressed.
+  bool is_trace_on             // In RUN mode with K_GTO pressed.
   bool is_key_pressed          // Used in ADV and tracing.
   display_mode_t display_mode
 
 runtime_state_t
-- name
-- display_mode                 // BLANK REG or STEP, possibly prefixed by [.
-- wait_t wait                  // Wait so many ms before calling next().
-- state_t (*next)()            // Should be called whenever wait >= 0.
-- state_t (*press)(i, j)       // User pressed a given key.
-- state_t (*release)()         // User releases previously pressed key.
+  name
+  display_mode                 // BLANK REG or STEP, possibly prefixed by [.
+  wait_t wait                  // Wait so many ms before calling next().
+  state_t (*next)()            // Should be called whenever wait >= 0.
+  state_t (*press)(i, j)       // User pressed a given key.
+  state_t (*release)()         // User releases previously pressed key.
 
 Modes:
-- EVAL LRN RUN
-- LIST_*: * in { STEPS, REGS, LBLS }
-- PROGRAM_SAVE PROGRAM_LOAD
-- ADV
+  EVAL LRN RUN
+  LIST_*: * in { STEPS, REGS, LBLS }
+  PROGRAM_SAVE PROGRAM_LOAD
+  ADV
 
 State names are 'mode.suffix'.
 State transitions are detemined by next/press/release.
@@ -46,8 +46,8 @@ LIST_*.READY   | [        100    LIST_*.LOOP      list_press(.)   SAME_STATE()
 LIST_*.LOOP    | [        0      list_next()      list_press(.)   SAME_STATE()
 
 Mode handlers:
-  info_t eval.press(i, j)
-  info_t lrn.press(i, j)
+  info_t eval.press(row, col)
+  info_t lrn.press(row, col)
   info_t run.next()
   info_t adv.next()
   info_t list_*.next()
@@ -62,7 +62,7 @@ Flags
 
 ==  API  ==
 
-wait_t press_key(i, j)
+wait_t press_key(row, col)
 wait_t release_key()
 wait_t next()
 wait_t load_program(int steps_in[])
@@ -72,11 +72,11 @@ wait_t cancel()
 
 ==  API IMPLEMENTATION  ==
 
-wait_t press_key(i, j)
-  assert 1 <= i <= 9 && 1 <= j <= 5
+wait_t press_key(row, col)
+  assert 1 <= row <= 9 && 1 <= col <= 5
   is_key_pressed: release_key()
   is_key_pressed = true
-  new_state = state_data[state].press(i, j)
+  new_state = state_data[state].press(row, col)
   new_state == SAME_STATE:
     auto_release_flag: return release_key()
     return SAME_WAIT
@@ -88,7 +88,7 @@ wait_t press_key(i, j)
 wait_t release_key()
   !is_key_pressed: return SAME_WAIT
   is_key_pressed = false
-  trace_on: trace_on = false
+  is_trace_on: is_trace_on = false
   new_state = state_data[state].release()
   new_state == SAME_STATE: return SAME_WAIT
   state = new_state
@@ -155,7 +155,7 @@ state_t run_next()
   info = run.next()
   mode == RUN:
     info.is_paused:    return RUN.PAUSED
-    trace_on:     return RUN.TRACED
+    is_trace_on:       return RUN.TRACED
     info.has_printed:  return RUN.PRINTED
     return RUN_LOOP
   else:
@@ -166,7 +166,7 @@ state_t run_press(i, j)
     mode = EVAL
     return EVAL.IDLE
   key(i, j) == K_GTO:
-    trace_on = true
+    is_trace_on = true
   return SAME_STATE
 
 

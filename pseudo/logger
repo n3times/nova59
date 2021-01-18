@@ -5,10 +5,6 @@ Assume we know:
   state.display
 
 void update_current_operation()
-  state.display.is_edit:
-    log.current_opn.set(state.display) // or empty.
-    return
-
   opns = parser.operations
   int last_opn_index = opns.operations.len - 1
 
