@@ -1,0 +1,89 @@
+Code  |	Name	Mnemo	O@Open	ArgRUN iArgRUN	EVAL	Comments
+--------------------------------------------------------
+00-09 |	0-9	0-9	vxo	0	-	=
+10-19 |	A-E'	A-vE	vv=	0	-	=
+20    |	CL'	cl'	vvo	0	-	=
+21    |	2nd	sec	xx=	Ignored Ignored Mod
+22    |	INV	! inv	xv=	Mod     Mod     Mod
+23    |	lNx	lnx	vvc	0	0	=
+24    |	CE	ce	vv=	0	-	=
+25    |	CLR	clr	vvo	0	-	=
+26    |	2n'	se'	xx=	Ignored Ignored Ignored
+27    |	IN'	in'	xv=	Mod     Mod     Mod	INV 2nd in EVAL
+28    |	log	log	vvc	0	0	=
+29    |	CP	cp	vvc	0	- 	=	
+30    |	tan	tan	vvc	0	0	=
+31    |	LRN	? lrn	vx=	0	-	=
+32    |	x/t	xt	vvc	0	-	=
+33    |	x^2	x2	vvc	0	-	=	
+34    |	vx	vx	vvc	0	-	=
+35    |	1/x	x1	vvc	0	-	=
+36    |	Pgm	pgm	vvc	DD SBR	-	DD+
+37    |	P/R	p/r	vvc	0	0	=
+38    |	sin	sin	vvc	0	0	=
+39    |	cos	cos	vvc	0	0	=
+40    |	Ind	ind	xx=	Mod     Mod     Mod	
+41    |	SST	up	xx=	
+42    |	STO	sto	vvc	DD	-	DD+
+43    |	RCL	rcl	vvc	DD	-	DD+
+44    |	SUM	sum	vvc	DD	DD	DD+
+45    |	y^x	^ yx	vvc	0	0	=
+46    |	Ins	ins	vx=	0	-	=
+47    |	CMs	cms	vvc	0	-	=
+48    |	Exc	exc	vvc	DD	-	DD+
+49    |	Prd	prd	vvc	DD	DD	DD+
+50    |	|x|	abs 	vvc	0	-	=
+51    |	BST	down	vx=	0	-	=
+52    |	EE	ee	vv*	0	0	=	* EE:o iEE:=
+53    |	(	(	vvc	0	-	=
+54    |	)	)	vvc	0	-	=
+55    |	/	/	vvc	0	-	=
+56    |	Del	del	vx=	0	-	=
+57    |	Eng	eng	vvc	0	0	=
+58    |	Fix	fix	vvc	D+	0	=
+59    |	Int	int	vvc	0	0	=
+60    |	Deg	deg	vv=	0	-	=
+61    |	GTO	gto	vvc	Addr	-	=
+62    |	Pg*	pg*	vvc	DD SBR	-	=
+63    |	Ex*	ex*	vvc	DD	-	=
+64    |	Pd*	pd*	vvc	DD	DD	=
+65    |	*	*	vvc	0	-	=
+66    |	Pse	pse	vv=	0	-	=
+67    |	x=t	x=t	vvc	Addr	Addr	=
+68    |	Nop	nop	xv=	Ignored in INV	INV (modifier)	Nop ?		
+69    |	Op	op	vvc	DD	-	DD+
+70    |	Rad	rad	vv=	0	-	=	
+71    |	SBR	sbr	vvc	Addr	0	=
+72    |	ST*	st*	vvc	DD	-	=
+73    |	RC*	rc*	vvc	DD	-	=
+74    |	SM*	sm*	vvc	DD	DD	=
+75    |	-	-	vvc	0	-	=
+76    |	Lbl	lbl	xv=	<any>	-	0	
+77    |	x>t	x>t	vvc	Addr	Addr	=
+78    |	Sig	sig	vvc	0	0	=
+79    |	avg	avg	vvc	0	0	=
+80    |	Grd	grd	vv=	0	-	=
+81    |	RST	rst	vv=	0	-	=
+82    |	HIR	hir	vvc	DD	-	DD+
+83    |	Go*	go*	vvc	DD	-	=
+84    |	Op*	op*	vvc	DD	-	=
+85    |	+	+	vvc	0	-	=
+86    |	Stf	stf	vvc	DD+	DD+	=
+87    |	Iff	iff	vvc	D+ Addr	D+ Addr =
+88    |	DMS	dms	vvc	0	0	=
+89    |	pi	pi	vvc	0	-	=
+90    |	Lst	lst	vvc	0	0	=
+91    |	R/S	return	vv=	0	-	=
+92    |	RTN	rtn	vvc	0	-	=
+93    |	.	.	vvo	0	-	=
+94    |	+/-	~	vv=	0	-	=
+95    |	=	=	vvc	0	-	=
+96    |	Wrt	wrt	vvc	0	0	=
+97    |	Dsz	dsz	vvc	D+ Addr	D+ Addr	=
+98    |	Adv	adv	vv=	0	-	=
+99    |	Prt	prt	vvc	0	-	=
+
+D+     =   (*DD | D)
+DD+    =   (*DD | DD)
+Addr   =   *DD | DDD | Lbl
+SBR    =   usr | SBR addr
