@@ -9,7 +9,7 @@ Code  |	Name	Mnemo	O@Open	ArgRUN iArgRUN	EVAL	Comments
 24    |	CE	ce	vv=	0	-	=
 25    |	CLR	clr	vvo	0	-	=
 26    |	2n'	se'	xx=	Ignored Ignored Ignored
-27    |	IN'	in'	xv=	Mod     Mod     Mod	INV 2nd in EVAL
+27    |	IN'	in'	xv=	Mod     Mod     Mod	= INV 2nd in EVAL
 28    |	log	log	vvc	0	0	=
 29    |	CP	cp	vvc	0	- 	=
 30    |	tan	tan	vvc	0	0	=
@@ -50,7 +50,7 @@ Code  |	Name	Mnemo	O@Open	ArgRUN iArgRUN	EVAL	Comments
 65    |	*	*	vvc	0	-	=
 66    |	Pse	pse	vv=	0	-	=
 67    |	x=t	x=t eq	vvc	Addr	Addr	=
-68    |	Nop	nop	xv=	Ignored in INV	INV (modifier)	Nop ?
+68    |	Nop	nop	xv=	0	-	=
 69    |	Op	op	vvc	DD	-	DD+
 70    |	Rad	rad	vv=	0	-	=
 71    |	SBR	sbr	vvc	Addr	0	=
@@ -83,7 +83,7 @@ Code  |	Name	Mnemo	O@Open	ArgRUN iArgRUN	EVAL	Comments
 98    |	Adv	adv	vv=	0	-	=
 99    |	Prt	prt	vvc	0	-	=
 
-D+     =   *DD | D
-DD+    =   *DD | DD
-Addr   =   *DD | DDD | Lbl
-SBR    =   usr | SBR addr
+D+    =  *DD | D
+DD+   =  *DD | DD
+Addr  =  *DD | DDD | Lbl
+SBR   =  usr | SBR addr

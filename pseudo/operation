@@ -1,5 +1,6 @@
-Operations are syntactic representation of operations. They are produced by
-the parser and used by EVAL, LRN and RUN handlers.
+An Operation object is a syntactic representation of an operation.
+Operations are produced by the parser and used by EVAL, LRN and RUN handlers to
+"calculate", that is to change the state of the calculator.
 
 
 ==  Operation as Structure  ==
@@ -24,7 +25,7 @@ Operand
   String value      // Up to 3 digits: opcode for label, address or register...
 
 OperandType - enum
-  UNK IND LBL D DD DDD
+  UNK IND LBL D DD DDD USR
 
 OperandKind - enum
   OPD_KIND_ADDRESS  // DDD, IND or LBL
@@ -44,14 +45,14 @@ OperatorKind - enum
   OPR_KIND_NONE        // Not an operator.
 
 
-==  Readable form  == 
+==  To string  == 
 
 // Operand, possibly incomplete.
 String operand_as_string(Operand opd)
   type = opd.type
   value = opd.value
   case type:
-    LBL:
+    LBL: USR:
       assert value.len > 0
       return key_data[int(opd.value)].as_string
     D: DD: DDD:

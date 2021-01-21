@@ -4,8 +4,10 @@
 // structured operations.
 Parser
   ParserState state
-  Operation operations[]  // An ever growing array. Last/current may be empty.
+  Operation operations[]  // An ever growing array. Last/current is PENDING and
+                          // may be empty. Others are COMPLETE or CANCELED.
   bool sec                // 2nd key is selected.
+  Mode mode
 
   // Updates the parser state after a key from the keyboard has been pressed.
   // Params: mode is EVAL or LRN, row in 1..9, col in 1..5.
@@ -17,7 +19,7 @@ Parser
   // Param: val in 0..99.
   Action handle(Mode mode, int val)
 
-Mode - enum  { LRN, EVAL, RUN, SST }
+Mode - enum  { LRN, EVAL, RUN, SST }  // Other modes not involved.
 
 ActionType - enum
   KEY_MOD_SEC    // 2nd key has been selected
@@ -41,7 +43,7 @@ ActionType - enum
 
 Action
   ActionType type  //
-  int key          // A key, or a combination of 2 digit keys.
+  int val          // A key, or a combination of 2 digit keys.
 
 ParserState - enum
   OPR_UNK       // Operation so far is "_" or "INV _".
@@ -57,17 +59,14 @@ ParserState - enum
   ADDRESS       // It is an address, possibly in "Pgm xx SBR address" but
                 // nothing else in known.
 
-  OPN_COMPLETE  // Operator and operands are fully determined and cannot change.
-  OPN_CANCELED  // Operation has been canceled and cannot change.
-
 
 == Helper functions ==
 
 cancel_opn()
   opn = operations.last
   opr = opn.operator
-  !opr.inv && opr.key == K_UNK: return
-  parser.state = OPN_CANCELED
+  is_blank_opn = !opr.inv && opr.key == K_UNK
+  is_blank_opn: return  // Reuse.
   opn.state = CANCELED
 
   add new operation  // Previous operation remains incomplete
@@ -80,12 +79,14 @@ done_opr()
 
 done_opd()
   case opd.type:
+    UNK: assert false
     // Complete operand if necessary.
     IND: DD: val = %02d.val
     DDD: val = %03.d
   done_opx()
 
 done_opx()
+  assert opr.key != UNK
   if current_operation has additional operands
     add new operand (UNK, "")
     parser.state = OPD_UNK
@@ -97,6 +98,7 @@ done_opx()
       operator = [ false, -1 ]
       operands = []
 
+// Some Key defines.
 2ND = 21
 INV = 22
 IN' = 27
@@ -133,8 +135,8 @@ Action handle_key_pressed(Mode mode, int row, int col)
     ~parse.sec
     return parser.sec ? KEY_MOD_SEC : KEY_MOD_NOSEC
   val = get_key_value(parser.sec, row, col)
-  parser.sec: parser.sec = false
-  parser.state == OPR_UNK && val == IN':
+  parser.sec = false
+  parser.state == OPR_UNK && val == IN':  // 2nd INV = INV 2nd.
     val = INV
     parser.sec = true
 
@@ -150,22 +152,28 @@ Action handle(Mode mode, int val)
   mode_step = mode == MODE_RUN || mode == MODE_SST
   mode_key = mode == MODE_EVAL || mode == MODE_LRN
 
-  // Cancel operation if we exit LRN mode by going beyond the last program step.
-  mode == MODE_EVAL && self.mode == MODE_LRN: cancel_opn()
+  // When switching modes, the current operation may be dangling:
+  //   LRN or RUN -> EVAL: by going beyond the last program step
+  //   EVAL <-> SST: by switching between SST and eval key mid operation
+  self.mode != mode:
+    !is_opn_empty(opn)
+      self.mode == MODE_LRN && mode == MODE_EVAL: cancel_opn()
+      else self.mode == MODE_RUN && mode == MODE_EVAL: cancel_opn()
+      else self.mode == MODE_EVAL && mode == MODE_SST: break
+      else self.mode == MODE_SST && mode == MODE_EVAL: break
+      else: assert false
+    self.mode = mode
 
-  self.mode = mode
-
+  // Eval handler should then call the parser with the current program step.
   is(val, SST) && mode == MODE_EVAL:                              KEY_EVL_SST
 
   case parser.state:
-    OPN_COMPLETE: OPN_CANCELED: assert(false)
-
     // Condition                  opr inv|key        new state    ret_value
     OPR_UNK:
-      is(val, INV)||is(val, IN'):
+      is(val, INV) || is(val, IN'):
         opr.inv:                  ~opr.inv|.         OPR_UNK      KEY_OPR_NOINV
-        else   :                  ~opr.inv|.         OPR_UNK      KEY_OPR_INV
-      is_opr(val, mode, opr.inv): .|val              done_opr()   KEY_OPR_KEY
+        else:                     ~opr.inv|.         OPR_UNK      KEY_OPR_INV
+      is_opr(val):                .|val              done_opr()   KEY_OPR_KEY
       is(val, Lbl) && mode != EVAL:                  LBL_BEG      KEY_LBL_BEG
       else:  /* Skip 2nd, 2nd', Nop, Ind, maybe Lbl, SST */       KEY_SKIP
     LBL_BEG:                                         OPR_UNK      KEY_LBL_END
@@ -187,7 +195,7 @@ Action handle(Mode mode, int val)
           is_dig(val):            D|val              done_opd()   KEY_OPD_D
           else:                                      cancel_opn() handle(.)
         OPD_KIND_SBR:
-          is_usr(val):            LBL|val            done_opd()   KEY_OPD_LBL
+          is_usr(val):            USR|val            done_opd()   KEY_OPD_LBL
           is(val, SBR):           .|.                ADDRESS      KEY_PGM_SBR
           is(val, 2nd) || is(val, SST):                           KEY_SKIP
           else:                                      cancel_opn() handle(.)
@@ -200,7 +208,7 @@ Action handle(Mode mode, int val)
       is(val, Ind):               IND|.              OPD_MOD_IND  KEY_OPD_IND
       is_dig(val):                DDD|val            OPD_DDD_1    KEY_OPD_DDD
       is_lbl(val):                LBL|val            done_opd()   KEY_OPD_LBL
-      is_opr(val, mode, opr.inv):                    cancel_opn() handle(.)
+      is_opr(val):                                   cancel_opn() handle(.)
       else:  /* 2nd, 2n', maybe SST */                            KEY_SKIP
     OPD_DDD_1:
       mode_step:                  .|value.%02d.val   done_opd()   DBL_OPD_DDD
