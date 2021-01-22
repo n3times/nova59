@@ -1,5 +1,9 @@
-Key
-  KeyCode code
+Key - enum
+  K_0, K_1, ...
+  K_E', K_A, ...
+
+KeyData
+  Key key
   String name
   String mnemo
   bool (*isOperator)(bool inv, Mode mode)
@@ -7,10 +11,6 @@ Key
   DisplayEvalType (*displayEvalType)(bool inv, Mode mode)
   OperatorKind (*operatorKind)(bool inv, Mode mode)
   void (*eval)(State state, Operation operation)
-
-KeyCode - enum
-  K_0, K_1, ...
-  K_E', K_A, ...
 
 Mode - enum
   EVAL, RUN, SST, LRN

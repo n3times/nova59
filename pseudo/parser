@@ -3,13 +3,14 @@
 cancel_opn()
   opn = operations.last
   opr = opn.operator
-  is_blank_opn = !opr.inv && opr.code == K_UNK
+  is_blank_opn = !opr.inv && opr.key == K_UNK
   is_blank_opn: return  // Reuse.
   opn.state = CANCELED
 
+  parser.state = OPR_UNK
   add new operation  // Previous operation remains incomplete
-    parser.state = OPR_UNK
-    operator = (false, -1)
+    opn.state = PENDING
+    operator = ( false, -1 )
     operands = []
 
 done_opr()
@@ -24,16 +25,18 @@ done_opd()
   done_opx()
 
 done_opx()
-  assert opr.code != UNK
-  if current_operation has additional operands
+  assert opr.key != UNK
+  opn = operations.last
+  opr = opn.operator
+  if opn has additional operands
     add new operand (UNK, "")
     parser.state = OPD_UNK
   else
-    current_operation.state = COMPLETE
+    opn.state = COMPLETE
     parser.state = OPR_UNK
     add empty operation
       opn.state = PENDING
-      operator = [ false, -1 ]
+      operator = ( false, -1 )
       operands = []
 
 // Some Key defines.
@@ -106,7 +109,7 @@ Action handle(Mode mode, int val)
   is(val, SST) && mode == MODE_EVAL:                              KEY_EVL_SST
 
   case parser.state:
-    // Condition                  opr inv|code       new state    ret_value
+    // Condition                  opr inv|key        new state    ret_value
     OPR_UNK:
       is(val, INV) || is(val, IN'):
         opr.inv:                  ~opr.inv|.         OPR_UNK      KEY_OPR_NOINV

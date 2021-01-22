@@ -7,7 +7,7 @@ String operand_as_string(Operand opd)
   case type:
     LBL: USR:
       assert value.len > 0
-      return keys[int(opd.value)].as_string
+      return key_data[int(opd.value)].as_string
     D: DD: DDD:
       assert value.len > 0
       return value
@@ -23,7 +23,7 @@ String operation_as_string(Operation opn)
   // Operator.
   opr = opn.operator
   opr.inv: str += "INV "
-  opr.code != KEY_UNK: str += keys[opr.code].as_string
+  opr.key != KEY_UNK: str += key_data[opr.key].as_string
 
   // Operands.
   opr.operands.len > 0: str += " " + operand_as_string(opn.operands[0])

@@ -1,8 +1,14 @@
 ==  Main objects  ==
 
 Key
-  One of 100 keys (00 to 99). A Key has a name and, in case it is an operator,
-  info about the kind of operands and its evaluator. 
+  One of 100 keys (00 to 99).
+
+Mode
+  LRN, EVAL, RUN, SST, ADV, LIST, ...
+
+KeyData 
+  Info associated to a key such as its name and, for keys that act as operators,
+  its kind of operands and its evaluator. 
 
 Operation
   A syntactic representation of an operation, with its operator and operands.
@@ -26,6 +32,44 @@ Evaluators
 
 Logger
   Logs operations and their results.
+
+ProgramLister
+  Lists program
+
+
+==  Dependencies  ==
+
+Operation
+  Key
+
+KeyData
+  Key Mode
+
+Parser
+  Operation
+  KeyData
+
+ProgramLister
+  Parser
+
+LrnHandler
+  Parser
+
+EvaluatorHandler
+  Parser
+  KeyData
+  State
+
+Runtime
+  Mode Handlers
+  State
+    Mode
+    DisplayMode
+    Config Flags
+
+Evaluators
+  Operation
+  State
 
 
 ==  Example of flow: lnx  ==

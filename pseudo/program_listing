@@ -3,23 +3,22 @@
 // Print program as it would be printed by the TI-59 printer.
 void basic_program_listing(int steps[])
   parser = new_parser()
-
   for i = 0; i < steps.len; i++:
     step = steps[i]
     action = parser.handle(RUN, step)
     action.type in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
       print "%03d  %02d\n", i, step
     else:
-      print "%03d  %s\n", i, keys[step].as_string
+      print "%03d  %s\n", i, key_data[step].as_string
 
 
 == COMPLEX PROGRAM LISTING ==
 
-void nl(i, step)  =  print "\n%03d %s\n", i, keys[step].as_string
-void sp(i, step)  =  print " %s\n", keys[step].as_string
+void nl(i, step)      =  print "\n%03d %s\n", i, key_data[step].as_string
+void sp(i, step)      =  print " %s\n", key_data[step].as_string
 void sp_dbl(i, step)  =  print " %02d\n", step
-void dbl(step)    =  print "%02d\n", step
-void prt(step)    =  print "%d", step
+void dbl(step)        =  print "%02d\n", step
+void prt(step)        =  print "%d", step
 
 bool is_numeric(step):
   return step in { 0, 1, ..., 9, . }

@@ -1,12 +1,12 @@
 Principles
-  Intutive, typically same wording as keyboard.
+  Intuitive, typically same wording as keyboard.
   Maximum of 3 letters.
   Provide 1 letter alternatives to common operations:
-    return key : r/s
-    ?          : lrn
-    !          : inv
-    arrow-up   : sst
-    arrow-down : bst
+    r/s: return key
+    lrn: ?
+    inv: !
+    sst: arrow-up
+    bst: arrow-down
   Delete/backspace to correct
   Escape to menu
 
@@ -14,15 +14,15 @@ Primary
   A   B   C   D   E
   sec inv lnx ce  clr
   lrn xt  x2  vx  x1
-  sst sto rcl sum ^     ^: yx
+  sst sto rcl sum ^     ^ or yx
   bst ee  (   )   /
   gto 7   8   9   *
   sbr 4   5   6   -
   rst 1   2   3   +
-  r/s 0   .   ~   =     r/s
+  r/s 0   .   ~   =
 
 Secondary
-  vA  vB  vC  vD  vE    ?
+  vA  vB  vC  vD  vE
   se' in' log cp  cl'
   pgm p/r sin cos tan
   ins cms exc prd ind

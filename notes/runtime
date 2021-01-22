@@ -13,7 +13,7 @@ Principles
 Options:
 - Feedback flag ("[")
   Feedback is the original TI-59 behavior.
-  No feedback is useful as an option, in testing and monothreaded clients.
+  No feedback is useful as an option, and in testing and monothreaded clients.
 - Auto-release flag.
   With this option, a key press is immediately followed by a key release.
   Good for simple clients.
@@ -21,7 +21,7 @@ Options:
 - No blinking on error flag.
   Useful for monothreaded clients.
 
-The following options are non supported as they complicate the design without
+The following options are not supported as they complicate the design without
 providing much.
 - Classic behavior with no rapid fire, no auto stop options
 - Pause operation animation in EVAL mode option.

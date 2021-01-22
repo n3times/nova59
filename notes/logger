@@ -8,7 +8,7 @@ Log Types
       OPN: operation                    [ STO 45 ]
     Output
       RES: result from operation        [ 123.   ]
-    Pending Input  (1 at most)
+    Pending Input  (1 at most, at end of trace)
       NUM_: numbers in edit mode        [ 12     ]
       OPN_: pending operations [        [ STO 4_ ]
   EVAL Info [Also for SST | Trace]
@@ -86,10 +86,11 @@ Spacing operation/display:
 
 ==  EVAL/SST  ==
 
-* Numeric ops  =
-  always:    0 - 9, .
-  sometimes: +/-, EE, INV EE
-* Loggable ops = every op except numeric and program editing ops
+* Numeric ops
+  always numeric: 0 - 9, ., EE
+  numeric if display in edit mode: +/-, INV EE
+* Loggable ops
+  Every op except numeric and program editing ops
 * For loggable ops
   input: display if display in edit mode before operation
   input: operation

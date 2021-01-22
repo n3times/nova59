@@ -10,7 +10,7 @@ OperationState - enum  { PENDING, COMPLETE, CANCELED }
 
 Operator
   bool inv
-  KeyCode code
+  Key key
 
 Operand
   OperandType type  // Indicates how to interpret the operand value.
@@ -18,13 +18,3 @@ Operand
 
 OperandType - enum
   UNK IND LBL D DD DDD USR
-
-OperatorKind - enum
-  OPR_KIND_NO_PARAM    // x^2 ...
-  OPR_KIND_D           // Fix and Stf (+ Inv)
-  OPR_KIND_DD          // STO, RCL, ...
-  OPR_KIND_DD_ONLY     // ST*, RC*, ...
-  OPR_KIND_ADDRESS     // GTO, SBR, ...
-  OPR_KIND_D_ADDRESS   // Dsz and Iff (+ Inv)
-  OPR_KIND_DD_ADDRESS  // Pgm xx SBR address
-  OPR_KIND_NONE        // Not an operator.
