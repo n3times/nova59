@@ -43,7 +43,8 @@ Operation
   Key
 
 KeyData
-  Key Mode
+  Key
+  Mode
 
 Parser
   Operation
