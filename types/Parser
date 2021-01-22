@@ -1,0 +1,58 @@
+// Given a stream of keys and program steps, the parser generates a stream of
+// structured operations.
+Parser
+  ParserState state
+  Operation operations[]  // An ever growing array. Last/current is PENDING and
+                          // may be empty. Others are COMPLETE or CANCELED.
+  bool sec                // 2nd key is selected.
+  Mode mode
+
+  // Updates the parser state after a key from the keyboard has been pressed.
+  // Params: mode is EVAL or LRN, row in 1..9, col in 1..5.
+  Action handle_key_pressed(Mode mode, int row, int col)
+
+  // Updates the parser state after 'val' has been handled.
+  // In EVAL and LRN, 'val' is a key.
+  // In RUN and SST, 'val' is a step (a key or 2 digits).
+  // Param: val in 0..99.
+  Action handle(Mode mode, int val)
+
+Mode - enum  { LRN, EVAL, RUN, SST }  // Other modes not involved.
+
+ActionType - enum
+  KEY_MOD_SEC    // 2nd key has been selected
+  KEY_MOD_NOSEC  // 2nd key has been deselected
+  KEY_OPR_INV    // Operator modifier inv has been selected
+  KEY_OPR_NOINV  // Operator modifier inv has been deselected
+  KEY_OPR_KEY    // Operator key has been set
+  KEY_OPD_IND    // Operand ind modifier has been selected
+  KEY_OPD_NOIND  // Operand ind modifier has been deselected
+  KEY_OPD_D      // Digit as part of a D operand
+  KEY_OPD_DD     // Digit as part of a DD or Ind operand
+  KEY_OPD_DDD    // Digit as part of a DDD operand
+  DBL_OPD_DD     // 2 digits as part of a DD or Ind operand
+  DBL_OPD_DDD    // 2 digits as part of a DDD operand
+  KEY_OPD_LBL    // A label used as operand
+  KEY_SKIP       // Key does not affect operation
+  KEY_LBL_BEG    // Beginning of label marker ("Lbl" in "Lbl STO")
+  KEY_LBL_END    // End of label marker ("STO" in "Lbl STO")
+  KEY_EVL_SST    // SST key in EVAL mode
+  KEY_PGM_SBR    // SBR in Pgm xx SBR xxx
+
+Action
+  ActionType type  //
+  int val          // A key, or a combination of 2 digit keys.
+
+ParserState - enum
+  OPR_UNK       // Operation so far is "_" or "INV _".
+  LBL_BEG       // Waiting for the end of a label marker: "STO" in "Lbl STO".
+                // Can happen between "inv" and operator.
+
+  OPD_UNK       // Operand unknown "".
+                // Kind may be determined from inv, opr and mode values.
+  OPD_MOD_IND   // Operand is "*_"
+  OPD_DD_1      // Operand is "d_" or "*d_".
+  OPD_DDD_1     // Operand is "d__".
+  OPD_DDD_12    // Operand is "dd_".
+  ADDRESS       // It is an address, possibly in "Pgm xx SBR address" but
+                // nothing else in known.

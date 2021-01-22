@@ -1,5 +1,13 @@
 ==  Main objects  ==
 
+Key
+  One of 100 keys (00 to 99). A Key has a name and, in case it is an operator,
+  info about the kind of operands and its evaluator. 
+
+Operation
+  A syntactic representation of an operation, with its operator and operands.
+  Produced by the Parser and consume by the associated Evaluator.
+
 Runtime
   Intermediary between the client and the different mode handlers.
   Also, in charge of the display and of threading.

@@ -1,0 +1,37 @@
+Principles
+  Intutive, typically same wording as keyboard.
+  Maximum of 3 letters.
+  Provide 1 letter alternatives to common operations:
+    return key : r/s
+    ?          : lrn
+    !          : inv
+    arrow-up   : sst
+    arrow-down : bst
+  Delete/backspace to correct
+  Escape to menu
+
+Primary
+  A   B   C   D   E
+  sec inv lnx ce  clr
+  lrn xt  x2  vx  x1
+  sst sto rcl sum ^     ^: yx
+  bst ee  (   )   /
+  gto 7   8   9   *
+  sbr 4   5   6   -
+  rst 1   2   3   +
+  r/s 0   .   ~   =     r/s
+
+Secondary
+  vA  vB  vC  vD  vE    ?
+  se' in' log cp  cl'
+  pgm p/r sin cos tan
+  ins cms exc prd ind
+  del eng fix int abs
+  pse x=t nop op  deg
+  lbl x>t sig avg rad
+  stf iff dms pi  grd
+  wrt dsz adv prt lst
+
+Other
+  synthesized: hir rtn
+  indirect: st* rc* su* pr* ex* pg* gt* op*

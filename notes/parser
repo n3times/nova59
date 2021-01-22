@@ -1,12 +1,11 @@
 FAITHFULNESS
 * Parser should support all modes: EVAL LRN RUN SST
-* Nail RUN mode to best support legacy programs
+* Nail RUN mode to best support original/legacy programs
 * Treat RUN and SST identically for consistency
-* Treat EVAL and LRN similarly if it simplifies design
 * In EVAL and LRN mode, consider common sense and simplicity over faithfulness
 
 USES
-* Executing operations, change state in any mode
+* Produce operations that can be executed to change state in any mode
 * Program listing
 * Logging in RUN and EVAL modes
 
@@ -21,6 +20,6 @@ DIFFICULTIES
 * What happens beyond last program step
 
 DESIGN
-* Share state among modes.
-* Share logic, one main parse function, among modes.
+* Share parser state among modes.
+* Share logic as much as possible, one main parse function, among modes.
 * Have unit tests for every path/case.

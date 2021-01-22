@@ -10,18 +10,19 @@ void basic_program_listing(int steps[])
     action.type in { DBL_OPD_DD, DBL_OPD_DDD, KEY_OPD_D, KEY_OPD_DDD }:
       print "%03d  %02d\n", i, step
     else:
-      print "%03d  %s\n", i, key_data[step].as_string
+      print "%03d  %s\n", i, keys[step].as_string
 
 
 == COMPLEX PROGRAM LISTING ==
 
-void nl_key(i, key)  =  print "\n%03d %s\n", i, key_data[key].as_string
-void sp_key(i, key)  =  print " %s\n", key_data[key].as_string
-void sp_dbl(i, key)  =  print " %02d\n", key
-void dbl(key)        =  print "%02d\n", key
+void nl(i, step)  =  print "\n%03d %s\n", i, keys[step].as_string
+void sp(i, step)  =  print " %s\n", keys[step].as_string
+void sp_dbl(i, step)  =  print " %02d\n", step
+void dbl(step)    =  print "%02d\n", step
+void prt(step)    =  print "%d", step
 
-bool is_numeric_key(key):
-  return key in { 0, 1, ..., 9, . }
+bool is_numeric(step):
+  return step in { 0, 1, ..., 9, . }
 
 // Print operations, labels and numbers in their own lines.
 void complex_program_listing(int steps[])
@@ -38,27 +39,27 @@ void complex_program_listing(int steps[])
         assert(false)
 
       // Operator.
-      KEY_OPR_INV: KEY_OPR_NOINV: nl_key(i, step)
+      KEY_OPR_INV: KEY_OPR_NOINV: nl(i, step)
       KEY_OPR_KEY:
-        previousAction.type == KEY_OPR_INV: sp_key(step)
+        previousAction.type == KEY_OPR_INV: sp(step)
         else:
-          is_numeric_key(step):
+          is_numeric(step):
             number_line_len == 0: number_line_len == 10:
               new_number_line_len == 1
-              nl_key(i, key)
+              nl(i, step)
             else:
               new_number_line_len += 1
-              key(key)
+              prt(step)
           else:
-            nl_key(i, key)
+            nl(i, step)
 
       // Operand.
-      KEY_OPD_IND: KEY_OPD_D: KEY_OPD_DDD: KEY_OPD_LBL: sp_key(step)
+      KEY_OPD_IND: KEY_OPD_D: KEY_OPD_DDD: KEY_OPD_LBL: sp(step)
       DBL_OPD_DD: sp_dbl(step)
       DBL_OPD_DDD: dbl(step)
 
       // Miscellaneous.
-      KEY_SKIP: KEY_LBL_BEG: nl_key(i, step)
-      KEY_LBL_END: KEY_PGM_SBR: sp_key(step)
+      KEY_SKIP: KEY_LBL_BEG: nl(i, step)
+      KEY_LBL_END: KEY_PGM_SBR: sp(step)
     number_line_len = new_number_line_len
     previousAction = action

@@ -1,0 +1,40 @@
+Key
+  KeyCode code
+  String name
+  String mnemo
+  bool (*isOperator)(bool inv, Mode mode)
+  bool (*isLabel)(bool inv, Mode mode)
+  DisplayEvalType (*displayEvalType)(bool inv, Mode mode)
+  OperatorKind (*operatorKind)(bool inv, Mode mode)
+  void (*eval)(State state, Operation operation)
+
+KeyCode - enum
+  K_0, K_1, ...
+  K_E', K_A, ...
+
+Mode - enum
+  EVAL, RUN, SST, LRN
+
+DisplayEvalType - enum
+  OPEN, CLOSE, KEEP
+
+OperatorKind
+  int (*operandCount)(bool inv, Mode mode)
+  OperandKind (*operandKind)(int index, bool inv, Mode mode)
+
+OperandKind - enum
+  OPD_KIND_ADDRESS  // DDD, IND or LBL
+  OPD_KIND_D        // D or IND
+  OPD_KIND_DD       // DD or IND
+  OPD_KIND_DD_ONLY  // DD
+  OPD_KIND_SBR      // <usr> or SBR <address>
+
+OperatorKind - Constant Instances
+  OPR_KIND_NO_PARAM    // x^2 ...
+  OPR_KIND_D           // Fix and Sft (+ Inv)
+  OPR_KIND_DD          // STO, RCL, ...
+  OPR_KIND_DD_ONLY     // ST*, RC*, ...
+  OPR_KIND_ADDRESS     // GTO, SBR, ...
+  OPR_KIND_D_ADDRESS   // Dsz and Iff (+ Inv)
+  OPR_KIND_DD_ADDRESS  // Pgm xx SBR address
+  OPR_KIND_NONE        // Not an operator.

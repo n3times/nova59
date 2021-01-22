@@ -1,50 +1,3 @@
-An Operation object is a syntactic representation of an operation.
-Operations are produced by the parser and used by EVAL, LRN and RUN handlers to
-"calculate", that is to change the state of the calculator.
-
-
-==  Operation as Structure  ==
-
-// An operation such as "lnx" or "STO 12".
-// Operations are meant to be  evaluated, changing the state of the calculator.
-Operation
-  OperationState state
-  Operator operator
-  Operand operands[]  // A growing array of length 0, 1 or 2.
-
-// The state of an operation changes from PENDING to COMPLETE (or CANCELED) as
-// the operation is parsed.
-OperationState - enum  { PENDING, COMPLETE, CANCELED }
-
-Operator
-  bool inv
-  Key key
-
-Operand
-  OperandType type  // Indicates how to interpret the operand value
-  String value      // Up to 3 digits: opcode for label, address or register...
-
-OperandType - enum
-  UNK IND LBL D DD DDD USR
-
-OperandKind - enum
-  OPD_KIND_ADDRESS  // DDD, IND or LBL
-  OPD_KIND_D        // D or IND
-  OPD_KIND_DD       // DD or IND
-  OPD_KIND_DD_ONLY  // DD
-  OPD_KIND_SBR      // <usr> or SBR <address>
-
-OperatorKind - enum
-  OPR_KIND_NO_PARAM    // x^2 ...
-  OPR_KIND_D           // Fix and Sft (+ Inv)
-  OPR_KIND_DD          // STO, RCL, ...
-  OPR_KIND_DD_ONLY     // ST*, RC*, ...
-  OPR_KIND_ADDRESS     // GTO, SBR, ...
-  OPR_KIND_D_ADDRESS   // Dsz and Iff (+ Inv)
-  OPR_KIND_DD_ADDRESS  // Pgm xx SBR address
-  OPR_KIND_NONE        // Not an operator.
-
-
 ==  To string  == 
 
 // Operand, possibly incomplete.
@@ -54,7 +7,7 @@ String operand_as_string(Operand opd)
   case type:
     LBL: USR:
       assert value.len > 0
-      return key_data[int(opd.value)].as_string
+      return keys[int(opd.value)].as_string
     D: DD: DDD:
       assert value.len > 0
       return value
@@ -70,7 +23,7 @@ String operation_as_string(Operation opn)
   // Operator.
   opr = opn.operator
   opr.inv: str += "INV "
-  opr.key != KEY_UNK: str += key_data[opr.key].as_string
+  opr.code != KEY_UNK: str += keys[opr.code].as_string
 
   // Operands.
   opr.operands.len > 0: str += " " + operand_as_string(opn.operands[0])

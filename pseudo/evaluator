@@ -1,7 +1,7 @@
 ==  Evaluator in EVAL/SST/RUN Modes  ==
 
-bool is_numeric_opn(opn)  =  opn.opr.key in { 0, ..., 9, ., +/-, EE }
-bool is_program_edit_opn(opn)  =  opn.opr.key in { LRN, SST, BST, INS, DEL }
+bool is_numeric_opn(opn)  =  opn.opr.code in { 0, ..., 9, ., +/-, EE }
+bool is_program_edit_opn(opn)  =  opn.opr.code in { LRN, SST, BST, INS, DEL }
 
 ==  API  ==
 
@@ -22,14 +22,14 @@ void eval_completed_operations()
       opn_index <= opns.len - 1;
       opn_index++:
     opn = opns[opn_index]
-    key = opn.operator.key
+    code = opn.operator.code
 
     log_input = is_log_mode(mode)
 
     // Display may need to be evaled even if operation is not complete yet.
     do_eval_display = state.is_display_edit &&
-                      key != KEY_UNK &&
-                      key_data[key].does_eval_display
+                      code != KEY_UNK &&
+                      keys[code].does_eval_display()
     do_eval_display:
       log_input: log.input(state.display)
       state.display.eval()
