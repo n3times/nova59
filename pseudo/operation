@@ -10,14 +10,12 @@
 String operand_as_string(Operand opd)
   type = opd.type
   value = opd.value
-  str = ""
   case type:
-    LBL: USR:
+    LBL:
       value.len > 0:
         key = int(value)
-        str = key_data[key].as_string
+        str += key_data[key].as_string
     D: DD: DDD:
-      assert value.len > 0
       str = value
     IND:
       str = "*" + value
@@ -27,6 +25,7 @@ String operand_as_string(Operand opd)
   type == DDD && str.len < 3: str += "_"
   type == IND && str.len < 3: str += "_"
   str.len == 0: str += "_"
+  return str
 
 // Operation, complete, pending or canceled.
 // INV _
@@ -51,7 +50,9 @@ String operation_as_string(Operation opn)
 
   // Operands.
   opr.operands.len > 0: str += " " + operand_as_string(opn.operands[0])
-  opr.operands.len > 1: str += " " + operand_as_string(opn.operands[1])
+  opr.operands.len > 1:
+    opn.operands[1].sbr: str += " SBR"
+    str += " " + operand_as_string(opn.operands[1])
 
   opn.state != COMPLETE && str.last != "_": str += " _"
   opn.state == CANCELED: str += " [X]"

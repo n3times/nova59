@@ -35,9 +35,10 @@ void key(int key)
   step_index == 999: MODE_EVAL
   else: step_index += 1
 
-void eval_operand(Operator opn, int opd_index)
+void eval_operand(Operation opn, int opd_index)
   opr = opn.operator
   opd = opn.operands[opd_index]
+  opd.sbr = key(SBR)
   opd.type == IND:
     opd_index == 0 && opr has synthesized_ind:
       steps[step_index - 1] = synthesized_ind
@@ -57,13 +58,14 @@ void eval()
   // For example "IFF *1" => "IFF *1 A", evaluate "*1" and "A"
   opns = parser.operations
   last_opn_index = opns.len - 1
-  last_opn_subindex = opns[last_opn_index].operands.len
-  while (current_opn_index != last_opn_subindex ||
-         current_opn_subindex != last_opn_subindex):
-    current_opn_subindex > 0:
-      eval_operand(opns[current_opn_index], current_opn_subindex - 1)
-    current_opn_subindex < opns[current_opn_index].operands.len - 1:
-      current_opn_subindex += 1
+  last_opd_index = opns[last_opn_index].operands.len - 1
+  while (current_opn_index != last_opn_index ||
+         current_opd_index != last_opd_index):
+    is_operand = current_opd_index >= 0
+    is_operand:
+      eval_operand(opns[current_opn_index], current_opd_index)
+    current_opd_index < opns[current_opn_index].operands.len - 1:
+      current_opd_index += 1
     else:
       current_opn_index += 1
 
@@ -88,7 +90,8 @@ void eval()
       key == BST: bst()
       key == Ins: ins()
       key == Del: del()
-      key == SBR && opns[last_opn_index]operator.inv && steps[step_index - 1] == INV:
+      key == SBR && opns[last_opn_index]operator.inv
+                 && steps[step_index - 1] == INV:
         steps[step_index - 1] = RTN
       else:
         key(key)

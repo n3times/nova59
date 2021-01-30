@@ -119,7 +119,7 @@ Action handle(Mode mode, int val)
       else:  /* Skip 2nd, 2nd', Nop, Ind, maybe Lbl, SST */       KEY_SKIP
     LBL_BEG:                                         OPR_UNK      KEY_LBL_END
 
-    // Condition                  opd type|value     state        ret_value
+    // Condition                  opd type|val|sbr   state        ret_value
     OPD_UNK:
       case operand_kind(.):
         OPD_KIND_ADDRESS:         .|.                ADDRESS      handle(.)
@@ -136,8 +136,8 @@ Action handle(Mode mode, int val)
           is_dig(val):            D|val              done_opd()   KEY_OPD_D
           else:                                      cancel_opn() handle(.)
         OPD_KIND_SBR:
-          is_usr(val):            USR|val            done_opd()   KEY_OPD_LBL
-          is(val, SBR):           .|.                ADDRESS      KEY_PGM_SBR
+          is_usr(val):            Lbl|val            done_opd()   KEY_OPD_LBL
+          is(val, SBR):           .|.|true           ADDRESS      KEY_PGM_SBR
           is(val, 2nd) || is(val, SST):                           KEY_SKIP
           else:                                      cancel_opn() handle(.)
     OPD_MOD_IND:

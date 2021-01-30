@@ -36,7 +36,10 @@ void eval_completed_operations()
 
     // Eval operation.
     opn.state == COMPLETE:
+      // Evaluate operation.
       key_data[key].eval(opn, state)
+
+      // Log operation.
       log_output = is_log_mode(mode)
       is_number_edit_opn = is_numeric_opn(opn) && state.is_display_edit
       is_loggable_opn = !is_number_edit_opn && !is_program_edit_opn(opn)
