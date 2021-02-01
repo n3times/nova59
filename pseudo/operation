@@ -1,11 +1,11 @@
 ==  To string  == 
 
 // Operand, possibly incomplete.
-// LBL: LBL or _
-// D:   D or _
-// DD:  DD or D_ or _
-// DDD: DDD or DD_ or D_ or _
-// IND: *DD or *D_ or *_ 
+// LBL: LBL  _
+// D:   D    _
+// DD:  DD   D_   _
+// DDD: DDD  DD_  D_  _
+// IND: *DD  *D_  *_
 // UNK: _
 String operand_as_string(Operand opd)
   type = opd.type

@@ -1,7 +1,7 @@
-==  Evaluator in EVAL/SST/RUN Modes  ==
+==  Evaluator in EVAL | SST | RUN Modes  ==
 
-bool is_numeric_opn(opn)  =  opn.opr.key in { 0, ..., 9, ., +/-, EE }
-bool is_program_edit_opn(opn)  =  opn.opr.key in { LRN, SST, BST, INS, DEL }
+bool is_numeric_opn(opn)       =  opn.opr.key in { 0, ..., 9, ., +/-, EE }
+bool is_program_edit_opn(opn)  =  opn.opr.key in { LRN, SST, BST, Ins, Del }
 
 ==  API  ==
 
@@ -10,48 +10,49 @@ Evaluator
   int last_resolved_opn_index = -1  // Complete or canceled.
   Log log
 
-  Evaluator new_evaluator(Operation[], Log)
+  Evaluator new_evaluator(Parser parser)
+    operations = parser.operations
 
-  void eval_completed_operations()
+  void eval(operations, last_resolved_opn_index, state)
 
 ==  Implementation  ==
 
-void eval_completed_operations()
-  opns = operations
+// Evaluates non resolved operations.
+void eval(operations, last_resolved_opn_index, state)
   for opn_index = last_resolved_opn_index + 1;
-      opn_index <= opns.len - 1;
+      opn_index <= operations.len - 1;
       opn_index++:
-    opn = opns[opn_index]
+    opn = operations[opn_index]
     key = opn.operator.key
 
-    log_input = is_log_mode(mode)
+    may_log_input = is_log_mode(state.mode)
 
-    // Display may need to be evaled even if operation is not complete yet.
+    // Eval display.
     do_eval_display = state.is_display_edit &&
                       key != KEY_UNK &&
                       key_data[key].does_eval_display()
     do_eval_display:
-      log_input: log.input(state.display)
+      may_log_input: log.input(state.display)
       state.display.eval()
 
     // Eval operation.
-    opn.state == COMPLETE:
-      // Evaluate operation.
+    do_eval_opn = opn.state == COMPLETE
+    do_eval_opn:
       key_data[key].eval(opn, state)
 
       // Log operation.
-      log_output = is_log_mode(mode)
+      may_log_output = is_log_mode(state.mode)
       is_number_edit_opn = is_numeric_opn(opn) && state.is_display_edit
       is_loggable_opn = !is_number_edit_opn && !is_program_edit_opn(opn)
       is_loggable_opn:
-        log_input && state.is_display_edit: log.input(state.display)
-        log_input: log.input(opn)
-        log_output: log.output(state.display)
+        may_log_input && state.is_display_edit: log.input(state.display)
+        may_log_input: log.input(opn)
+        may_log_output: log.output(state.display)
 
     opn.state != PENDING:
       last_resolved_opn_index = opn_index
 
-  is_log_mode(mode): log.pending(get_pending_operation)
+  is_log_mode(state.mode): log.pending(get_pending_operation())
   update_current_operation()
 
 String get_pending_operation()

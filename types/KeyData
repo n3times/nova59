@@ -1,6 +1,4 @@
-Key - enum
-  K_0, K_1, ...
-  K_E', K_A, ...
+Key - enum  { K_0 K_1 .. K_E' K_A .. }
 
 KeyData
   Key key
@@ -12,11 +10,9 @@ KeyData
   OperatorKind (*operatorKind)(bool inv, Mode mode)
   void (*eval)(State state, Operation operation)
 
-Mode - enum
-  EVAL, RUN, SST, LRN
+Mode - enum  { EVAL RUN SST LRN }
 
-DisplayEvalType - enum
-  OPEN, CLOSE, KEEP
+DisplayEvalType - enum  { OPEN CLOSE KEEP }
 
 OperatorKind
   int (*operandCount)(bool inv, Mode mode)

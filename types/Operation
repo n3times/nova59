@@ -6,7 +6,7 @@ Operation
   Operator operator
   Operand operands[]  // A growing array of length 0, 1 or 2.
 
-OperationState - enum  { PENDING, COMPLETE, CANCELED }
+OperationState - enum  { PENDING COMPLETE CANCELED }
 
 Operator
   bool inv
@@ -18,5 +18,4 @@ Operand
   bool sbr          // Operand is SBR <addr> w/ <addr> given by type and value.
                     // Only used for Pgm xx SBR <addr>.
 
-OperandType - enum
-  UNK IND LBL D DD DDD
+OperandType - enum  { UNK IND LBL D DD DDD }

@@ -38,7 +38,6 @@ void key(int key)
 void eval_operand(Operation opn, int opd_index)
   opr = opn.operator
   opd = opn.operands[opd_index]
-  opd.sbr = key(SBR)
   opd.type == IND:
     opd_index == 0 && opr has synthesized_ind:
       steps[step_index - 1] = synthesized_ind
@@ -53,8 +52,10 @@ void eval_operand(Operation opn, int opd_index)
 
 == Implementation ==
 
-void eval()
-  // Evaluate operands that are not pending any longer.
+void eval(val)
+  action = parser.handle(LRN, val)
+
+  // Evaluate Operands.
   // For example "IFF *1" => "IFF *1 A", evaluate "*1" and "A"
   opns = parser.operations
   last_opn_index = opns.len - 1
@@ -69,8 +70,7 @@ void eval()
     else:
       current_opn_index += 1
 
-  key = action.key
-
+  // Evaluate Operator.
   case action.type:
     KEY_EVL_SST: DBL_OPD_DD: DBL_OPD_DDD:
       assert(false)
@@ -79,12 +79,13 @@ void eval()
       return
     KEY_OPD_LBL: KEY_OPD_D: KEY_OPD_DD: KEY_OPD_DDD:
     KEY_OPD_IND: KEY_OPD_NOIND:
-      // Pending operands.
+      // Operands are evaluated earlier in the code.
       return
     KEY_SKIP: KEY_LBL_BEG: KEY_LBL_END: KEY_PGM_SBR:
     KEY_OPR_INV: KEY_OPR_NOINV:
-      key(key)
+      key(action.key)
     KEY_OPR_KEY:
+      key = action.key
       key == LRN: lrn()
       key == SST: sst()
       key == BST: bst()

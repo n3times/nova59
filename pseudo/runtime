@@ -6,7 +6,7 @@ Runtime
 
 runtime_state_t
   name
-  display_mode                 // BLANK REG or STEP, possibly prefixed by [.
+  display_mode                 // BLANK, REG or STEP, possibly prefixed by [.
   wait_t wait                  // Wait so many ms before calling next().
   state_t (*next)()            // Should be called whenever wait >= 0.
   state_t (*press)(i, j)       // User pressed a given key.
@@ -35,7 +35,7 @@ RUN.READY      | [        100    RUN.LOOP         run_press(.)    SAME_STATE()
 RUN.LOOP       | [        0      run_next()       run_press(.)    SAME_STATE()
 RUN.PRINTED    | [        100*   RUN.LOOP         run_press(.)    SAME_STATE()
 RUN.PAUSED     | REG      600    RUN.READY        run_press(.)    SAME_STATE()
-RUN.TRACED     | REG      200    RUN.READY        run_press(.)    SAME_STATE()
+RUN.TRACED     | REG      300    RUN.READY        run_press(.)    SAME_STATE()
 ---------------+---------------------------------------------------------------
 PROGRAM_LOAD   | [        IDLE   NA()             pgm_press(.)    SAME_STATE()
 PROGRAM_SAVE   | [        IDLE   NA()             pgm_press(.)    SAME_STATE()
@@ -164,7 +164,7 @@ state_t run_next()
 state_t run_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
-    return EVAL.IDLE
+    return initial(EVAL)
   key(i, j) == K_GTO:
     is_trace_on = true
   return SAME_STATE
@@ -186,7 +186,7 @@ state_t adv_release()
 state_t pgm_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
-    return EVAL.IDLE
+    return initial(EVAL)
   return SAME_STATE
 
 
@@ -202,7 +202,7 @@ state_t list_next()
 state_t list_press(i, j)
   key(i, j) == K_RS:
     mode = EVAL
-    return EVAL.IDLE
+    return initial(EVAL)
   return SAME_STATE
 
 
