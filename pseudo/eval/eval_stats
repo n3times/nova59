@@ -1,0 +1,45 @@
+// r1: sum of y
+// r2: sum of y*y
+// r3: number of data points
+// r4: sum of x
+// r5: sum of x*x
+// r6: sum of x*y
+
+// All ops on doubles (+,-,*,/,root) should be done smoothly.
+
+void eval_sigma(opn)
+  double f, x, y, sy, syy, cnt, sx, sxx, sxy
+  f = opn.inv ? -1 : 1
+  n2d( &x,       &s.rT       )
+  n2d( &y,       &s.rX       )
+  n2d( &sy,      &s.r[1]     )
+  n2d( &syy,     &s.r[2]     )
+  n2d( &cnt,     &s.r[3]     )
+  n2d( &sx,      &s.r[4]     )
+  n2d( &sxx,     &s.r[5]     )
+  n2d( &sxy,     &s.r[6]     )
+  d2n( &s.r[1],  sy  + f*y   )
+  d2n( &s.r[2],  syy + f*y*y )
+  d2n( &s.r[3],  cnt + f     )
+  d2n( &s.r[4],  sx  + f*x   )
+  d2n( &s.r[5],  sxx + f*x*x )
+  d2n( &s.r[6],  sxy + f*x*y )
+  d2n( &s.rX,    cnt + f     )
+  d2n( &s.rT,    x + f       )  // side effect of actual implementation.
+
+void eval_avg(opn)
+  double sy, syy, cnt, sx, sxx
+  n2d( &sx,      &s.r[4]     )
+  n2d( &sy,      &s.r[1]     )
+  n2d( &cnt,     &s.r[3]     )
+  opn.inv:
+    n2d( &sxx,   &s.r[5]             )
+    n2d( &syy,   &s.r[2]             )
+    devX = root((sxx - sx*sx/cnt)/(cnt-1))
+    devY = root((syy - sy*sy/cnt)/(cnt-1))
+    d2n( &rT,    devX                )
+    d2n( &rX,    devY                )
+  else:
+    cnt == 0: s.err = true
+    d2n( &rT,    sx/cnt )
+    d2n( &rX,    sy/cnt )

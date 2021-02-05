@@ -1,3 +1,5 @@
+// All ops on doubles (+,-,*,/,root,...) should be done smoothly.
+
 ==  Utility Methods  ==
 
 double convert(angle, from, to)
@@ -10,7 +12,11 @@ double convert(angle, from, to)
 
 typedef double(*dbl_fun)(double)
 
-void eval_fun(dbl_fun fun)          =  regX = d2n(fun(n2d(regX))
+void eval_fun(dbl_fun fun)
+  double x
+  n2d( &x, &s.rX )
+  x = fun(x)
+  d2n( &s.rX, x)
 double fun_trig(dbl_fun fun, x)     =  return fun(convert(x, trigMode, RAD)
 double fun_arc_trig(dbl_fun fun, x) =  return convert(fun(x), RAD, trigMode)
 
@@ -20,7 +26,7 @@ double frac(x) =  sign(x) * (|x| - [|x|])
 
 ==  Implementation  ==
 
-void eval_pi =  regX = pi
+void eval_pi =  s.rX = pi
 
 void eval_deg  =  trigMode = DEG
 void eval_rad  =  trigMode = RAD
@@ -40,33 +46,26 @@ double fun_frac(x) =  return frac(x)
 void eval_int(opn) =  eval_fun(opn.inv ? fun_frac : fun_int)
 
 double fun_root(x)
-  x < 0: error = true; x = -x
   return root(x)
 void eval_root() =  eval_fun(fun_root)
 
 double fun_ln(x)
-  x = 0: return -inf
-  x < 0: error = true; x = -x
   return ln(x)
 double fun_e(x) =  return e^x
 void eval_ln(opn) =  eval_fun(opn.inv ? fun_e : fun_ln)
 
 double fun_log(x)
-  x = 0: return -inf
-  x < 0: error = true; x = -x
   return log(x)
 double fun_10(x) =  return 10^x
 void eval_log(opn) =  eval_fun(opn.inv ? fun_10 : fun_log)
 
 double fun_sin(x) =  return fun_trig(sin, x)
 double fun_arcsin(x)
-  x < -1 && x > 1: error = true; return x
   return fun_arc_trig(arcsin, x)
 void eval_sin(opn) =  eval_fun(opn.inv ? fun_arcsin : fun_sin)
 
 double fun_cos(x) =  return fun_trig(cos, x)
 double fun_arccos(x)
-  x < -1 && x > 1: error = true; return x
   return fun_arc_trig(arccos, x)
 void eval_cos(opn) =  eval_fun(opn.inv ? fun_arccos : fun_cos)
 
@@ -93,25 +92,28 @@ double fun_idms(x)
 void eval_dms(opn) =  eval_fun(opn.inv ? fun_idms : fun_dms)
 
 void eval_p_r()
-  r = n2d(regT)
-  theta = convert(n2d(regX), trigMode, RAD)
+  double r, theta
+  n2d( &r,     &s.rT )
+  n2d( &theta, &s.rX )
+  theta = convert(theta, trigMode, RAD)
   x = r * sin(theta)
   y = r * cos(theta)
-  regX = d2n(x)
-  regT = d2n(y)
+  d2n( &s.rX, x )
+  d2n( &s.rT, y )
 void eval_r_p()
-  x = n2d(regT)
-  y = n2d(regX)
+  double x, y, r, theta
+  n2d( &x, &s.rT )
+  n2d( &y, &s.rX )
   x == 0:
-    y == 0: theta = 0
-    y > 0:  theta = pi/2
-    y < 0:  theta = 3pi/2
+    y == 0: theta =  pi/4
+    y > 0:  theta =  pi/2
+    y < 0:  theta = -pi/2
   else:
     theta = arctan(y/x)  // -pi/2 .. pi/2
     x < 0: theta += pi
-    // theta in -pi/2 .. 3pi/2
+  // theta in -pi/2 .. 3pi/2
   r = root(x*x + y*y)
   theta = convert(theta, RAD, trigMode)
-  regX = d2n(theta)
-  regT = d2n(r)
+  d2n( &s.rX, theta )
+  d2n( &s.rT, r     )
 void eval_p_r(opn) =  opn.inv ? eval_r_p() : eval_p_r()
