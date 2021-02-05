@@ -1,26 +1,37 @@
-// Arithmetic.
+// Uses math.h to compute common math functions adapted to the TI-59:
+// - raises errors appropriately
+// - takes care of special values.
+// - helps ensure 13-digit precision
+
+
+/********************
+  Arithmetic.
+ ********************/
 double smooth_times(x, y) =  return x * y
 
 double smooth_divide(x, y)
   y != 0: return x/y
   s.err = true
   x == 0: return 1
-  x > 0: return inf
-  return -inf
+  return x > 0 ? inf : -inf
 
+// Takes care of the case where x and y are very close by ensuring
+// we don't go beyond 13-digit precision.
+// 1 - 0.99999999999917 = 0.111111111111 and not 0.111111111183
 double careful_substraction(x, y)
   // x >= y > 0
   N *X, *Y, *R
   d2n(&X, x)
   d2n(&Y, y)
   while (Y.e < X.e) {
+    // Note that we purposefully lose precision.
     Y.m /= 10;
     Y.e++;
   }
   R.m = X.m - Y.m
   R.e = X.e;
   if (R.m != 0) {
-    while (R.m < POWER_10[12]) {
+    while (R.m < 10^12) {
       R.m *= 10;
       R.e--;
     }
@@ -30,19 +41,19 @@ double careful_substraction(x, y)
 
 double smooth_plus(x, y)
   x * y >= 0: return x + y
-  // xy < 0.
-  |x| < |y|: return smooth_plus(y, x)
-  // |x| >= |y|.
-  x < 0: return -smooth_plus(-x, -y)
-  // x > 0 && y < 0 && |x| >= |y|.
-  -y / x < 0.9: return x + y
-  return careful_substraction(x, -y)
+  // Write x + y as s * (x' - y') where s = +/- 1 and x' >= y' > 0.
+  s = sign(x + y)
+  x, y = max(|x|, |y|), min(|x|, |y|)
+  y / x < 0.9: return s * (x - y)
+  return s * careful_substraction(x, y)
 
 double smooth_minus(x, y)
   return smooth_plus(x, -y)
 
 
-// Trigonometry.
+/********************
+  Trigonometry.
+ ********************/
 double smooth_sin(x)
   abs_x = x > 0 ? x : -x;
   abs_x == SMOOTH_M_PI: return 0
@@ -58,7 +69,7 @@ double smooth_cos(x)
 double smooth_tan(x)
   abs_x = x > 0 ? x : -x;
   abs_x == SMOOTH_M_PI:     return 0
-  abs_x == SMOOTH_M_PI / 2: return inf
+  abs_x == SMOOTH_M_PI / 2: s.err = true; return inf
   abs_x >= BIG_TRIG:        return 0
   return math_tan(x);
 
@@ -77,7 +88,10 @@ double smooth_acos(x)
 double smooth_atan(x)
   return math_atan(x);
 
-// Other.
+
+/********************
+  Other.
+ ********************/
 double smooth_root(x)
   x < 0:
     s.err = true
@@ -85,13 +99,14 @@ double smooth_root(x)
   return math_sqrt(x)
 
 double smooth_pow(x, y)
+  x == 0:
+    y > 0: return 0
+    y == 0: return 1
+    s.err = true
+    return inf
   x < 0:
     s.err = true
     x = -x
-  x == 0:
-    b > y: return 0
-    y == 0: return 1
-    return inf
   log = y * math_log10(x)
   log >= 100:
     s.err = true
@@ -109,19 +124,11 @@ double smooth_ipow(x, y)
   return inf
 
 double smooth_ln(x)
-  x == 0:
-    s.err = true
-    return -inf
-  x < 0:
-    s.err = true
-    x = -x
-  return math_log(x)
+  x <= 0: s.err = true
+  x == 0: return -inf
+  return math_log(abs(x))
 
 double smooth_log(x)
-  x == 0:
-    s.err = true
-    return -inf
-  x < 0:
-    s.err = true
-    x = -x
-  return math_log10(x)
+  x <= 0: s.err = true
+  x == 0: return -inf
+  return math_log10(abs(x))

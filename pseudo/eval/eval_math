@@ -32,7 +32,11 @@ void eval_deg  =  trigMode = DEG
 void eval_rad  =  trigMode = RAD
 void eval_grad =  trigMode = GRAD
 
-double fun_1_x(x) =  return x == 0 ? inf : 1/x
+double fun_1_x(x)
+  x == 0:
+    s.err = true
+    return inf
+  return 1/x
 void eval_1_x()   =  eval_fun(fun_1_x)
 
 double fun_square(x) =  return x*x
