@@ -1,0 +1,150 @@
+// Uses math.h to compute common math functions on TI-59 numbers:
+// - raises errors appropriately
+// - takes care of special values.
+// - helps ensure 13-digit precision
+
+// N code as 64-bit long int:
+// - 48 bits for mantissa
+// - 8 bits for exponent
+// - some bits for errors
+
+
+/********************
+  Arithmetic.
+ ********************/
+
+N n_times(X, Y) =  return d2n(n2d(X) * n2d(Y)) 
+
+N n_div(X, Y)
+  x = n2d(X)
+  y = n2d(Y)
+  y != 0: return d2n(x/y)
+  x == 0: return N_ONE | N_ERROR
+  return (x > 0) ? N_INF : N_MINUS_INF
+
+
+/********************
+  Trigonometry.
+ ********************/
+
+N n_sin(X)
+  x = n2d(X)
+  abs(x) == M_PI:     return N_0
+  abs(x) >= BIG_TRIG: return N_0
+  return d2n(math_sin(x))
+
+N n_cos(X)
+  x = n2d(X)
+  abs(x) == M_PI_OVER2: return N_0
+  abs(x) >= BIG_TRIG:   return N_1
+  return d2n(math_cos(x))
+
+N n_tan(X)
+  x = n2d(X)
+  abs(x) == SMOOTH_M_PI:     return N_0
+  abs(x) == SMOOTH_M_PI / 2: return N_INF | N_ERROR
+  abs(x) >= BIG_TRIG:        return N_0
+  return d2n(math_tan(x))
+
+N n_asin(X)
+  x = n2d(X)
+  x < -1 || x > 1: return X | N_ERROR
+  return d2n(math_asin(x))
+
+N n_acos(X)
+  x = n2d(X)
+  x < -1 || x > 1: return X | N_ERROR
+  return d2n(math_acos(x))
+
+N n_atan(X) =  return d2n(math_acos(n2d(X)))
+
+
+/********************
+  Arithmetic.
+ ********************/
+
+// Takes care of the case where x and y are very close by ensuring
+// we don't go beyond 13-digit precision.
+// 1 - 0.99999999999917 = 0.111111111111 and not 0.111111111183
+double careful_substraction(x, y)
+  // x >= y > 0
+  N *X, *Y, *R
+  d2n(&X, x)
+  d2n(&Y, y)
+  while (Y.e < X.e) {
+    // Note that we purposefully lose precision.
+    Y.m /= 10;
+    Y.e++;
+  }
+  R.m = X.m - Y.m
+  R.e = X.e;
+  if (R.m != 0) {
+    while (R.m < 10^12) {
+      R.m *= 10;
+      R.e--;
+    }
+  }
+  n2d(&r, &R)
+  return r
+
+N n_plus(X, Y)
+  x = n2d(X)
+  y = n2d(Y)
+  x * y >= 0: return d2n(x + y)
+  // Write x + y as s * (x' - y') where s = +/- 1 and x' >= y' > 0.
+  s = sign(x + y)
+  x, y = max(|x|, |y|), min(|x|, |y|)
+  y / x < 0.9: return d2n(s * (x - y))
+  return d2n(s * careful_substraction(x, y))
+
+N n_minus(X, Y)
+  return n_plus(X, d2n(-n2d(Y)))
+
+
+/********************
+  Other.
+ ********************/
+
+N n_root(X)
+  x = n2d(X)
+  x < 0: return d2n(math_sqrt(-x)) | N_ERROR
+  return d2n(math_sqrt(x))
+
+N n_square(X)
+  x = n2d(X)
+  return d2n(x * x)
+
+N n_pow(X, Y)
+  x = n2d(X)
+  y = n2d(Y)
+  x == 0:
+    y > 0:  return N_0
+    y == 0: return N_1
+    y < 0:  return N_INF
+  x < 0:
+    s.err = true
+    x = -x
+  log = y * math_log10(x)
+  log >= 100:  return N_INF
+  log <= -100: return N_EPS
+  return d2n(math_pow(x, y))
+
+N n_ipow(X, Y)
+  x = n2d(X)
+  y = n2d(Y)
+  y != 0: return n_pow(X, d2n(1/y))
+  x == 0 || x == 1 || x == -1: return N_1 | N_ERROR
+  -1 < x < 1: return N_MINUS_INF
+  return N_INF
+
+N n_ln(X)
+  x = n2d(X)
+  x == 0: return N_MINUS_INF
+  x < 0:  return d2n(math_log(-x)) | N_ERROR
+  return d2n(math_log(x))
+
+N n_log(X)
+  x = n2d(X)
+  x == 0: return N_MINUS_INF
+  x < 0:  return d2n(math_log10(-x)) | N_ERROR
+  return d2n(math_log10(x))
