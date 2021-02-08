@@ -1,5 +1,3 @@
-// All ops on doubles (+,-,*,/,root,...) should be done smoothly.
-
 ==  Utility Methods  ==
 
 double convert(angle, from, to)
@@ -10,104 +8,93 @@ double convert(angle, from, to)
   to == GRAD:   angle = angle / pi * 200
   return angle
 
-typedef double(*dbl_fun)(double)
-
-void eval_fun(dbl_fun fun)
-  double x
-  n2d( &x, &s.rX )
-  x = fun(x)
-  d2n( &s.rX, x)
-double fun_trig(dbl_fun fun, x)     =  return fun(convert(x, trigMode, RAD)
-double fun_arc_trig(dbl_fun fun, x) =  return convert(fun(x), RAD, trigMode)
-
-double int(x)  =  sign(x) * [|x|]
-double frac(x) =  sign(x) * (|x| - [|x|]) 
-
 
 ==  Implementation  ==
 
-void eval_pi =  s.rX = pi
+void eval_pi(opn, s)
+  s.rX = pi
 
-void eval_deg  =  trigMode = DEG
-void eval_rad  =  trigMode = RAD
-void eval_grad =  trigMode = GRAD
+void eval_deg(opn, s)
+  s.trigMode = DEG
+void eval_rad(opn, s)
+  s.trigMode = RAD
+void eval_grad(opn, s)
+  s.trigMode = GRAD
 
-double fun_1_x(x)
-  x == 0:
-    s.err = true
-    return inf
-  return 1/x
-void eval_1_x()   =  eval_fun(fun_1_x)
+void eval_fun(N(*fun)(N, e), s)
+  s.rX = fun(s.rX, e)
+  s.err |= e
 
-double fun_square(x) =  return x*x
-void eval_square()   =  eval_fun(fun_square)
+void eval_root(opn,   s) =  eval_fun(n_root,                    s)
+void eval_ln(opn,     s) =  eval_fun(opn.inv ? n_exp : n_ln,    s)
+void eval_log(opn,    s) =  eval_fun(opn.inv ? n_pow10 : n_log, s)
+void eval_square(opn, s) =  eval_fun(n_square,                  s)
+void eval_1_x(opn,    s) =  eval_fun(n_1_x,                     s)
+void eval_absopn(opn, s) =  eval_fun(n_abs,                     s)
+void eval_int(opn,    s) =  eval_fun(opn.inv ? n_frac : n_int,  s)
 
-double fun_abs(x) =  return |x|
-void eval_abs()   =  eval_fun(fun_abs)
 
-double fun_int(x)  =  return int(x)
-double fun_frac(x) =  return frac(x)
-void eval_int(opn) =  eval_fun(opn.inv ? fun_frac : fun_int)
+void eval_trig_fun(N(*fun)(N), s)
+  res = d2n(convert(n2d(s.rX), s.trigMode, RAD), e)
+  s.err |= e
+  s.rX = fun(res, e)
+  s.err |= e
 
-double fun_root(x)
-  return root(x)
-void eval_root() =  eval_fun(fun_root)
+void eval_arc_trig_fun(N(*fun)(N))
+  s.rX = fun(s.rX, e)
+  s.err |= e
+  s.rX = d2n(convert(n2d(res), s.trigMode, RAD), e)
+  s.err |= e
 
-double fun_ln(x)
-  return ln(x)
-double fun_e(x) =  return e^x
-void eval_ln(opn) =  eval_fun(opn.inv ? fun_e : fun_ln)
+void eval_sin(opn)
+  opn.inv ? eval_arc_trig_fun(n_arc_sin) : eval_trig_fun(n_sin)
+void eval_cos(opn)
+  opn.inv ? eval_arc_trig_fun(n_arc_cos) : eval_trig_fun(n_cos)
+void eval_tan(opn)
+  opn.inv ? eval_arc_trig_fun(n_arc_tan) : eval_trig_fun(n_tan)
 
-double fun_log(x)
-  return log(x)
-double fun_10(x) =  return 10^x
-void eval_log(opn) =  eval_fun(opn.inv ? fun_10 : fun_log)
 
-double fun_sin(x) =  return fun_trig(sin, x)
-double fun_arcsin(x)
-  return fun_arc_trig(arcsin, x)
-void eval_sin(opn) =  eval_fun(opn.inv ? fun_arcsin : fun_sin)
-
-double fun_cos(x) =  return fun_trig(cos, x)
-double fun_arccos(x)
-  return fun_arc_trig(arccos, x)
-void eval_cos(opn) =  eval_fun(opn.inv ? fun_arccos : fun_cos)
-
-double fun_tan(x)    =  return fun_trig(tan, x)
-double fun_arctan(x) =  return fun_arc_trig(arctan, x)
-void eval_tan(opn)   =  eval_fun(opn.inv ? fun_arctan : fun_tan)
-
-double fun_dms(x)
+N n_dms(X, e)
+  x = n2d(X)
   neg = x < 0
   neg: x = -x
   h = [x];
   m = [frac(x) * 100]
   s = frac(x * 100) * 100
   res = h + m/60 + s/(60 * 60)
-  return neg ? -res : res 
-double fun_idms(x)
+  return d2n(neg ? -res : res, e)
+
+N n_idms(X, e)
+  x = n2d(X)
   neg = x < 0
   neg: x = -x
   h = [x];
   m = [frac(x) * 60]
   s = frac(frac(x) * 60) * 60
   res = h + m/100 + s/(100 * 100)
-  return neg ? -res : res 
-void eval_dms(opn) =  eval_fun(opn.inv ? fun_idms : fun_dms)
+  return d2n(neg ? -res : res, e)
 
-void eval_p_r()
-  double r, theta
-  n2d( &r,     &s.rT )
-  n2d( &theta, &s.rX )
-  theta = convert(theta, trigMode, RAD)
+void eval_dms(opn)
+  opn_inv:
+    s.rX = n_idms(X, e)
+  else:
+    s.rX = n_dms(X, e)
+  s.err |= e
+
+void eval_p_r(s)
+  r = n2d(s.rT)
+  theta = n2d(s.rX)
+  theta = convert(theta, s.trigMode, RAD)
   x = r * sin(theta)
   y = r * cos(theta)
-  d2n( &s.rX, x )
-  d2n( &s.rT, y )
-void eval_r_p()
-  double x, y, r, theta
-  n2d( &x, &s.rT )
-  n2d( &y, &s.rX )
+  s.rX = d2n(x, e)
+  s.err |= e
+  s.rT = d2n(y, e)
+  s.err |= e
+
+void eval_r_p(s)
+  x = n2d(s.rT)
+  y = n2d(s.rX)
   x == 0:
     y == 0: theta =  pi/4
     y > 0:  theta =  pi/2
@@ -117,7 +104,10 @@ void eval_r_p()
     x < 0: theta += pi
   // theta in -pi/2 .. 3pi/2
   r = root(x*x + y*y)
-  theta = convert(theta, RAD, trigMode)
-  d2n( &s.rX, theta )
-  d2n( &s.rT, r     )
-void eval_p_r(opn) =  opn.inv ? eval_r_p() : eval_p_r()
+  theta = convert(theta, RAD, s.trigMode)
+  s.rX = d2n(theta, e)
+  s.err |= e
+  s.rT = d2n(r, e)
+  s.err |= e
+
+void eval_p_r(opn, s) =  opn.inv ? eval_r_p(s) : eval_p_r(s)
