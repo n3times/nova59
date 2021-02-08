@@ -1,0 +1,10 @@
+double n2d(X)
+  m = X.m
+  e = X.e - 12
+  e >= 0: return m * power10(e)
+  return m / power10(e)
+
+N d2n(x, e)
+  e = false
+  x == 0: return N_0
+  ...

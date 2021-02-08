@@ -1,0 +1,41 @@
+N n_sin(X, e)
+  e = false
+  x = n2d(X)
+  abs(x) == M_PI:     return N_0
+  abs(x) >= BIG_TRIG: return N_0
+  return d2n(math_sin(x), e)
+
+N n_cos(X, e)
+  e = false
+  x = n2d(X)
+  abs(x) == M_PI_OVER2: return N_0
+  abs(x) >= BIG_TRIG:   return N_1
+  return d2n(math_cos(x), e)
+
+N n_tan(X, e)
+  e = false
+  x = n2d(X)
+  abs(x) == SMOOTH_M_PI: return N_0
+  abs(x) == SMOOTH_M_PI / 2:
+    e = true
+    return N_INF
+  abs(x) >= BIG_TRIG:    return N_0
+  return d2n(math_tan(x), e)
+
+N n_asin(X, e)
+  e = false
+  x = n2d(X)
+  abs(x) > 1:
+    e = true
+    return X
+  return d2n(math_asin(x), e)
+
+N n_acos(X, e)
+  e = false
+  x = n2d(X)
+  abs(x) > 1:
+    e = true
+    return X
+  return d2n(math_acos(x), e)
+
+N n_atan(X, e) =  return d2n(math_atan(n2d(X)), e)

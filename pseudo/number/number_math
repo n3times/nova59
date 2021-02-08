@@ -1,0 +1,108 @@
+N n_abs(X, e)
+  e = false
+  return |X|
+
+N n_int(X, e)
+  x = n2d(X)
+  x = sign(x) * [|x|]
+  return d2n(x, e)
+
+N n_frac(X, e)
+  x = n2d(X)
+  x = sign(x) * (|x| - [|x|])
+  return d2n(x, e)
+
+N n_1_x(X, e)
+  x = n2d(X)
+  x == 0:
+    e = true
+    return N_INF
+  return d2n(1/x, e)
+
+N n_root(X, e)
+  x = n2d(X)
+  x < 0:
+    e = true
+    return d2n(math_sqrt(-x, e)
+  return d2n(math_sqrt(x), e)
+
+N n_square(X, e)
+  x = n2d(X)
+  return d2n(x * x, e)
+
+N n_pow(X, Y, e)
+  e = false
+  x = n2d(X)
+  y = n2d(Y)
+  x == 0:
+    y > 0:  return N_0
+    y == 0: return N_1
+    y < 0:
+      e = true
+      return N_INF
+  x < 0:
+    e = true
+    x = -x
+  log = y * math_log10(x)
+  log >= 100:
+    e = true
+    return N_INF
+  log <= -100:
+    e = true
+    return N_EPS
+  res = d2n(math_pow(x, y), e')
+  e |= e'
+  return res
+
+N n_ipow(X, Y, e)
+  x = n2d(X)
+  y = n2d(Y)
+  y != 0: return n_pow(X, d2n(1/y), e)
+  e = true
+  x == 0 || x == 1 || x == -1:
+    return N_1
+  -1 < x < 1:
+    return N_MINUS_INF
+  return N_INF
+
+N n_ln(X, e)
+  x = n2d(X)
+  x == 0:
+    e = true
+    return N_MINUS_INF
+  x < 0:
+    res = d2n(math_log(-x), e)
+    e = true
+    return res
+  return d2n(math_log(x), e)
+
+N n_log(X, e)
+  x = n2d(X)
+  x == 0:
+    e = true
+    return N_MINUS_INF
+  x < 0:
+    res = d2n(math_log10(-x), e)
+    e = true
+    return res
+  return d2n(math_log10(x), e)
+
+N n_exp(X, e)
+  x = n2d(X)
+  x > 231:
+    e = true
+    return N_INF
+  x < -231:
+    e = true
+    return N_EPS
+  return d2n(math_exp(x), e)
+
+N n_pow10(X, e)
+  x = n2d(X)
+  x >  100:
+    e = true
+    return N_INF
+  x < -100:
+    e = true
+    return N_EPS
+  return d2n(math_pow(10, x), e)
