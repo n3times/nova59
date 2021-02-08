@@ -4,13 +4,14 @@
 // - helps ensure 13-digit precision
 
 double n2d(X)
-  m = mantissa(N)
-  e = exponent(N) - 12
+  m = mantissa(X)
+  e = exponent(X) - 12
   e >= 0: return m * power10(e)
   return m / power10(e)
 
-N d2n(double x, e)
-  x == 0: return N(0, 0)
+N d2n(x, e)
+  e = false
+  x == 0: return N_0
   ...
 
 
@@ -21,13 +22,11 @@ N d2n(double x, e)
 N n_times(X, Y, e) =  return d2n(n2d(X) * n2d(Y), e)
 
 N n_div(X, Y, e)
-  e = false
   x = n2d(X)
   y = n2d(Y)
   y != 0: return d2n(x/y, e)
   e = true
-  x == 0:
-    return N_ONE
+  x == 0: return N_1
   return x > 0 ? N_INF : N_MINUS_INF
 
 
@@ -86,45 +85,43 @@ N n_atan(X, e) =  return d2n(math_atan(n2d(X)), e)
 // we don't go beyond 13-digit precision.
 // 1 - 0.99999999999917 = 0.111111111111 and not 0.111111111183
 double careful_substraction(x, y)
-  // x >= y > 0
-  N *X, *Y, *R
-  d2n(&X, x)
-  d2n(&Y, y)
-  while (Y.e < X.e) {
+  assert x >= y > 0
+  X = d2n(x)
+  Y = d2n(y)
+  while Y.e < X.e:
     // Note that we purposefully lose precision.
     Y.m /= 10;
     Y.e++;
-  }
   R.m = X.m - Y.m
-  R.e = X.e;
-  if (R.m != 0) {
-    while (R.m < 10^12) {
+  R.e = X.e
+  if (R.m != 0):
+    while R.m < 10^12:
       R.m *= 10;
-      R.e--;
-    }
-  }
-  n2d(&r, &R)
-  return r
+      R.e--
+  return n2d(R)
 
-N n_plus(X, Y)
+N n_plus(X, Y, e)
   x = n2d(X)
   y = n2d(Y)
-  x * y >= 0: return d2n(x + y)
+  x * y >= 0: return d2n(x + y, e)
   // Write x + y as s * (x' - y') where s = +/- 1 and x' >= y' > 0.
   s = sign(x + y)
   x, y = max(|x|, |y|), min(|x|, |y|)
-  y / x < 0.9: return d2n(s * (x - y))
-  return d2n(s * careful_substraction(x, y))
+  y / x < 0.9: return d2n(s * (x - y), e)
+  e = false
+  return d2n(s * careful_substraction(x, y), e)
 
-N n_minus(X, Y)
-  return n_plus(X, d2n(-n2d(Y)))
+N n_minus(X, Y, e)
+  return n_plus(X, -Y, e)
 
 
 /********************
   Other.
  ********************/
 
-N n_abs(X, e) =  return d2n(abs(n2d(X)), e)
+N n_abs(X, e)
+  e = false
+  return |X|
 
 N n_int(X, e)
   x = n2d(X)
@@ -174,10 +171,11 @@ N n_pow(X, Y, e)
   log <= -100:
     e = true
     return N_EPS
-  return d2n(math_pow(x, y), e)
+  res = d2n(math_pow(x, y), e')
+  e |= e'
+  return res
 
 N n_ipow(X, Y, e)
-  e = false
   x = n2d(X)
   y = n2d(Y)
   y != 0: return n_pow(X, d2n(1/y), e)
@@ -189,7 +187,6 @@ N n_ipow(X, Y, e)
   return N_INF
 
 N n_ln(X, e)
-  e = false
   x = n2d(X)
   x == 0:
     e = true
@@ -200,7 +197,6 @@ N n_ln(X, e)
   return d2n(math_log(x), e)
 
 N n_log(X, e)
-  e = false
   x = n2d(X)
   x == 0:
     e = true
@@ -211,7 +207,6 @@ N n_log(X, e)
   return d2n(math_log10(x), e)
 
 N n_exp(X, e)
-  e = false
   x = n2d(X)
   x > 231:
     e = true
@@ -222,7 +217,6 @@ N n_exp(X, e)
   return d2n(math_exp(x), e)
 
 N n_pow10(X, e)
-  e = false
   x = n2d(X)
   x >  100:
     e = true
