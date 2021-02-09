@@ -28,7 +28,7 @@ N n_root(X, e)
 
 N n_square(X, e)
   x = n2d(X)
-  return d2n(x * x, e)
+  return d2n(x*x, e)
 
 N n_pow(X, Y, e)
   e = false
@@ -59,10 +59,8 @@ N n_ipow(X, Y, e)
   y = n2d(Y)
   y != 0: return n_pow(X, d2n(1/y), e)
   e = true
-  x == 0 || x == 1 || x == -1:
-    return N_1
-  -1 < x < 1:
-    return N_MINUS_INF
+  x == 0 || x == 1 || x == -1: return N_1
+  abs(x) < 1: return N_MINUS_INF
   return N_INF
 
 N n_ln(X, e)

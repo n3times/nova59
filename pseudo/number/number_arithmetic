@@ -1,3 +1,32 @@
+/*
+ *  HELPERS.
+ */
+
+// Takes care of the case where x and y are very close by ensuring
+// we don't go beyond 13-digit precision.
+//   1.000000000000
+// - 0.9999999999999
+// -----------------
+//   0.000000000001
+N careful_substraction(X, Y)
+  assert X >= Y > 0
+  while Y.exp < X.exp:
+    // Note that we purposefully lose precision.
+    Y.mant /= 10;
+    Y.exp++;
+  R.mant = X.mant - Y.mant
+  R.exp = X.exp
+  if R.mant != 0:
+    while R.mant < 10^12:
+      R.mant *= 10;
+      R.exp--
+  return R
+
+
+/*
+ *  IMPLEMENTATION.
+ */
+
 N n_times(X, Y, e) =  return d2n(n2d(X) * n2d(Y), e)
 
 N n_div(X, Y, e)
@@ -8,25 +37,6 @@ N n_div(X, Y, e)
   x == 0: return N_1
   return x > 0 ? N_INF : N_MINUS_INF
 
-// Takes care of the case where x and y are very close by ensuring
-// we don't go beyond 13-digit precision.
-// 1 - 0.99999999999917 = 0.111111111111 and not 0.111111111183
-double careful_substraction(x, y)
-  assert x >= y > 0
-  X = d2n(x)
-  Y = d2n(y)
-  while Y.e < X.e:
-    // Note that we purposefully lose precision.
-    Y.m /= 10;
-    Y.e++;
-  R.m = X.m - Y.m
-  R.e = X.e
-  if (R.m != 0):
-    while R.m < 10^12:
-      R.m *= 10;
-      R.e--
-  return n2d(R)
-
 N n_plus(X, Y, e)
   x = n2d(X)
   y = n2d(Y)
@@ -36,7 +46,7 @@ N n_plus(X, Y, e)
   x, y = max(|x|, |y|), min(|x|, |y|)
   y / x < 0.9: return d2n(s * (x - y), e)
   e = false
-  return d2n(s * careful_substraction(x, y), e)
+  return careful_substraction(X, Y)
 
 N n_minus(X, Y, e)
   return n_plus(X, -Y, e)

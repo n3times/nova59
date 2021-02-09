@@ -1,10 +1,11 @@
-double n2d(X)
-  m = X.m
-  e = X.e - 12
-  e >= 0: return m * power10(e)
-  return m / power10(e)
+double n2d(X) =  return X.mant * power10(X.exp - 12)
 
 N d2n(x, e)
   e = false
   x == 0: return N_0
-  ...
+  X.mant = (long long) (abs(x) * power10(12 - exp) + 0.5)
+  X.exp = (int) floor(math_log10(abs(x)))
+  x.exp > 99:  e = true; X = N_INF
+  x.exp < -99: e = true; X = N_EPS
+  x < 0: X = -X
+  return X
