@@ -32,14 +32,16 @@ void eval_avg(opn, s)
   SX  = s.r[4]
   SXX = s.r[5]
   opn.inv:
+    // devX = root((SXX - SX * SX / CNT)) / (CNT - 1))
     devX = n_root(n_div(n_minus(SXX,
                                 n_div(n_square(SX, e1), CNT, e2), e3),
-                        n_minus(CNT, N_ONE),e4), e5)
+                        n_minus(CNT, N_ONE, e4),e5), e6)
     s.err |= e1 | e2 | e3 | e4 | e5
+    // devY = root((SYY - SY * SY / CNT)) / (CNT - 1))
     devY = n_root(n_div(n_minus(SYY,
                                 n_div(n_square(SY, e1), CNT, e2), e3),
-                        n_minus(CNT, N_ONE),e4), e5)
-    s.err |= e1 | e2 | e3 | e4 | e5
+                        n_minus(CNT, N_ONE, e4),e5), e6)
+    s.err |= e1 | e2 | e3 | e4 | e5 | e6
     s.rT = devX
     s.rX = devT
   else:

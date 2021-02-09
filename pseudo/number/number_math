@@ -1,6 +1,12 @@
 N n_abs(X, e)
   e = false
-  return |X|
+  X.mant = abs(X.mant)
+  return X
+
+N n_chs(X, e)
+  e = false
+  X.mant = -X.mant
+  return X
 
 N n_int(X, e)
   x = n2d(X)

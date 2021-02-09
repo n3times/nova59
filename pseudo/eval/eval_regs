@@ -6,7 +6,7 @@ int eval_get_param(opn, index)
   type == IND: return reg[val]
   type == LBL: return get_address_at_label(val)
   type == UNK: return -1
- 
+
 int eval_get_param_ind(opn, index)
   opd.type == DD: return reg[opd.value]
   else: return -1
@@ -22,31 +22,31 @@ bool in_bounds(i)  =  return 0 <= i <= 99
 
 void sto_fun(inv, index) =  reg[index] = regX
 void eval_sto(opn)       =  eval_mem_fun(sto_fun, noind, opn)
-void eval_sto_ind(opn)   =  eval_mem_fun(sto_fun, ind, opn)
+void eval_sto_ind(opn)   =  eval_mem_fun(sto_fun, ind,   opn)
 
 void rcl_fun(inv, index) =  regX = regX[index]
 void eval_rcl(opn)       =  eval_mem_fun(rcl_fun, noind, opn)
-void eval_rcl_ind(opn)   =  eval_mem_fun(rcl_fun, ind, opn)
+void eval_rcl_ind(opn)   =  eval_mem_fun(rcl_fun, ind,   opn)
 
 void exc_fun(inv, index) =  regX <-> regX[index]
 void eval_exc(opn)       =  eval_mem_fun(exc_fun, noind, opn)
-void eval_exc_ind(opn)   =  eval_mem_fun(exc_fun, ind, opn)
+void eval_exc_ind(opn)   =  eval_mem_fun(exc_fun, ind,   opn)
 
 void sum_fun(inv, index)
   inv: reg[index]  += regX
   else: reg[index] -= regX
 void eval_sum(opn)       =  eval_mem_fun(sum_fun, noind, opn)
-void eval_sum_ind(opn)   =  eval_mem_fun(sum_fun, ind, opn)
+void eval_sum_ind(opn)   =  eval_mem_fun(sum_fun, ind,   opn)
 
 void prd_fun(inv, index)
   inv: reg[index]  *= regX
   else: reg[index] /= regX
 void eval_prd(opn)       =  eval_mem_fun(prd_fun, noind, opn)
-void eval_prd_ind(opn)   =  eval_mem_fun(prd_fun, ind, opn)
+void eval_prd_ind(opn)   =  eval_mem_fun(prd_fun, ind,   opn)
 
-void eval_cms(opn) =  for i in 0..9: reg[index] = 0
+void eval_cms(opn)       =  for i in 0..9: reg[index] = 0
 
-void xt(opn) =  regX <-> regT
+void eval_xt(opn)        =  regX <-> regT
 
 void hir_fun(opn)
   index = eval_get_param(opn, 0);
@@ -54,10 +54,9 @@ void hir_fun(opn)
   i = index % 10
   i not in 0..7: return
   case op:
-    0: hir[i] = regX
-    1: regX = hir[i]
-    3: hir[i] += regX
-    4: hir[i] *= regX
-    5: hir[i] -= regX
-    6:
-    9: hir[i] /= regX
+    0:    hir[i]  = regX
+    1:    regX    = hir[i]
+    3:    hir[i] += regX
+    4:    hir[i] *= regX
+    5:    hir[i] -= regX
+    6: 9: hir[i] /= regX

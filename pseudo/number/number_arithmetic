@@ -27,16 +27,6 @@ N careful_substraction(X, Y)
  *  IMPLEMENTATION.
  */
 
-N n_times(X, Y, e) =  return d2n(n2d(X) * n2d(Y), e)
-
-N n_div(X, Y, e)
-  x = n2d(X)
-  y = n2d(Y)
-  y != 0: return d2n(x/y, e)
-  e = true
-  x == 0: return N_1
-  return x > 0 ? N_INF : N_MINUS_INF
-
 N n_plus(X, Y, e)
   x = n2d(X)
   y = n2d(Y)
@@ -48,5 +38,14 @@ N n_plus(X, Y, e)
   e = false
   return careful_substraction(X, Y)
 
-N n_minus(X, Y, e)
-  return n_plus(X, -Y, e)
+N n_minus(X, Y, e) =  return n_plus(X, n_chs(Y), e)
+
+N n_times(X, Y, e) =  return d2n(n2d(X) * n2d(Y), e)
+
+N n_div(X, Y, e)
+  x = n2d(X)
+  y = n2d(Y)
+  y != 0: return d2n(x/y, e)
+  e = true
+  x == 0: return N_1
+  return x > 0 ? N_INF : n_chs(N_INF)
