@@ -1,0 +1,66 @@
+display_t number2display(n, fix, eng, ee)
+  neg = n.mant < 0
+  mant = abs(n.mant)
+  exp = n.exp
+
+  is_big = exp >= 10 || exp == 9 && mant >= pow10(13) - 500
+  is_small = exp <= -12 || exp == -11 && mant >= 5 * pow10(12)
+  is_exp = ee || eng || is_big || is_small && fix == 9
+
+  !is_exp && is_small: return number2display(N_0, fix, eng, ee)
+
+  // Compute actual length of the mantissa, leading and trailing 0's included.
+  mant_len = is_exp ? 8 : 10
+  is_exp:
+    eng:
+      new_exp = 3 * floor(exp / 3.)
+      int_len = 1 + exp - new_exp
+      exp = new_exp
+    else:  int_len = 1
+  else:    int_len = max(0, exp + 1)
+  frac_len = mant_len - int_len
+  fix != 9:
+    frac_len = min(frac_len, fix)
+    mant_len = int_len + frac_len
+
+  keep = mant_len;
+  !is_exp && exp < 0: keep = frac_len + exp + 1;
+  mant = mant / pow10(13 - keep)
+  round = abs(n.mant) / pow10(12 - keep) % 10 >= 5
+  round:
+    mant += 1
+    mant == pow10(mant_len):
+      return number2display({ pow10(12), exp + 1 }, fix, eng, ee)
+
+  // Remove trailing 0's.
+  mant != 0 && fix == 9:
+    while mant % 10 == 0 && frac_len > 0:
+      mant /= 10
+      frac_len -= 1
+      mant_len -= 1
+
+  // Add a leading 0 if possible.
+  int_len == 0 && mant_len < 10:
+    int_len += 1
+    mant_len += 1
+
+  exp == 100:
+    frac_len = fix < 8 ? fix : 7
+    mant = pow10(1 + frac_len) - 1
+    set_display(neg, mant, 1, frac_len, 99)
+  else is_exp: set_display(neg, mant, int_len, frac_len, exp)
+  else: set_display(neg, mant, int_len, frac_len)
+
+
+display_t set_display(neg, mant, int_len, int frac_len, int exp)
+  d = ""
+  neg && mant > 0: d.append('-')
+  for i = 0; i < int_len + frac_len; i++:
+    i == 0 && int_len == 0: d.append('.')
+    d.append('0' + mant / pow10(int_len + frac_len - 1 - i) % 10)
+    i + 1 == int_len: d.append('.')
+  exp:
+    d.append(exp < 0 ? '-' : ' ')
+    d.append('0' + abs(exp) / 10)
+    d.append('0' + abs(exp) % 10)
+  return d
