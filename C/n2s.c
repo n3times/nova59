@@ -13,16 +13,12 @@ typedef struct n_s {
 } n_t;
 
 typedef enum mode_e {
-  NONE,
+  FLOAT,
   EE,
   ENG
 } mode_t;
 
 static n_t N_0 = { 0LL, 0 };
-
-static void p(char c) {
-  printf("%c", c);
-}
 
 static void get_display(bool neg, long long mant, int int_len, int frac_len,
                         int exp, bool err, char *str_out) {
@@ -46,7 +42,7 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
 
 // n is a TI-59 number.
 // fix in 0..9.
-// mode in { NONE, EE, ENG).
+// mode in { FLOAT, EE, ENG).
 // str_out should have at least 16 characters.
 // 
 // Returns representation of number as string:
@@ -61,9 +57,11 @@ void n2s(n_t n, int fix, mode_t mode, char *str_out) {
 
   bool is_big = exp >= 10; // || (exp == 9 && mant >= pow(10, 13) - 500);
   bool is_small = exp <= -12 || (exp == -11 && mant < 5 * pow(10, 12));
-  bool is_exp = mode != NONE || is_big || (is_small && fix == 9);
+  bool is_exp = mode != FLOAT || is_big || (is_small && fix == 9);
 
-  if (!is_exp && is_small) return n2s(N_0, fix, mode, str_out);
+  if (is_small && fix != 9 && mode == FLOAT) {
+    return n2s(N_0, fix, FLOAT, str_out);
+  }
 
   // Compute actual mantissa.
   int mant_len = is_exp ? 8 : 10;
@@ -151,15 +149,15 @@ int main(void) {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 98, 99
   };
   int fixes[] = { 0, 5, 8, 9 };
-  mode_t modes[] = { NONE, EE, ENG };
+  mode_t modes[] = { FLOAT, EE, ENG };
 
   for (int i = 0; i < N_ELEMS(mants); i++) {
     printf("==========================================================\n\n");
     printf("mantissa = %lld\n\n", mants[i]);
     for (int j = 0; j < N_ELEMS(modes); j++) {
       for (int k = 0; k < N_ELEMS(fixes); k++) {
-        printf("=== Fix %d Mode %s ===\n\n",
-               fixes[k], j == NONE ? "none" : j == EE ? "ee" : "eng");
+        printf("=== mode %s | fix %d ===\n\n",
+               j == FLOAT ? "FLOAT" : j == EE ? "EE" : "ENG", fixes[k]);
         for (int l = 0; l < N_ELEMS(exps); l++) {
           if (mants[i] == 0 && exps[l]) continue;
           n_t n = { mants[i], exps[l] };
@@ -167,7 +165,7 @@ int main(void) {
           n2s(n, fixes[k], modes[j], (char *)&str);
           printf("%s\n", str);
         }
-        p('\n');
+        printf("\n");
       }
     }
   }
