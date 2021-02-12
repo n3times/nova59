@@ -4,7 +4,8 @@
 
 #include "n.h"
 
-static n_t n_chs(n_t n) {
+n_t n_chs(n_t n, bool *err) {
+  if (err) *err = false;
   n.mant = -n.mant;
   return n;
 }
@@ -51,7 +52,7 @@ n_t s2n(char *s, bool *err) {
   if (ABS(n.exp) > 99) {
     if (err) *err = true;
     n = n.exp < 0 ? N_EPS : N_INF;
-    return n.mant < 0 ? n_chs(n) : n;
+    return n.mant < 0 ? n_chs(n, NULL) : n;
   }
 
   return n;
