@@ -18,6 +18,12 @@ typedef enum mode_e {
   ENG
 } mode_t;
 
+typedef enum trig_e {
+  RAD,
+  DEG,
+  GRAD
+} trig_t;
+
 
 /******************************************************************************
  *
@@ -84,16 +90,16 @@ n_t n_exp(n_t n, bool *err);
 n_t n_pow10(n_t n, bool *err);
 
 /** Trigonometric functions. */
-n_t n_sin(n_t n, bool *err);
-n_t n_cos(n_t n, bool *err);
-n_t n_tan(n_t n, bool *err);
-n_t n_asin(n_t n, bool *err);
-n_t n_acos(n_t n, bool *err);
-n_t n_atan(n_t n, bool *err);
+n_t n_sin(n_t n, trig_t mode, bool *err);
+n_t n_cos(n_t n, trig_t mode, bool *err);
+n_t n_tan(n_t n, trig_t mode, bool *err);
+n_t n_asin(n_t n, trig_t mode, bool *err);
+n_t n_acos(n_t n, trig_t mode, bool *err);
+n_t n_atan(n_t n, trig_t mode, bool *err);
 
 /** Misc. functions. */
 n_t n_dms(n_t n, bool *err);
 n_t n_idms(n_t n, bool *err);
-void n_p_r(n_t rho, n_t theta, n_t *x, n_t *y, bool *err);
-void n_r_p(n_t x, n_t y, n_t *rho, n_t *theta, bool *err);
+void n_p_r(n_t rho, n_t theta, n_t *x, n_t *y, trig_t mode, bool *err);
+void n_r_p(n_t x, n_t y, n_t *rho, n_t *theta, trig_t mode, bool *err);
 #endif  // N_H
