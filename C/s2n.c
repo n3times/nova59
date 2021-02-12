@@ -2,18 +2,13 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "number.h"
+#include "n.h"
 
 static n_t n_chs(n_t n) {
   n.mant = -n.mant;
   return n;
 }
 
-// s is a string:
-// - optional "-"
-// - followed by float, with at most 1 "."
-// - optionally followed by exp (" " or "-", plus 2 digits)
-// - optionally followed by " ?"
 n_t s2n(char *s, bool *err) {
   n_t n = N_0;
   bool neg = false;

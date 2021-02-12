@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "number.h"
+#include "n.h"
 
 int main() {
   char s[16];

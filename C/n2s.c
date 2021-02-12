@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "number.h"
+#include "n.h"
 
 static void get_display(bool neg, long long mant, int int_len, int frac_len,
                         int exp, bool err, char *str_out) {
@@ -24,16 +24,6 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
-// n is a TI-59 number.
-// fix in 0..9.
-// mode in { FLOAT, EE, ENG).
-// str_out should have at least 16 characters.
-// 
-// Returns representation of number as string:
-// - optional "-"
-// - followed by decimal number, with one "."
-// - optionally followed by exponent: " " and 2 digits
-// - optionally followed by overflow: " ?".
 void n2s(n_t n, int fix, mode_t mode, char *str_out) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);

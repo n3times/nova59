@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "number.h"
+#include "n.h"
 
 int main(void) {
   long long mants[] = { 
