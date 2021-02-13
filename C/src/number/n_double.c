@@ -2,6 +2,10 @@
 
 #include "n.h"
 
+double n2d(n_t n) {
+  return (double)n.mant * pow(10, n.exp - 12);
+}
+
 n_t d2n(double d, bool *err) {
   if (err) *err = false;
   if (d == 0) return N_0;
