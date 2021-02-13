@@ -4,12 +4,6 @@
 
 #include "n.h"
 
-n_t n_chs(n_t n, bool *err) {
-  if (err) *err = false;
-  n.mant = -n.mant;
-  return n;
-}
-
 n_t s2n(char *s, bool *err) {
   n_t n = N_0;
   bool neg = false;
@@ -40,7 +34,7 @@ n_t s2n(char *s, bool *err) {
   if (n.mant == 0) return N_0;
 
   // Normalize.
-  while (n.mant < pow(10, 12)) {
+  while (n.mant < POW10_12) {
     n.mant *= 10;
     n.exp -= 1;
   }
@@ -52,7 +46,7 @@ n_t s2n(char *s, bool *err) {
   if (ABS(n.exp) > 99) {
     if (err) *err = true;
     n = n.exp < 0 ? N_EPS : N_INF;
-    return n.mant < 0 ? n_chs(n, NULL) : n;
+    return n.mant < 0 ? n_chs(n) : n;
   }
 
   return n;

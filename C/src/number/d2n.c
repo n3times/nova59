@@ -12,6 +12,6 @@ n_t d2n(double d, bool *err) {
     *err = true; 
     n = n.exp < 0 ? N_EPS : N_INF;
   }
-  if (n.mant < 0) n.mant = -n.mant;
+  if (d < 0) n.mant = -n.mant;
   return n;
 }

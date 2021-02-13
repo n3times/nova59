@@ -29,8 +29,8 @@ void n2s(n_t n, int fix, mode_t mode, char *str_out) {
   long long mant = ABS(n.mant);
   int exp = n.exp;
 
-  bool is_big = exp >= 10; // || (exp == 9 && mant >= pow(10, 13) - 500);
-  bool is_small = exp <= -12 || (exp == -11 && mant < 5 * pow(10, 12));
+  bool is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
+  bool is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
   bool is_exp = mode != FLOAT || is_big || (is_small && fix == 9);
 
   if (is_small && fix != 9 && mode == FLOAT) {
@@ -62,7 +62,7 @@ void n2s(n_t n, int fix, mode_t mode, char *str_out) {
   if (round) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
-      n_t n_1 = { pow(10, 12) * (neg ? -1 : 1), n.exp + 1 };
+      n_t n_1 = { POW10_12 * (neg ? -1 : 1), n.exp + 1 };
       return n2s(n_1, fix, mode, str_out);
     }
   }

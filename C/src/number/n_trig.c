@@ -3,13 +3,12 @@
 
 #include "n.h"
 
-#define BIG_TRIG pow(10, 13)
 #define PI 3.14159265359
 
 // Returns angle in period interval [0, period[ for mode.
 static double normalize(double d, trig_t mode) {
   double period;
-  if (ABS(d) >= BIG_TRIG) return 0;
+  if (ABS(d) >= POW10_13) return 0;
    switch (mode) {
     case RAD:  period = 2 * PI; break;
     case DEG:  period = 360;    break;

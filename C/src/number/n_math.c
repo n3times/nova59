@@ -5,36 +5,31 @@
 
 #define NULL 0
 
-n_t n_chs(n_t n, bool *err) {
-  if (err) *err = false;
+n_t n_chs(n_t n) {
   n.mant = -n.mant;
   return n;
 }
 
-n_t n_abs(n_t n, bool *err) {
-  if (err) *err = false;
+n_t n_abs(n_t n) {
   n.mant = ABS(n.mant);
   return n;
 }
 
-n_t n_sign(n_t n, bool *err) {
-  if (err) *err = false;
+n_t n_sign(n_t n) {
   if (n.mant > 0) return N_1;
-  else if (n.mant < 0) return n_chs(N_1, NULL);
+  else if (n.mant < 0) return n_chs(N_1);
   return N_0;
 }
 
-n_t n_int(n_t n, bool *err) {
-  if (err) *err = false;
-  if (n.exp >= pow(10, 13)) return n;
-  return d2n((long long)n2d(n), err); 
+n_t n_int(n_t n) {
+  if (n.exp >= 12) return n;
+  return d2n((long long)n2d(n), NULL);
 }
 
-n_t n_frac(n_t n, bool *err) {
-  if (err) *err = false;
-  if (n.exp >= pow(10, 13)) return N_0;
+n_t n_frac(n_t n) {
+  if (n.exp >= 12) return N_0;
   double d = n2d(n);
-  return d2n(d - (long long)d, err); 
+  return d2n(d - (long long)d, NULL);
 }
 
 n_t n_square(n_t n, bool *err) {
@@ -63,7 +58,7 @@ n_t n_ln(n_t n, bool *err) {
   if (err) *err = false;
   if (n.mant == 0) {
     if (err) *err = true;
-    return n_chs(N_INF, NULL);
+    return n_chs(N_INF);
   }
   if (n.mant < 0) {
     if (err) *err = true;
@@ -76,7 +71,7 @@ n_t n_log(n_t n, bool *err) {
   if (*err) *err = false;
   if (n.mant == 0) {
     if (*err) *err = true;
-    return n_chs(N_INF, NULL);
+    return n_chs(N_INF);
   }
   if (n.mant < 0) {
     if (*err) *err = true;
