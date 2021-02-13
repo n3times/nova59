@@ -3,27 +3,25 @@
 
 #include "n.h"
 
-#define NULL 0
 #define BIG_TRIG pow(10, 13)
-#define PI 3.14159265358979323846
+#define PI 3.14159265359
 
-static n_t PI_RAD  = { 3141592653590LL, 0 };
-static n_t PI_DEG  = { 1800000000000LL, 2 };
-static n_t PI_GRAD = { 2000000000000LL, 2 };
-
-static bool is_pi(n_t n, trig_t mode) {
-  n_t pi = PI_RAD;
-  if (mode == DEG)  pi = PI_DEG;
-  if (mode == GRAD) pi = PI_GRAD;
-  return n.mant == pi.mant && n.exp == pi.exp;
+// Returns angle in period interval [0, period[ for mode.
+static double normalize(double d, trig_t mode) {
+  double period;
+  if (ABS(d) >= BIG_TRIG) return 0;
+   switch (mode) {
+    case RAD:  period = 2 * PI; break;
+    case DEG:  period = 360;    break;
+    case GRAD: period = 400;;   break;
+  }
+  return (d/period - floor(d/period)) * period;
 }
-
-// TODO: deal with errors.
 
 static double scale(double d, trig_t from, trig_t to) {
   if (from == to) return d;
   if (from == DEG)  d = d / 180 * PI;
-  if( from == GRAD) d = d / 200 * PI;
+  if (from == GRAD) d = d / 200 * PI;
   if (to == DEG)    d = d / PI * 180;
   if (to == GRAD)   d = d / PI * 200;
   return (double) d;
@@ -31,24 +29,53 @@ static double scale(double d, trig_t from, trig_t to) {
 
 n_t n_sin(n_t n, trig_t mode, bool *err) {
   if (err) *err = false;
-  if (is_pi(n_abs(n, NULL), mode)) return N_0;
   double d = n2d(n);
+  d = normalize(d, mode);
+
+  if (d == 0) return N_0;
+  if (mode == DEG  && d == 180) return N_0;
+  if (mode == GRAD && d == 200) return N_0;
+  if (mode == RAD  && d == PI)  return N_0;
+
   d = scale(d, mode, RAD);
-  if (ABS(d) >= BIG_TRIG) return N_0;
   return d2n(sin(d), err);
 }
 
 n_t n_cos(n_t n, trig_t mode, bool *err) {
   if (err) *err = false;
   double d = n2d(n);
+  d = normalize(d, mode);
+
+  if (mode == DEG   && (d ==  90  || d == 270))    return N_0;
+  if (mode == GRAD  && (d == 100  || d == 300))    return N_0;
+  if (mode == RAD   && (d == PI/2 || d == 3*PI/2)) return N_0;
+
   d = scale(d, mode, RAD);
-  if (ABS(d) == M_PI) return N_0;
-  if (ABS(d) >= BIG_TRIG) return N_1;
   return d2n(cos(d), err);
 }
 
 n_t n_tan(n_t n, trig_t mode, bool *err) {
+  if (err) *err = false;
   double d = n2d(n);
+  d = normalize(d, mode);
+
+  if (d == 0) return N_0;
+  if (mode == DEG  && d == 180) return N_0;
+  if (mode == GRAD && d == 200) return N_0;
+  if (mode == RAD  && d == PI)  return N_0;
+  if (mode == DEG  && (d == 90 || d == 270)) {
+    if (err) *err = true;
+    return N_INF;
+  }
+  if (mode == GRAD  && (d == 100 || d == 300)) {
+    if (err) *err = true;
+    return N_INF;
+  }
+  if (mode == RAD && (d == PI/2 || d == 3*PI/2)) {
+    if (err) *err = true;
+    return N_INF;
+  }
+
   d = scale(d, mode, RAD);
   return d2n(tan(d), err);
 }
