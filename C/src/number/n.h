@@ -1,5 +1,6 @@
 #ifndef N_H
 #define N_H
+
 #include <stdbool.h>
 
 
@@ -32,9 +33,9 @@ typedef enum notation_e {
 
 /** Trigonometric mode. */
 typedef enum trig_e {
-  RAD,
-  DEG,
-  GRAD
+  RAD,  // Radians.
+  DEG,  // Degrees.
+  GRAD  // Gradians.
 } trig_t;
 
 
@@ -53,18 +54,14 @@ extern n_t N_EPS;  // Epsilon, smallest positive number.
 
 /******************************************************************************
  *
- *  FUNCTIONS.
+ *  NOTE ON ERRORS.
+ *
+ *  For functions, if "err" parameter is non null, it will be set to true if an
+ *  error occurs, and false otherwise.
+ *  An error occurs when some parameter is not in the function domain ("square
+ *  root of -1") or because of underflow or overflow ("square of 10^80").
  *
  ******************************************************************************/
-
-/**
- * Functions on numbers.
- *
- * If "err" is non null, it will be set to true if an error occurs, and false
- * otherwise.
- * An error occurs when some parameter is not in the function domain ("square
- * root of -1") or because of underflow or overflow ("square of 10^80").
- */
 
 
 /******************************************************************************
@@ -160,23 +157,30 @@ n_t n_atan(n_t n, trig_t mode, bool *err);
  *
  ******************************************************************************/
 
+/** Converts degrees/minutes/seconds to decimal degrees. */
 n_t n_dms(n_t n, bool *err);
+
+/** Converts decimal degrees to degrees/minutes/seconds. */
 n_t n_idms(n_t n, bool *err);
-void n_p_r(n_t rho, n_t theta, n_t *x, n_t *y, trig_t mode, bool *err);
-void n_r_p(n_t x, n_t y, n_t *rho, n_t *theta, trig_t mode, bool *err);
+
+/** Converts polar coordinates to rectangular coordinates. */
+void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err);
+
+/** Converts rectangular coordinates to polar coordinates. */
+void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
 
 
 /******************************************************************************
  *
  *  CONVERSION WITH STRINGS.
  *
+ *  String representation of numbers:
+ *  - optional "-"
+ *  - followed by digits and at most 1 "."
+ *  - optionally followed by exponent: " " or "-", and 2 digits
+ *  - optionally followed by overflow: " ?".
+ *
  ******************************************************************************/
-
-// Numbers are represented as strings:
-// - optional "-"
-// - followed by digits and at most 1 "."
-// - optionally followed by exponent: " " or "-", and 2 digits
-// - optionally followed by overflow: " ?".
 
 /** Number to string. String 'str_out' must have at least 16 characters. */
 void n2s(n_t n, int fix, notation_t notation, char *str_out);
@@ -196,4 +200,5 @@ double n2d(n_t n);
 
 /** Double to number. Sets error if under/overflow. */
 n_t d2n(double d, bool *err);
+
 #endif  // N_H
