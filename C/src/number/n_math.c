@@ -45,7 +45,7 @@ n_t n_1_x(n_t n, bool *err) {
   return d2n(n2d(n), err);
 }
 
-n_t n_root(n_t n, bool *err) {
+n_t n_sqrt(n_t n, bool *err) {
   if (err) *err = false;
   if (n.mant < 0) {
     if (err) *err = true;

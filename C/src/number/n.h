@@ -66,7 +66,7 @@ extern n_t N_EPS;  // Epsilon, smallest positive number.
 
 /******************************************************************************
  *
- *  ARITHMETIC FUNCTIONS.
+ *  ARITHMETIC OPERATORS.
  *
  ******************************************************************************/
 
@@ -81,6 +81,12 @@ n_t n_times(n_t n1, n_t n2, bool *err);
 
 /** Division. */
 n_t n_div(n_t n1, n_t n2, bool *err);
+
+/** Exponentiation. */
+n_t n_pow(n_t n1, n_t n2, bool *err);
+
+/** Root extraction. */
+n_t n_ipow(n_t n1, n_t n2, bool *err);
 
 
 /******************************************************************************
@@ -111,7 +117,7 @@ n_t n_square(n_t n, bool *err);
 n_t n_1_x(n_t n, bool *err);
 
 /** Square root of n. */
-n_t n_root(n_t n, bool *err);
+n_t n_sqrt(n_t n, bool *err);
 
 /** Natural log. */
 n_t n_ln(n_t n, bool *err);

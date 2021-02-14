@@ -71,3 +71,54 @@ n_t n_div(n_t n1, n_t n2, bool *err) {
   if (d1 == 0) return N_1;
   return (d1 > 0) ? N_INF : n_chs(N_INF);
 }
+
+n_t n_pow(n_t n1, n_t n2, bool *err) {
+  double d1 = n2d(n1);
+  double d2 = n2d(n2);
+  if (err) *err = false;
+
+  if (d1 == 0) {
+    if (d2 == 0) {
+      return N_1;
+    } else if (d2 > 0) {
+      return N_0;
+    } else {
+      if (err) *err = true;
+      return N_INF;
+    }
+  }
+  if (d1 < 0) {
+    if (err) *err = true;
+    d1 = -d1;
+  }
+  int exp = (int) (d2 * log10(d1));
+  if (exp > 99) {
+    if (err) *err = true;
+    return N_INF;
+  } else if (exp < -99) {
+    if (err) *err = true;
+    return N_EPS;
+  }
+
+  bool err2;
+  n_t res = d2n(pow(d1, d2), &err2);
+  if (err) *err = *err | err2;
+  return res;
+}
+
+n_t n_ipow(n_t n1, n_t n2, bool *err) {
+  double d1 = n2d(n1);
+  double d2 = n2d(n2);
+  if (err) *err = false;
+  if (d2 == 0) {
+    if (d1 == 0) {
+      if (err) *err = true;
+      return N_1;
+    } else if (d1 > 0) {
+      if (err) *err = true;
+      return N_INF;
+    }
+
+  }
+  return N_0;
+}
