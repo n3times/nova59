@@ -10,4 +10,8 @@
 #define POW10_12  1000000000000LL
 #define POW10_13  10000000000000LL
 
+double normalize_angle(double d, trig_t mode);
+
+double scale_angle(double d, trig_t from, trig_t to);
+ 
 #endif  // N_INTERNAL_H
