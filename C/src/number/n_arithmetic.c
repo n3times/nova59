@@ -1,7 +1,7 @@
+#include "n_internal.h"
+
 #include <math.h>
 #include <stdio.h>
-
-#include "n.h"
 
 /*  HELPERS  */
 

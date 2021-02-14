@@ -1,4 +1,4 @@
-#include "n.h"
+#include "n_internal.h"
 
 n_t N_0   = {             0LL,   0 };
 n_t N_1   = {             1LL,   0 };

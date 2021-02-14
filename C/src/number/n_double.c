@@ -1,6 +1,6 @@
-#include <math.h>
+#include "n_internal.h"
 
-#include "n.h"
+#include <math.h>
 
 double n2d(n_t n) {
   return (double)n.mant * pow(10, n.exp - 12);

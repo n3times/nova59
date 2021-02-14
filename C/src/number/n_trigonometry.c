@@ -1,7 +1,7 @@
+#include "n_internal.h"
+
 #include <stdbool.h>
 #include <math.h>
-
-#include "n.h"
 
 #define PI 3.14159265359
 

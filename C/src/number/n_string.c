@@ -1,8 +1,8 @@
+#include "n_internal.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
-
-#include "n.h"
 
 static void get_display(bool neg, long long mant, int int_len, int frac_len,
                         int exp, bool err, char *str_out) {
@@ -24,16 +24,16 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
-void n2s(n_t n, int fix, notation_t mode, char *str_out) {
+void n2s(n_t n, int fix, notation_t notation, char *str_out) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
 
   bool is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
   bool is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
-  bool is_exp = mode != FLOAT || is_big || (is_small && fix == 9);
+  bool is_exp = notation != FLOAT || is_big || (is_small && fix == 9);
 
-  if (is_small && fix != 9 && mode == FLOAT) {
+  if (is_small && fix != 9 && notation == FLOAT) {
     return n2s(N_0, fix, FLOAT, str_out);
   }
 
@@ -42,7 +42,7 @@ void n2s(n_t n, int fix, notation_t mode, char *str_out) {
   int int_len = 0;
   if (is_exp) {
     int_len = 1;
-    if (mode == ENG) {
+    if (notation == ENG) {
       int new_exp = (int)(3 * floor(exp / 3.0));
       int_len = 1 + exp - new_exp;
       exp = new_exp;
@@ -63,7 +63,7 @@ void n2s(n_t n, int fix, notation_t mode, char *str_out) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
       n_t n_1 = { POW10_12 * (neg ? -1 : 1), n.exp + 1 };
-      return n2s(n_1, fix, mode, str_out);
+      return n2s(n_1, fix, notation, str_out);
     }
   }
 

@@ -1,6 +1,8 @@
+#include "n.h"
+
 #include <stdio.h>
 
-#include "n.h"
+#define N_ELEMS(array)  ( sizeof(array) / sizeof((array)[0]) )
 
 int main(void) {
   long long mants[] = { 
