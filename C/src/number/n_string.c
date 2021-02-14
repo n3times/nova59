@@ -24,7 +24,7 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
-void n2s(n_t n, int fix, mode_t mode, char *str_out) {
+void n2s(n_t n, int fix, notation_t mode, char *str_out) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
