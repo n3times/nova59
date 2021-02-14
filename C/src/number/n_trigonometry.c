@@ -5,11 +5,18 @@
 
 #define PI 3.14159265359
 
+
+/******************************************************************************
+ *
+ *  HELPERS.
+ *
+ ******************************************************************************/
+
 // Returns angle in period interval [0, period[ for mode.
 double normalize_angle(double d, trig_t mode) {
   double period;
   if (ABS(d) >= POW10_13) return 0;
-   switch (mode) {
+  switch (mode) {
     case RAD:  period = 2 * PI; break;
     case DEG:  period = 360;    break;
     case GRAD: period = 400;;   break;
@@ -17,7 +24,7 @@ double normalize_angle(double d, trig_t mode) {
   return (d/period - floor(d/period)) * period;
 }
 
-double scale_angle(double d, trig_t from, trig_t to) {
+double convert_trig_mode(double d, trig_t from, trig_t to) {
   if (from == to) return d;
   if (from == DEG)  d = d / 180 * PI;
   if (from == GRAD) d = d / 200 * PI;
@@ -25,6 +32,13 @@ double scale_angle(double d, trig_t from, trig_t to) {
   if (to == GRAD)   d = d / PI * 200;
   return (double) d;
 }
+
+
+/******************************************************************************
+ *
+ *  IMPLEMENTATION.
+ *
+ ******************************************************************************/
 
 n_t n_sin(n_t n, trig_t mode, bool *err) {
   if (err) *err = false;
@@ -36,7 +50,7 @@ n_t n_sin(n_t n, trig_t mode, bool *err) {
   if (mode == GRAD && d == 200) return N_0;
   if (mode == RAD  && d == PI)  return N_0;
 
-  d = scale_angle(d, mode, RAD);
+  d = convert_trig_mode(d, mode, RAD);
   return d2n(sin(d), err);
 }
 
@@ -49,7 +63,7 @@ n_t n_cos(n_t n, trig_t mode, bool *err) {
   if (mode == GRAD  && (d == 100  || d == 300))    return N_0;
   if (mode == RAD   && (d == PI/2 || d == 3*PI/2)) return N_0;
 
-  d = scale_angle(d, mode, RAD);
+  d = convert_trig_mode(d, mode, RAD);
   return d2n(cos(d), err);
 }
 
@@ -75,7 +89,7 @@ n_t n_tan(n_t n, trig_t mode, bool *err) {
     return N_INF;
   }
 
-  d = scale_angle(d, mode, RAD);
+  d = convert_trig_mode(d, mode, RAD);
   return d2n(tan(d), err);
 }
 
@@ -85,7 +99,7 @@ n_t n_asin(n_t n, trig_t mode, bool *err) {
     if (err) *err = true;
     return n;
   }
-  d = scale_angle(d, RAD, mode);
+  d = convert_trig_mode(d, RAD, mode);
   return d2n(d, err);
 }
 
@@ -95,12 +109,12 @@ n_t n_acos(n_t n, trig_t mode, bool *err) {
     if (err) *err = true;
     return n;
   }
-  d = scale_angle(d, RAD, mode);
+  d = convert_trig_mode(d, RAD, mode);
   return d2n(d, err);
 }
 
 n_t n_atan(n_t n, trig_t mode, bool *err) {
   double d = atan(n2d(n));
-  d = scale_angle(d, RAD, mode);
+  d = convert_trig_mode(d, RAD, mode);
   return d2n(d, err);
 }

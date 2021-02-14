@@ -33,7 +33,7 @@ void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err) {
   double d_rho = n2d(rho);
   double d_theta = n2d(theta);
   d_theta = normalize_angle(d_theta, mode);
-  d_theta = scale_angle(d_theta, mode, RAD);
+  d_theta = convert_trig_mode(d_theta, mode, RAD);
   double x = d_rho * sin(d_theta);
   double y = d_rho * cos(d_theta);
   *x_out = d2n(x, err);
@@ -55,7 +55,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err) {
   }
   // theta in -pi/2 .. 3pi/2
   d_rho = sqrt(d_x * d_x + d_y * d_y);
-  d_theta = scale_angle(d_theta, RAD, mode);
+  d_theta = convert_trig_mode(d_theta, RAD, mode);
   *rho_out = d2n(d_rho, err);
   *theta_out = d2n(d_theta, err);
 }

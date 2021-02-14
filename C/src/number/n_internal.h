@@ -12,6 +12,6 @@
 
 double normalize_angle(double d, trig_t mode);
 
-double scale_angle(double d, trig_t from, trig_t to);
+double convert_trig_mode(double d, trig_t from, trig_t to);
  
 #endif  // N_INTERNAL_H

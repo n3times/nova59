@@ -4,6 +4,13 @@
 #include <math.h>
 #include <stdbool.h>
 
+
+/******************************************************************************
+ *
+ *  HELPERS.
+ *
+ ******************************************************************************/
+
 static void get_display(bool neg, long long mant, int int_len, int frac_len,
                         int exp, bool err, char *str_out) {
   int i = 0;
@@ -24,6 +31,14 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
+
+/******************************************************************************
+ *
+ *  IMPLEMENTATION.
+ *
+ ******************************************************************************/
+
+/** Number to string. */
 void n2s(n_t n, int fix, notation_t notation, char *str_out) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);
@@ -103,6 +118,7 @@ void n2s(n_t n, int fix, notation_t notation, char *str_out) {
   get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, err, str_out);
 }
 
+/** String to number. */
 n_t s2n(char *s, bool *err) {
   n_t n = N_0;
   bool neg = false;
