@@ -68,13 +68,13 @@ n_t n_ln(n_t n, bool *err) {
 }
 
 n_t n_log(n_t n, bool *err) {
-  if (*err) *err = false;
+  if (err) *err = false;
   if (n.mant == 0) {
-    if (*err) *err = true;
+    if (err) *err = true;
     return n_chs(N_INF);
   }
   if (n.mant < 0) {
-    if (*err) *err = true;
+    if (err) *err = true;
     n.mant = -n.mant;
   }
   return d2n(log10(n2d(n)), NULL);
@@ -83,7 +83,7 @@ n_t n_log(n_t n, bool *err) {
 n_t n_exp(n_t n, bool *err) {
   double d = n2d(n);
   if (ABS(d) > 231) {
-    if (*err) *err = true;
+    if (err) *err = true;
     return d < 0 ? N_EPS : N_INF;
   }
   return d2n(exp(d), err);
@@ -92,7 +92,7 @@ n_t n_exp(n_t n, bool *err) {
 n_t n_pow10(n_t n, bool *err) {
   double d = n2d(n);
   if (ABS(d) > 100) {
-    if (*err) *err = true;
+    if (err) *err = true;
     return d < 0 ? N_EPS : N_INF;
   }
   return d2n(pow(10, d), err);
