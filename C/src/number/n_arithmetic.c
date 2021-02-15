@@ -41,6 +41,8 @@ n_t normalize(n_t n, bool *err) {
 
 n_t n_plus(n_t n1, n_t n2, bool *err) {
   if (err) *err = false;
+  if (n1.mant == 0) return n2;
+  if (n2.mant == 0) return n1;
   if (n1.exp < n2.exp) {
     n_t tmp = n1;
     n1 = n2;
