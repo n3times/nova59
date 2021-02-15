@@ -164,10 +164,10 @@ n_t n_atan(n_t n, trig_t mode, bool *err);
  ******************************************************************************/
 
 /** Converts degrees/minutes/seconds to decimal degrees. */
-n_t n_dms(n_t n, bool *err);
+n_t n_dms(n_t n, int fix, notation_t notation, bool *err);
 
 /** Converts decimal degrees to degrees/minutes/seconds. */
-n_t n_idms(n_t n, bool *err);
+n_t n_idms(n_t n, int fix, notation_t notation, bool *err);
 
 /** Converts polar coordinates to rectangular coordinates. */
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err);

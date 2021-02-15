@@ -3,30 +3,47 @@
 #include <math.h>
 #include <stdbool.h>
 
-n_t n_dms(n_t n, bool *err) {
-  if (n.exp >= 12) return n;
-  double d  = n2d(n);
-  bool neg = d < 0;
-  d = ABS(d);
-  long long h = (long long) d;
-  double frac = d - h;
-  double m = (int) (frac * 100);
-  double s = (frac * 100 - m) * 100;
-  double res = h + m / 60 + s / 60 / 60;
-  return d2n(neg ? -res : res, err);
+n_t N_100 = { 1000000000000LL, 2 };
+n_t N_60 = { 6000000000000LL, 1 };
+n_t N_36 = { 3600000000000LL, 1 };
+n_t N_06 = { 6000000000000LL, -1 };
+
+n_t n_dms(n_t n, int fix, notation_t notation, bool *err) {
+  // Normalize.
+  char str[16];
+  n2s(n, fix, notation, str);
+  n = s2n(str, err);
+
+  if (n.exp >= 10) return n;
+
+  bool neg = n.mant < 0;
+  if (neg) n.mant = -n.mant;
+  n_t h = n_int(n);
+  n_t x = n_times(n_frac(n), N_100, 0);
+  n_t m = n_div(n_int(x), N_60, 0);
+  n_t s = n_div(n_frac(x), N_36, 0);
+  n_t res = n_plus(n_plus(h, m, 0), s, 0);
+  if (neg) res.mant = -res.mant;
+  return res;
 }
 
-n_t n_idms(n_t n, bool *err) {
-  if (n.exp >= 12) return n;
-  double d  = n2d(n);
-  bool neg = d < 0;
-  d = ABS(d);
-  long long h = (long long) d;
-  double frac = d - h;
-  double m = (int) (frac * 60);
-  double s = (frac * 60 - m) * 60;
-  double res = h + m / 100 + s / 100 / 100;
-  return d2n(neg ? -res : res, err);
+n_t n_idms(n_t n, int fix, notation_t notation, bool *err) {
+  // Normalize.
+  char str[16];
+  n2s(n, fix, notation, str);
+  n = s2n(str, err);
+
+  if (n.exp >= 10) return n;
+
+  bool neg = n.mant < 0;
+  if (neg) n.mant = -n.mant;
+  n_t h = n_int(n);
+  n_t x = n_times(n_frac(n), N_100, 0);
+  n_t m = n_div(n_int(n_times(n_int(x), N_06, 0)), N_100, 0);
+  n_t s = N_0;///n_div(n_frac(x), N_36, 0);
+  n_t res = n_plus(n_plus(h, m, 0), s, 0);
+  if (neg) res.mant = -res.mant;
+  return res;
 }
 
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err) {

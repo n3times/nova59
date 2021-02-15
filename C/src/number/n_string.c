@@ -155,6 +155,7 @@ n_t s2n(char *s, bool *err) {
   }
   if (neg) n.mant = -n.mant;
   if (index_dot == -1) index_dot = index_end;
+  if (index_dot > index_end) index_dot = index_end;
   n.exp += 12 - index_end + index_dot;
 
   // Overflow/underflow.
