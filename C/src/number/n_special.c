@@ -18,13 +18,17 @@ n_t n_dms(n_t n, int fix, notation_t notation, bool *err) {
 
   bool neg = n.mant < 0;
   if (neg) n.mant = -n.mant;
-  n_t h = n_int(n);
-  n_t x = n_times(n_frac(n), N_100, 0);
-  n_t m = n_div(n_int(x), N_60, 0);
-  n_t s = n_div(n_frac(x), N_36, 0);
-  n_t res = n_plus(n_plus(h, m, 0), s, 0);
-  if (neg) res.mant = -res.mant;
-  return res;
+
+  long long h = (long long) (n.mant / pow(10, 12 - n.exp));
+  n.mant -= h * pow(10, 12 - n.exp);
+  int m = (int) (n.mant / pow(10, 10 - n.exp));
+  n.mant -= m * pow(10, 10 - n.exp);
+  double s = n.mant / pow(10,  8 - n.exp);
+  double res = h + m/60. + s/3600.;
+
+  if (neg) res = -res;
+
+  return d2n(res, err);
 }
 
 n_t n_idms(n_t n, int fix, notation_t notation, bool *err) {
