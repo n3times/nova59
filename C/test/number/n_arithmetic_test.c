@@ -6,7 +6,18 @@
 
 typedef n_t (*fun_t)(n_t, n_t, bool *);
 
+static void p(n_t n1, n_t n2, n_t res, bool err, char *op) {
+  printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d%s\n",
+         n1.mant, n1.exp,
+         op,
+         n2.mant, n2.exp,
+         res.mant, res.exp,
+         err ? "?" : "");
+}
+
 int main() {
+  bool err;
+  n_t n;
   n_t ns[] = {
     N_0, N_1, N_PI, N_EPS, N_INF,
     n_chs(N_1), n_chs(N_PI), n_chs(N_EPS), n_chs(N_INF)
@@ -18,17 +29,16 @@ int main() {
   for (int k = 0; k < N_ELEMS(funs); k++) {
     for (int i = 0; i < N_ELEMS(ns); i++) {
       for (int j = 0; j < N_ELEMS(ns); j++) {
-        bool err;
-        n_t n = funs[k](ns[i], ns[j], &err);
-        printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d%s\n",
-               ns[i].mant, ns[i].exp,
-               ops[k],
-               ns[j].mant, ns[j].exp,
-               n.mant, n.exp,
-               err ? "?" : "");
+        n = funs[k](ns[i], ns[j], &err);
+        p(ns[i], ns[j], n, err, ops[k]);
       }
       printf("\n");
     }
     printf("\n\n\n");
   }
+
+  n_t N_5  =  { 5000000000000LL,  -1 };
+  n_t N_0_6 = { 6000000000000LL, 1 };
+  n = n_times(N_5, N_0_6, &err);
+  p(N_5, N_0_6, n, err, "*");
 }

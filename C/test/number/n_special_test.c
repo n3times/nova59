@@ -4,10 +4,10 @@
 
 #define N_ELEMS(array)  ( sizeof(array) / sizeof((array)[0]) )
 
-static n_t N_0_5 = { 5000000000000LL, -1 };
-static n_t N_0_5_NEG = { -5000000000000LL, -1 };
-static n_t N_X = {        1420000000000LL, 0 };
-static n_t N_Y = {        1000000000000LL, -11 };
+static n_t N_0_5 =     {  5000000000000LL,  -1 };
+static n_t N_0_5_NEG = { -5000000000000LL,  -1 };
+static n_t N_X =       {  1420000000000LL,   0 };
+static n_t N_Y =       {  1000000000000LL, -11 };
 
 static void test_dms(n_t n) {
   bool e;

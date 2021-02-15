@@ -37,13 +37,15 @@ n_t n_idms(n_t n, int fix, notation_t notation, bool *err) {
 
   bool neg = n.mant < 0;
   if (neg) n.mant = -n.mant;
-  n_t h = n_int(n);
-  n_t x = n_times(n_frac(n), N_100, 0);
-  n_t m = n_div(n_int(n_times(n_int(x), N_06, 0)), N_100, 0);
-  n_t s = N_0;///n_div(n_frac(x), N_36, 0);
-  n_t res = n_plus(n_plus(h, m, 0), s, 0);
-  if (neg) res.mant = -res.mant;
-  return res;
+  double d = n2d(n);
+  long long h = (long long) d;
+  double total_s = (d - h) * 3600;
+  int m = (int) (total_s / 60);
+  double s = total_s - m * 60;
+  double res = h + m / 100. + s / 10000;
+  if (neg) res = -res;
+
+  return d2n(res, err);
 }
 
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err) {
