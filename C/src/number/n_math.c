@@ -42,7 +42,7 @@ n_t n_1_x(n_t n, bool *err) {
     if (err) *err = true;
     return N_INF;
   }
-  return d2n(n2d(n), err);
+  return d2n(1/n2d(n), err);
 }
 
 n_t n_sqrt(n_t n, bool *err) {

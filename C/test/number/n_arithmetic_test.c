@@ -18,12 +18,14 @@ int main() {
   for (int k = 0; k < N_ELEMS(funs); k++) {
     for (int i = 0; i < N_ELEMS(ns); i++) {
       for (int j = 0; j < N_ELEMS(ns); j++) {
-        n_t n = funs[k](ns[i], ns[j], 0);
-        printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d\n",
+        bool err;
+        n_t n = funs[k](ns[i], ns[j], &err);
+        printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d%s\n",
                ns[i].mant, ns[i].exp,
                ops[k],
                ns[j].mant, ns[j].exp,
-               n.mant, n.exp);
+               n.mant, n.exp,
+               err ? "?" : "");
       }
       printf("\n");
     }

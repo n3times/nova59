@@ -113,14 +113,14 @@ n_t n_ipow(n_t n1, n_t n2, bool *err) {
   double d2 = n2d(n2);
   if (err) *err = false;
   if (d2 == 0) {
-    if (d1 == 0) {
-      if (err) *err = true;
+    if (err) *err = true;
+    d1 = ABS(d1);
+    if (d1 == 0 || d1 == 1) {
       return N_1;
-    } else if (d1 > 0) {
-      if (err) *err = true;
-      return N_INF;
+    } else if (d1 < 1) {
+      return n_chs(N_INF);
     }
-
+    return N_INF;
   }
-  return N_0;
+  return n_pow(n1, n_1_x(n2, 0), err);
 }
