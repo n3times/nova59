@@ -1,0 +1,5 @@
+C library that supports common operations on TI-59 numbers:
+- arithmetic operators
+- math functions
+- conversions between numbers and doubles
+- conversions between numbers and strings 
