@@ -63,7 +63,7 @@ void n2s(n_t n, int fix, notation_t notation, char *str_out) {
       exp = new_exp;
     }
   } else {
-    int_len = MAX(0, exp + 1); 
+    int_len = MAX(0, exp + 1);
   }
   int frac_len = mant_len - int_len;
   if (fix != 9) {
@@ -122,22 +122,29 @@ void n2s(n_t n, int fix, notation_t notation, char *str_out) {
 n_t s2n(char *s, bool *err) {
   n_t n = N_0;
   bool neg = false;
+  bool neg_exp = false;
   int index_dot = -1;
   int index_end;
   if (err) *err = false;
+  bool in_exp = false;
 
   // Compute mantissa/exponent.
   for (int i = 0; ; i++) {
     if (s[i] == '\0') break;
+    if (in_exp) {
+      if (s[i] == ' ')  break;
+      n.exp = n.exp * 10 + s[i] - '0';
+      continue;
+    }
     if (i == 0 && s[i] == '-') {
       neg = true;
       continue;
     }
     if (s[i] == ' ' && s[i + 1] == '?') break;
     if (s[i] == ' ' || s[i] == '-') {
-      n.exp = (s[i + 1] - '0') * 10 + s[i + 2] - '0';
-      if (s[i] == '-') n.exp = -n.exp;
-      break;
+      in_exp = true;
+      neg_exp = s[i] == '-';
+      continue;
     }
     if (s[i] == '.') {
       index_dot = i;
@@ -147,6 +154,7 @@ n_t s2n(char *s, bool *err) {
     index_end = i;
   }
   if (n.mant == 0) return N_0;
+  if (neg_exp) n.exp = -n.exp;
 
   // Normalize.
   while (n.mant < POW10_12) {
