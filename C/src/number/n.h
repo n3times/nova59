@@ -180,18 +180,35 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
  *
  *  CONVERSION WITH STRINGS.
  *
- *  String representation of numbers:
- *  - optional "-"
- *  - followed by digits and at most 1 "."
- *  - optionally followed by exponent: " " or "-", and 2 digits
- *  - optionally followed by overflow: " ?".
- *
  ******************************************************************************/
 
-/** Number to string. String 'str_out' must have at least 16 characters. */
+/**
+ * Number to string.
+ *
+ * This is the number as it would appear on the display with leading and
+ * trailing spaces trimmed:
+ * - "-" if negative number
+ * - followed by digits and exactly 1 "."
+ * - optionally followed by exponent: " " or "-", and exactly 2 digits
+ * - optionally followed by overflow: " ?"
+ *
+ * String 'str_out' must have at least 16 characters.
+ */
 void n2s(n_t n, int fix, notation_t notation, char *str_out);
 
-/** String to number. Sets error if under/overflow. */
+/**
+ * String to number.
+ *
+ * String should have:
+ * - a mantissa: a sequence of digits, optionally starting with "-" and with at
+ *   most 1 "."
+ * - an optional exponent: a sequence of digits, optionally starting with "-"
+ * - an optional "?"
+ * In addition there can be 1 or more spaces before, after or between
+ * components.
+ *
+ * Sets error if under/overflow.
+ */
 n_t s2n(char *s, bool *err);
 
 

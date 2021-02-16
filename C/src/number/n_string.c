@@ -131,8 +131,13 @@ n_t s2n(char *s, bool *err) {
   // Compute mantissa/exponent.
   for (int i = 0; ; i++) {
     if (s[i] == '\0') break;
+    if (s[i] == '?') break;
     if (in_exp) {
-      if (s[i] == ' ')  break;
+      if (s[i] == ' ')  continue;
+      if (s[i] == '-')  {
+        neg_exp = !neg_exp;
+        continue;
+      }
       n.exp = n.exp * 10 + s[i] - '0';
       continue;
     }
@@ -140,7 +145,6 @@ n_t s2n(char *s, bool *err) {
       neg = true;
       continue;
     }
-    if (s[i] == ' ' && s[i + 1] == '?') break;
     if (s[i] == ' ' || s[i] == '-') {
       in_exp = true;
       neg_exp = s[i] == '-';
