@@ -3,11 +3,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-n_t N_100 = { 1000000000000LL, 2 };
-n_t N_60 = { 6000000000000LL, 1 };
-n_t N_36 = { 3600000000000LL, 1 };
-n_t N_06 = { 6000000000000LL, -1 };
-
 n_t n_dms(n_t n, int fix, notation_t notation, bool *err) {
   // Normalize.
   char str[16];
