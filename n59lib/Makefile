@@ -8,3 +8,6 @@ lib:
 
 tests:
 	make lib
+
+clean:
+	rm *.o *.a
