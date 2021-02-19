@@ -1,0 +1,21 @@
+function test
+{
+  c=${i#test/}
+  c=${c%.c}
+  echo $c
+  gcc -Wall -Isrc/. -L. -ln59 test/$c.c
+  ./a.out > tmp
+  wc=`diff golden/$c.golden tmp | wc -l`
+  if [ $wc = 0 ]
+  then
+  echo "PASS"
+  else
+    echo "*** FAIL ***"
+  fi
+}
+
+for i in test$1/*.c ;
+do
+  test $i
+done
+

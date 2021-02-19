@@ -10,4 +10,4 @@ tests:
 	make lib
 
 clean:
-	rm *.o *.a
+	rm *.o *.a tmp a.out
