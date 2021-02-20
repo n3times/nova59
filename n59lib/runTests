@@ -1,23 +1,20 @@
 test () {
-  # echo "$1"
   c=${i#test/}
   c=${c%.c}
-  echo $c
   gcc -Wall -Isrc/. -L. -ln59 test/$c.c
   ./a.out > tmp
   wc=`diff golden/$c.golden tmp | wc -l`
   if [ $wc = 0 ]
   then
-    echo "PASS"
+    echo "$c: PASS"
   else
-    echo "*** FAIL ***"
+    echo "$c: *** FAIL ***"
   fi
 }
 
 test_all () {
   for i in test/*.c ;
   do
-    echo $i
     test $i
     echo ""
   done

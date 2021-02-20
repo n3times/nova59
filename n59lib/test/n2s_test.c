@@ -25,12 +25,12 @@ int main(void) {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 98, 99
   };
   int fixes[] = { 0, 5, 8, 9 };
-  notation_t notations[] = { FLOAT, SCI, ENG };
+  format_t formats[] = { FLOAT, SCI, ENG };
 
   for (int i = 0; i < N_ELEMS(mants); i++) {
     printf("==========================================================\n\n");
     printf("mantissa = %lld\n\n", mants[i]);
-    for (int j = 0; j < N_ELEMS(notations); j++) {
+    for (int j = 0; j < N_ELEMS(formats); j++) {
       for (int k = 0; k < N_ELEMS(fixes); k++) {
         printf("=== mode %s | fix %d ===\n\n",
                j == FLOAT ? "FLOAT" : j == SCI ? "EE" : "ENG", fixes[k]);
@@ -38,7 +38,7 @@ int main(void) {
           if (mants[i] == 0 && exps[l]) continue;
           n_t n = { mants[i], exps[l] };
           char str[16];
-          n2s(n, fixes[k], notations[j], (char *)&str);
+          n2s(n, fixes[k], formats[j], (char *)&str);
           printf("%s\n", str);
         }
         printf("\n");

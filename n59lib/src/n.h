@@ -13,9 +13,9 @@
 /**
  * TI-59 number.
  *
- * For non zero numbers:
- * - mantissa is a positive or negative integer, with exactly 13 digits.
- * - exponent is in -99..99.
+ * Non zero numbers have
+ * - a mantissa: a positive or negative integer, with exactly 13 digits.
+ * - an exponent: an integer in -99..99.
  *
  * 0 is represented as { 0, 0 }.
  */
@@ -24,12 +24,12 @@ typedef struct n_s {
   int exp;
 } n_t;
 
-/** Number notation. */
-typedef enum notation_e {
+/** Display format. */
+typedef enum format_e {
   FLOAT,  // Float if possible, scientific for small and big numbers.
   SCI,    // Scientific notation.
   ENG     // Engineering notation.
-} notation_t;
+} format_t;
 
 /** Trigonometric mode. */
 typedef enum trig_e {
@@ -164,10 +164,10 @@ n_t n_atan(n_t n, trig_t mode, bool *err);
  ******************************************************************************/
 
 /** Converts degrees/minutes/seconds to decimal degrees. */
-n_t n_dms(n_t n, int fix, notation_t notation, bool *err);
+n_t n_dms(n_t n, int fix, format_t format, bool *err);
 
 /** Converts decimal degrees to degrees/minutes/seconds. */
-n_t n_idms(n_t n, int fix, notation_t notation, bool *err);
+n_t n_idms(n_t n, int fix, format_t format, bool *err);
 
 /** Converts polar coordinates to rectangular coordinates. */
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err);
@@ -194,16 +194,15 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
  *
  * String 'str_out' must have at least 16 characters.
  */
-void n2s(n_t n, int fix, notation_t notation, char *str_out);
+void n2s(n_t n, int fix, format_t format, char *str_out);
 
 /**
  * String to number.
  *
  * String should have:
- * - a mantissa: a sequence of digits, optionally starting with "-" and with at
- *   most 1 "."
- * - an optional exponent: a sequence of digits, optionally starting with "-"
- * - an optional "?"
+ * - a sequence of digits, optionally starting with "-" and with at most 1 ".".
+ * - an optional exponent: a sequence of digits, optionally preceded by "-".
+ * - an optional "?".
  * In addition there can be 1 or more spaces before, after or between
  * components.
  *

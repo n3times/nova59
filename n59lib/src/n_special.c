@@ -3,10 +3,10 @@
 #include <math.h>
 #include <stdbool.h>
 
-n_t n_dms(n_t n, int fix, notation_t notation, bool *err) {
+n_t n_dms(n_t n, int fix, format_t format, bool *err) {
   // Normalize.
   char str[16];
-  n2s(n, fix, notation, str);
+  n2s(n, fix, format, str);
   n = s2n(str, err);
 
   if (n.exp >= 10) return n;
@@ -26,10 +26,10 @@ n_t n_dms(n_t n, int fix, notation_t notation, bool *err) {
   return d2n(res, err);
 }
 
-n_t n_idms(n_t n, int fix, notation_t notation, bool *err) {
+n_t n_idms(n_t n, int fix, format_t format, bool *err) {
   // Normalize.
   char str[16];
-  n2s(n, fix, notation, str);
+  n2s(n, fix, format, str);
   n = s2n(str, err);
 
   if (n.exp >= 10) return n;

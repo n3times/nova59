@@ -10,25 +10,29 @@
  *
  ******************************************************************************/
 
-n_t normalize(n_t n, bool *err) {
+// Given a mantissa and an exponent with an arbitrary number of digits, returns
+// a TI-59 number, that is either 0 or a number whose mantissa has exactly 13
+// digits and whose exponent is in -99..99.
+n_t normalize(long long mant, int exp, bool *err) {
   if (err) *err = false;
-  if (n.mant == 0) return N_0;
-  bool neg = n.mant < 0;
-  if (neg) n.mant = -n.mant;
-  while (n.mant >= POW10_13) {
-    n.mant /= 10;
-    n.exp += 1;
+  if (mant == 0) return N_0;
+  bool neg = mant < 0;
+  if (neg) mant = -mant;
+  while (mant >= POW10_13) {
+    mant /= 10;
+    exp += 1;
   }
-  while (n.mant < POW10_12) {
-    n.mant *= 10;
-    n.exp -= 1;
+  while (mant < POW10_12) {
+    mant *= 10;
+    exp -= 1;
   }
-  if (neg) n.mant = -n.mant;
-  if (ABS(n.exp > 99)) {
+  if (neg) mant = -mant;
+  if (ABS(exp > 99)) {
     if (err) *err = true;
-    n = n.exp < 0 ? N_EPS : N_INF;
+    n_t n = exp < 0 ? N_EPS : N_INF;
     return neg ? n_chs(n) : n;
   }
+  n_t n = { mant, exp };
   return n;
 }
 
@@ -48,13 +52,18 @@ n_t n_plus(n_t n1, n_t n2, bool *err) {
     n1 = n2;
     n2 = tmp;
   }
-  if (n2.exp + 12 < n1.exp) return n1;
+
+  // Note that, as in the TI-59, we do not round up:
+  //       9999999999.999
+  //     +           .0009
+  //     = 9999999999.999
+  if (n1.exp - n2.exp >= 13) return n1;
+
   while (n2.exp < n1.exp) {
     n2.exp += 1;
     n2.mant /= 10;
   }
-  n_t n = { n1.mant + n2.mant, n1.exp };
-  return normalize(n, err);
+  return normalize(n1.mant + n2.mant, n1.exp, err);
 }
 
 n_t n_minus(n_t n1, n_t n2, bool *err) {
@@ -93,8 +102,8 @@ n_t n_pow(n_t n1, n_t n2, bool *err) {
     if (err) *err = true;
     d1 = -d1;
   }
-  int exp = (int) (d2 * log10(d1));
-  if (exp > 99) {
+  double exp = (double) (d2 * log10(d1));
+  if (exp >= 100) {
     if (err) *err = true;
     return N_INF;
   } else if (exp < -99) {
@@ -104,7 +113,7 @@ n_t n_pow(n_t n1, n_t n2, bool *err) {
 
   bool err2;
   n_t res = d2n(pow(d1, d2), &err2);
-  if (err) *err = *err | err2;
+  if (err) *err = *err || err2;
   return res;
 }
 
@@ -122,5 +131,5 @@ n_t n_ipow(n_t n1, n_t n2, bool *err) {
     }
     return N_INF;
   }
-  return n_pow(n1, n_1_x(n2, 0), err);
+  return n_pow(n1, n_1_x(n2, NULL), err);
 }
