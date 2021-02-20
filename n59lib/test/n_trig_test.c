@@ -3,11 +3,11 @@
 #include "n.h"
 
 int main() {
-  n_t n = {-7110000000000LL, 2 };
-  printf("%lld %d\n", n.mant, n.exp);
-  n = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n, DEG,
+  n_t n = { 9000000000000LL, 0 };
+  printf("Forensics asin(acos(atan(tan(cos(sin(9)))))):\n%lld %d => ", n.mant, n.exp);
+  n_t res = n = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n, DEG,
       NULL), DEG, NULL), DEG, NULL), DEG, NULL), DEG, NULL), DEG, NULL);
-  printf("%f\n", n2d(n));
+  printf("%lld %d\n\n", res.mant, res.exp);
   trig_t mode = GRAD;
   for (double i = -800; i < 800; i += 50) {
     printf("%f sin %e\n", i, n2d(n_sin(d2n(i, NULL), mode, NULL)));

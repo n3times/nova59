@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define NULL 0
-
 n_t n_chs(n_t n) {
   n.mant = -n.mant;
   return n;

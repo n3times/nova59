@@ -7,6 +7,8 @@
 #define MIN(x, y)  ( (x) < (y) ? (x) : (y) )
 #define MAX(x, y)  ( (x) > (y) ? (x) : (y) )
 
+#define NULL 0
+
 #define POW10_12  1000000000000LL
 #define POW10_13  10000000000000LL
 

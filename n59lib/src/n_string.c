@@ -1,6 +1,5 @@
 #include "n_internal.h"
 
-#include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -128,7 +127,7 @@ n_t s2n(char *s, bool *err) {
   if (err) *err = false;
   bool in_exp = false;
 
-  // Compute mantissa/exponent.
+  // Extract mantissa and exponent.
   for (int i = 0; ; i++) {
     if (s[i] == '\0') break;
     if (s[i] == '?') break;
