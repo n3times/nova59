@@ -1,5 +1,5 @@
-function test
-{
+test () {
+  # echo "$1"
   c=${i#test/}
   c=${c%.c}
   echo $c
@@ -8,14 +8,25 @@ function test
   wc=`diff golden/$c.golden tmp | wc -l`
   if [ $wc = 0 ]
   then
-  echo "PASS"
+    echo "PASS"
   else
     echo "*** FAIL ***"
   fi
 }
 
-for i in test$1/*.c ;
-do
-  test $i
-done
+test_all () {
+  for i in test/*.c ;
+  do
+    echo $i
+    test $i
+    echo ""
+  done
+}
 
+if [ "$1" == "" ]
+then
+  test_all
+else
+  i=n_$1_test
+  test $i
+fi
