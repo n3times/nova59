@@ -76,7 +76,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out) {
   if (round) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
-      n_t n_1 = { POW10_12 * (neg ? -1 : 1), n.exp + 1 };
+      n_t n_1 = n_make(POW10_12 * (neg ? -1 : 1), n.exp + 1);
       return n2s(n_1, fix, format, str_out);
     }
   }

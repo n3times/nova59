@@ -41,7 +41,7 @@ typedef enum trig_e {
 
 /******************************************************************************
  *
- *  CONSTANTS.
+ *  CONSTANTS AND UTILITY METHODS.
  *
  ******************************************************************************/
 
@@ -50,6 +50,10 @@ extern n_t N_1;    // 1.
 extern n_t N_PI;   // Pi.
 extern n_t N_INF;  // Infinity, largest number.
 extern n_t N_EPS;  // Epsilon, smallest positive number.
+
+
+/** Preferred method to make a TI-59 number. */
+n_t n_make(long long mant, int exp);
 
 
 /******************************************************************************

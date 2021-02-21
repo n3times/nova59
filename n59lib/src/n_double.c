@@ -3,23 +3,24 @@
 #include <math.h>
 
 double n2d(n_t n) {
-  return (double)n.mant * pow(10, n.exp - 12);
+  return n.mant * pow(10, n.exp - 12);
 }
 
 n_t d2n(double d, bool *err) {
   if (err) *err = false;
   if (d == 0) return N_0;
-  n_t n;
-  n.exp = (int) floor(log10(ABS(d)));
-  n.mant = (long long) (ABS(d) * pow(10, 12 - n.exp) + 0.5);
-  if (n.mant >= POW10_13) {
-    n.mant /= 10;
-    n.exp += 1;
+  int exp = (int) floor(log10(ABS(d)));
+  long long mant = (long long) (ABS(d) * pow(10, 12 - exp) + 0.5);
+  if (mant >= POW10_13) {
+    mant /= 10;
+    exp += 1;
   }
-  if (ABS(n.exp) >  99) {
+  if (ABS(exp) >  99) {
     if (err) *err = true;
-    n = n.exp < 0 ? N_EPS : N_INF;
+    n_t n = exp < 0 ? N_EPS : N_INF;
+    if (d < 0) n = n_chs(n);
+    return n;
   }
-  if (d < 0) n.mant = -n.mant;
-  return n;
+  if (d < 0) mant = -mant;
+  return n_make(mant, exp);
 }

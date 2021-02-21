@@ -34,8 +34,7 @@ n_t normalize(long long mant, int exp, bool *err) {
     n_t n = exp < 0 ? N_EPS : N_INF;
     return neg ? n_chs(n) : n;
   }
-  n_t n = { mant, exp };
-  return n;
+  return n_make(mant, exp);
 }
 
 

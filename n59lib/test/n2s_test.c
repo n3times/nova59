@@ -36,7 +36,7 @@ int main(void) {
                j == FLOAT ? "FLOAT" : j == SCI ? "EE" : "ENG", fixes[k]);
         for (int l = 0; l < N_ELEMS(exps); l++) {
           if (mants[i] == 0 && exps[l]) continue;
-          n_t n = { mants[i], exps[l] };
+          n_t n = n_make(mants[i], exps[l]);
           char str[16];
           n2s(n, fixes[k], formats[j], (char *)&str);
           printf("%s\n", str);
