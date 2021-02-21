@@ -12,6 +12,10 @@ n_t d2n(double d, bool *err) {
   n_t n;
   n.exp = (int) floor(log10(ABS(d)));
   n.mant = (long long) (ABS(d) * pow(10, 12 - n.exp) + 0.5);
+  if (n.mant >= POW10_13) {
+    n.mant /= 10;
+    n.exp += 1;
+  }
   if (ABS(n.exp) >  99) {
     if (err) *err = true;
     n = n.exp < 0 ? N_EPS : N_INF;
