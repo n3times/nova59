@@ -60,8 +60,8 @@ n_t n_make(long long mant, int exp);
  *
  *  NOTE ON ERRORS.
  *
- *  For functions, if "err" parameter is non null, it will be set to true if an
- *  error occurs, and false otherwise.
+ *  For functions, if "err_out" parameter is non null, it will be set to true
+ *  if an error occurs, and false otherwise.
  *  An error occurs when some parameter is not in the function domain ("square
  *  root of -1") or because of underflow or overflow ("square of 10^80").
  *
@@ -75,22 +75,22 @@ n_t n_make(long long mant, int exp);
  ******************************************************************************/
 
 /** Addition. */
-n_t n_plus(n_t n1, n_t n2, bool *err);
+n_t n_plus(n_t n1, n_t n2, bool *err_out);
 
 /** Substraction. */
-n_t n_minus(n_t n1, n_t n2, bool *err);
+n_t n_minus(n_t n1, n_t n2, bool *err_out);
 
 /** Multiplication. */
-n_t n_times(n_t n1, n_t n2, bool *err);
+n_t n_times(n_t n1, n_t n2, bool *err_out);
 
 /** Division. */
-n_t n_div(n_t n1, n_t n2, bool *err);
+n_t n_div(n_t n1, n_t n2, bool *err_out);
 
 /** Exponentiation. */
-n_t n_pow(n_t n1, n_t n2, bool *err);
+n_t n_pow(n_t n1, n_t n2, bool *err_out);
 
 /** Root extraction. */
-n_t n_ipow(n_t n1, n_t n2, bool *err);
+n_t n_ipow(n_t n1, n_t n2, bool *err_out);
 
 
 /******************************************************************************
@@ -115,25 +115,25 @@ n_t n_int(n_t n);
 n_t n_frac(n_t n);
 
 /** n * n. */
-n_t n_square(n_t n, bool *err);
+n_t n_square(n_t n, bool *err_out);
 
 /** 1/n. */
-n_t n_1_x(n_t n, bool *err);
+n_t n_1_x(n_t n, bool *err_out);
 
 /** Square root of n. */
-n_t n_sqrt(n_t n, bool *err);
+n_t n_sqrt(n_t n, bool *err_out);
 
 /** Natural log. */
-n_t n_ln(n_t n, bool *err);
+n_t n_ln(n_t n, bool *err_out);
 
 /** Log in base 10. */
-n_t n_log(n_t n, bool *err);
+n_t n_log(n_t n, bool *err_out);
 
 /** e^n. */
-n_t n_exp(n_t n, bool *err);
+n_t n_exp(n_t n, bool *err_out);
 
 /** 10^n. */
-n_t n_pow10(n_t n, bool *err);
+n_t n_pow10(n_t n, bool *err_out);
 
 
 /******************************************************************************
@@ -143,22 +143,22 @@ n_t n_pow10(n_t n, bool *err);
  ******************************************************************************/
 
 /** sine. */
-n_t n_sin(n_t n, trig_t mode, bool *err);
+n_t n_sin(n_t n, trig_t mode, bool *err_out);
 
 /** cosine. */
-n_t n_cos(n_t n, trig_t mode, bool *err);
+n_t n_cos(n_t n, trig_t mode, bool *err_out);
 
 /** tangent. */
-n_t n_tan(n_t n, trig_t mode, bool *err);
+n_t n_tan(n_t n, trig_t mode, bool *err_out);
 
 /** arcsine. */
-n_t n_asin(n_t n, trig_t mode, bool *err);
+n_t n_asin(n_t n, trig_t mode, bool *err_out);
 
 /** arccosine. */
-n_t n_acos(n_t n, trig_t mode, bool *err);
+n_t n_acos(n_t n, trig_t mode, bool *err_out);
 
 /** arctangent. */
-n_t n_atan(n_t n, trig_t mode, bool *err);
+n_t n_atan(n_t n, trig_t mode, bool *err_out);
 
 
 /******************************************************************************
@@ -168,16 +168,16 @@ n_t n_atan(n_t n, trig_t mode, bool *err);
  ******************************************************************************/
 
 /** Converts degrees/minutes/seconds to decimal degrees. */
-n_t n_dms(n_t n, int fix, format_t format, bool *err);
+n_t n_dms(n_t n, int fix, format_t format, bool *err_out);
 
 /** Converts decimal degrees to degrees/minutes/seconds. */
-n_t n_idms(n_t n, int fix, format_t format, bool *err);
+n_t n_idms(n_t n, int fix, format_t format, bool *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
-void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err);
+void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err_out);
 
 /** Converts rectangular coordinates to polar coordinates. */
-void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
+void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_out);
 
 
 /******************************************************************************
@@ -198,7 +198,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
  * String 'str_out' must have at least 16 characters.
  * Sets error if overflow.
  */
-void n2s(n_t n, int fix, format_t format, char *str_out, bool *err);
+void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
 
 /**
  * String to number.
@@ -212,7 +212,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err);
  *
  * Sets error if under/overflow.
  */
-n_t s2n(char *s, bool *err);
+n_t s2n(char *s, bool *err_out);
 
 
 /******************************************************************************
@@ -225,6 +225,6 @@ n_t s2n(char *s, bool *err);
 double n2d(n_t n);
 
 /** Double to number. Sets error if under/overflow. */
-n_t d2n(double d, bool *err);
+n_t d2n(double d, bool *err_out);
 
 #endif  // N_H
