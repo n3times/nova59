@@ -6,8 +6,9 @@
 n_t n_dms(n_t n, int fix, format_t format, bool *err) {
   // Normalize.
   char str[16];
-  n2s(n, fix, format, str);
-  n = s2n(str, err);
+  bool err1, err2, err3;
+  n2s(n, fix, format, str, &err1);
+  n = s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
@@ -23,14 +24,17 @@ n_t n_dms(n_t n, int fix, format_t format, bool *err) {
 
   if (neg) res = -res;
 
-  return d2n(res, err);
+  n = d2n(res, &err3);
+  if (err) *err = err1 || err2 || err3;
+  return n;
 }
 
 n_t n_idms(n_t n, int fix, format_t format, bool *err) {
   // Normalize.
   char str[16];
-  n2s(n, fix, format, str);
-  n = s2n(str, err);
+  bool err1, err2, err3;
+  n2s(n, fix, format, str, &err1);
+  n = s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
@@ -44,7 +48,9 @@ n_t n_idms(n_t n, int fix, format_t format, bool *err) {
   double res = h + m / 100. + s / 10000;
   if (neg) res = -res;
 
-  return d2n(res, err);
+  n = d2n(res, &err3);
+  if (err) *err = err1 || err2 || err3;
+  return n;
 }
 
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err) {

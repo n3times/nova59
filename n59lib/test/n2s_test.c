@@ -38,8 +38,9 @@ int main(void) {
           if (mants[i] == 0 && exps[l]) continue;
           n_t n = n_make(mants[i], exps[l]);
           char str[16];
-          n2s(n, fixes[k], formats[j], (char *)&str);
-          printf("%s\n", str);
+          bool err;
+          n2s(n, fixes[k], formats[j], (char *)&str, &err);
+          printf("%s%s\n", str, err ? " ?" : "");
         }
         printf("\n");
       }

@@ -194,11 +194,11 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err);
  * - "-" if negative number
  * - followed by digits and exactly 1 "."
  * - optionally followed by exponent: " " or "-", and exactly 2 digits
- * - optionally followed by overflow: " ?"
  *
  * String 'str_out' must have at least 16 characters.
+ * Sets error if overflow.
  */
-void n2s(n_t n, int fix, format_t format, char *str_out);
+void n2s(n_t n, int fix, format_t format, char *str_out, bool *err);
 
 /**
  * String to number.

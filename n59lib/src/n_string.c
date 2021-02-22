@@ -11,7 +11,7 @@
  ******************************************************************************/
 
 static void get_display(bool neg, long long mant, int int_len, int frac_len,
-                        int exp, bool err, char *str_out) {
+                        int exp, char *str_out) {
   int i = 0;
   if (neg) str_out[i++] = '-';
   for (int j = 0; j < int_len + frac_len; j++) {
@@ -26,7 +26,6 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
     str_out[i++] = '0' + exp / 10;
     str_out[i++] = '0' + exp % 10;
   }
-  if (err) { str_out[i++] = ' '; str_out[i++] = '?'; }
   str_out[i++] = '\0';
 }
 
@@ -38,17 +37,18 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
  ******************************************************************************/
 
 /** Number to string. */
-void n2s(n_t n, int fix, format_t format, char *str_out) {
+void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
+  if (err) *err = false;
 
   bool is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
   bool is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
   bool is_exp = format != FLOAT || is_big || (is_small && fix == 9);
 
   if (is_small && fix != 9 && format == FLOAT) {
-    return n2s(N_0, fix, FLOAT, str_out);
+    return n2s(N_0, fix, FLOAT, str_out, err);
   }
 
   // Compute actual mantissa.
@@ -77,7 +77,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
       n_t n_1 = n_make(POW10_12 * (neg ? -1 : 1), n.exp + 1);
-      return n2s(n_1, fix, format, str_out);
+      return n2s(n_1, fix, format, str_out, err);
     }
   }
 
@@ -97,7 +97,6 @@ void n2s(n_t n, int fix, format_t format, char *str_out) {
   }
 
   // Deal with edge cases.
-  bool err = false;
   if (mant == 0) {
     // 0.
     neg = false;
@@ -111,10 +110,10 @@ void n2s(n_t n, int fix, format_t format, char *str_out) {
     frac_len = MIN(fix, 7);
     mant = (int) pow(10, 1 + frac_len) - 1;
     exp = 99;
-    err = true;
+    if (err) *err = true;
   }
 
-  get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, err, str_out);
+  get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, str_out);
 }
 
 /** String to number. */
