@@ -13,25 +13,27 @@
 /**
  * TI-59 number.
  *
- * Non zero numbers have
- * - a mantissa: a positive or negative integer, with exactly 13 digits.
- * - an exponent: an integer in -99..99.
+ * For non zero numbers,
+ * - the mantissa is a positive or negative integer, with exactly 13 digits
+ * - the exponent is an integer in -99..99
  *
  * 0 is represented as { 0, 0 }.
+ *
+ * Note: Prefer n_make(mant, exp) to directly modifying mant and exp.
  */
 typedef struct n_s {
   long long mant;
   int exp;
 } n_t;
 
-/** Display format. */
+/** Display formats. */
 typedef enum format_e {
   FLOAT,  // Float if possible, scientific for small and big numbers.
   SCI,    // Scientific notation.
   ENG     // Engineering notation.
 } format_t;
 
-/** Trigonometric mode. */
+/** Trigonometric modes. */
 typedef enum trig_e {
   RAD,  // Radians.
   DEG,  // Degrees.
@@ -52,7 +54,7 @@ extern n_t N_INF;  // Infinity, largest number.
 extern n_t N_EPS;  // Epsilon, smallest positive number.
 
 
-/** Preferred method to make a TI-59 number. */
+/** Preferred method to set the mantissa and exponent of a TI-59 number. */
 n_t n_make(long long mant, int exp);
 
 
@@ -193,9 +195,8 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_ou
  * trailing spaces trimmed:
  * - "-" if negative number
  * - followed by digits and exactly 1 "."
- * - optionally followed by exponent: " " or "-", and exactly 2 digits
  *
- * String 'str_out' must have at least 16 characters.
+ * String 'str_out' must have at least 14 characters.
  * Sets error if overflow.
  */
 void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
@@ -206,7 +207,6 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
  * String should have:
  * - a sequence of digits, optionally starting with "-" and with at most 1 ".".
  * - an optional exponent: a sequence of digits, optionally preceded by "-".
- * - an optional "?".
  * In addition there can be 1 or more spaces before, after or between
  * components.
  *
@@ -224,7 +224,11 @@ n_t s2n(char *s, bool *err_out);
 /** Number to double. */
 double n2d(n_t n);
 
-/** Double to number. Sets error if under/overflow. */
+/**
+ * Double to number.
+ *
+ * Sets error if under/overflow.
+ */
 n_t d2n(double d, bool *err_out);
 
 #endif  // N_H

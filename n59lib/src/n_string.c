@@ -129,7 +129,6 @@ n_t s2n(char *s, bool *err) {
   // Extract mantissa and exponent.
   for (int i = 0; ; i++) {
     if (s[i] == '\0') break;
-    if (s[i] == '?') break;
     if (in_exp) {
       if (s[i] == ' ')  continue;
       if (s[i] == '-')  {
