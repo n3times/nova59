@@ -36,7 +36,7 @@ n_t n_square(n_t n, bool *err) {
 }
 
 n_t n_1_x(n_t n, bool *err) {
-  if (n.mant == 0) {
+  if (n_is_zero(n)) {
     if (err) *err = true;
     return N_INF;
   }
@@ -54,7 +54,7 @@ n_t n_sqrt(n_t n, bool *err) {
 
 n_t n_ln(n_t n, bool *err) {
   if (err) *err = false;
-  if (n.mant == 0) {
+  if (n_is_zero(n)) {
     if (err) *err = true;
     return n_chs(N_INF);
   }
@@ -67,7 +67,7 @@ n_t n_ln(n_t n, bool *err) {
 
 n_t n_log(n_t n, bool *err) {
   if (err) *err = false;
-  if (n.mant == 0) {
+  if (n_is_zero(n)) {
     if (err) *err = true;
     return n_chs(N_INF);
   }

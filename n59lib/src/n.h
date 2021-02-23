@@ -4,6 +4,19 @@
 #include <stdbool.h>
 
 
+/**
+ * Library that defines TI-59 numbers as well as arithmetic operators and
+ * mathematical functions on those numbers.
+ *
+ * Note on errors:
+ *
+ * For functions, if "err_out" parameter is non null, it will be set to true
+ * if an error occurs, and false otherwise.
+ * An error occurs when some parameter is not in the function domain ("square
+ * root of -1") or because of underflow or overflow ("square of 10^80").
+ */
+
+
 /******************************************************************************
  *
  *  TYPES.
@@ -43,7 +56,7 @@ typedef enum trig_e {
 
 /******************************************************************************
  *
- *  CONSTANTS AND UTILITY METHODS.
+ *  CONSTANTS.
  *
  ******************************************************************************/
 
@@ -54,20 +67,20 @@ extern n_t N_INF;  // Infinity, largest number.
 extern n_t N_EPS;  // Epsilon, smallest positive number.
 
 
+/******************************************************************************
+ *
+ *  UTILITY METHODS.
+ *
+ ******************************************************************************/
+
 /** Preferred method to set the mantissa and exponent of a TI-59 number. */
 n_t n_make(long long mant, int exp);
 
+/** Returns true if n1 and n2 are equal. */
+bool n_equals(n_t n1, n_t n2);
 
-/******************************************************************************
- *
- *  NOTE ON ERRORS.
- *
- *  For functions, if "err_out" parameter is non null, it will be set to true
- *  if an error occurs, and false otherwise.
- *  An error occurs when some parameter is not in the function domain ("square
- *  root of -1") or because of underflow or overflow ("square of 10^80").
- *
- ******************************************************************************/
+/** Returns true if n is zero. */
+bool n_is_zero(n_t n);
 
 
 /******************************************************************************
@@ -184,7 +197,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_ou
 
 /******************************************************************************
  *
- *  CONVERSION WITH STRINGS.
+ *  CONVERSION TO/FROM STRINGS.
  *
  ******************************************************************************/
 
@@ -217,7 +230,7 @@ n_t s2n(char *s, bool *err_out);
 
 /******************************************************************************
  *
- *  CONVERSION WITH DOUBLES.
+ *  CONVERSION TO/FROM DOUBLES.
  *
  ******************************************************************************/
 
