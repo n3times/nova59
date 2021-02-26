@@ -24,6 +24,11 @@ if [ "$1" == "" ]
 then
   test_all
 else
-  i=n_$1_test
+  if [[ "$1" == *"test" ]]
+  then
+    i=$1
+  else
+    i=n_$1_test
+  fi
   test $i
 fi

@@ -136,6 +136,7 @@ n_t s2n(char *s, bool *err) {
         continue;
       }
       n.exp = n.exp * 10 + s[i] - '0';
+      if (n.exp >= 1000000) break;
       continue;
     }
     if (i == 0 && s[i] == '-') {
@@ -151,7 +152,11 @@ n_t s2n(char *s, bool *err) {
       index_dot = i;
       continue;
     }
-    n.mant = n.mant * 10 + s[i] - '0';
+    if (n.mant >= POW10_12) {
+      n.exp += 1;
+    } else {
+      n.mant = n.mant * 10 + s[i] - '0';
+    }
     index_end = i;
   }
   if (n.mant == 0) return N_0;
