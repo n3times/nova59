@@ -10,7 +10,7 @@
  *
  * Note on errors:
  *
- * For functions, if "err_out" parameter is non null, it will be set to true
+ * For functions, if 'err_out' parameter is non null, it will be set to true
  * if an error occurs, and false otherwise.
  * An error occurs when some parameter is not in the function domain ("square
  * root of -1") or because of underflow or overflow ("square of 10^80").
@@ -73,7 +73,11 @@ extern n_t N_EPS;  // Epsilon, smallest positive number.
  *
  ******************************************************************************/
 
-/** Preferred method to set the mantissa and exponent of a TI-59 number. */
+/**
+ * Preferred method to make a TI-59 number.
+ *
+ * Asserts that mant and exp are in the correct range.
+ */
 n_t n_make(long long mant, int exp);
 
 /** Returns true if n1 and n2 are equal. */
@@ -166,13 +170,13 @@ n_t n_cos(n_t n, trig_t mode, bool *err_out);
 /** tangent. */
 n_t n_tan(n_t n, trig_t mode, bool *err_out);
 
-/** arcsine. */
+/** arcsine. Range is -90..90 (in DEG mode). */
 n_t n_asin(n_t n, trig_t mode, bool *err_out);
 
-/** arccosine. */
+/** arccossine. Range is 0..180 (in DEG mode). */
 n_t n_acos(n_t n, trig_t mode, bool *err_out);
 
-/** arctangent. */
+/** arctangent. Range is -90..90 (in DEG mode). */
 n_t n_atan(n_t n, trig_t mode, bool *err_out);
 
 
@@ -182,16 +186,32 @@ n_t n_atan(n_t n, trig_t mode, bool *err_out);
  *
  ******************************************************************************/
 
-/** Converts degrees/minutes/seconds to decimal degrees. */
+/**
+ * Converts degrees/minutes/seconds to decimal degrees.
+ *
+ * Only the digits of n that are visible on the TI-59 display are considered
+ * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
+ * be first trimmed down to 3.15 and then converted to 3.25.
+ */
 n_t n_dms(n_t n, int fix, format_t format, bool *err_out);
 
-/** Converts decimal degrees to degrees/minutes/seconds. */
+/**
+ * Converts decimal degrees to degrees/minutes/seconds.
+ *
+ * Only the digits of n that are visible on the TI-59 display are considered
+ * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
+ * be first trimmed down to 3.25 and then converted to 3.15.
+ */
 n_t n_idms(n_t n, int fix, format_t format, bool *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
 void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err_out);
 
-/** Converts rectangular coordinates to polar coordinates. */
+/**
+ * Converts rectangular coordinates to polar coordinates.
+ *
+ * theta_out is in range -90..270
+ */
 void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_out);
 
 
@@ -209,21 +229,25 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_ou
  * - "-" if negative number
  * - followed by digits and exactly 1 "."
  *
+ * For example: for pi, with fix 2, format SCI: "3.14 00".
+ *
  * String 'str_out' must have at least 14 characters.
- * Sets error if overflow.
+ * Sets error if overflow, that is when the display would blink on a TI-59.
  */
 void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
 
 /**
  * String to number.
  *
- * String should have:
- * - a sequence of digits, optionally starting with "-" and with at most 1 ".".
- * - an optional exponent: a sequence of digits, optionally preceded by "-".
- * In addition there can be 1 or more spaces before, after or between
- * components.
+ * String should be composed of:
+ * - a float number such as "1", "12.34", "-12.", "0.1" or "-.1"
+ * - followed by an exponent such as "2", "04" or "-99"
  *
- * Sets error if under/overflow.
+ * There may be spaces at the beginning and end of the string, and between the
+ * float number and the exponent. If the the exponent is positive, a space is
+ * required between the float and the exponent.
+ *
+ * Sets error if under/overflow or wrong formatting.
  */
 n_t s2n(char *s, bool *err_out);
 
