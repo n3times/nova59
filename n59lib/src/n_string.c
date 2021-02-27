@@ -3,8 +3,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include <stdio.h>
-
 /******************************************************************************
  *
  *  HELPERS.
@@ -226,6 +224,5 @@ n_t s2n(char *s, bool *err) {
     return n < 0 ? n_chs(ret) : ret;
   }
 
-///printf("=> %lld %d\n", n, exp);
   return n_make(n, exp);
 }
