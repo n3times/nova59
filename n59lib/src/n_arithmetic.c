@@ -72,21 +72,21 @@ n_t n_minus(n_t n1, n_t n2, bool *err) {
 }
 
 n_t n_times(n_t n1, n_t n2, bool *err) {
-  return d2n(n2d(n1) * n2d(n2), err);
+  return n_d2n(n_n2d(n1) * n_n2d(n2), err);
 }
 
 n_t n_div(n_t n1, n_t n2, bool *err) {
-  double d1 = n2d(n1);
-  double d2 = n2d(n2);
-  if (d2 != 0) return d2n(d1/d2, err);
+  double d1 = n_n2d(n1);
+  double d2 = n_n2d(n2);
+  if (d2 != 0) return n_d2n(d1/d2, err);
   if (err) *err = true;
   if (d1 == 0) return N_1;
   return (d1 > 0) ? N_INF : n_chs(N_INF);
 }
 
 n_t n_pow(n_t n1, n_t n2, bool *err) {
-  double d1 = n2d(n1);
-  double d2 = n2d(n2);
+  double d1 = n_n2d(n1);
+  double d2 = n_n2d(n2);
   if (err) *err = false;
 
   if (d1 == 0) {
@@ -113,14 +113,14 @@ n_t n_pow(n_t n1, n_t n2, bool *err) {
   }
 
   bool err2;
-  n_t res = d2n(pow(d1, d2), &err2);
+  n_t res = n_d2n(pow(d1, d2), &err2);
   if (err) *err = *err || err2;
   return res;
 }
 
 n_t n_ipow(n_t n1, n_t n2, bool *err) {
-  double d1 = n2d(n1);
-  double d2 = n2d(n2);
+  double d1 = n_n2d(n1);
+  double d2 = n_n2d(n2);
   if (err) *err = false;
   if (d2 == 0) {
     if (err) *err = true;

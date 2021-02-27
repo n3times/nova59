@@ -21,18 +21,18 @@ n_t n_sign(n_t n) {
 
 n_t n_int(n_t n) {
   if (n.exp >= 12) return n;
-  return d2n((long long)n2d(n), NULL);
+  return n_d2n((long long)n_n2d(n), NULL);
 }
 
 n_t n_frac(n_t n) {
   if (n.exp >= 12) return N_0;
-  double d = n2d(n);
-  return d2n(d - (long long)d, NULL);
+  double d = n_n2d(n);
+  return n_d2n(d - (long long)d, NULL);
 }
 
 n_t n_square(n_t n, bool *err) {
-  double d = n2d(n);
-  return d2n(d * d, err);
+  double d = n_n2d(n);
+  return n_d2n(d * d, err);
 }
 
 n_t n_1_x(n_t n, bool *err) {
@@ -40,7 +40,7 @@ n_t n_1_x(n_t n, bool *err) {
     if (err) *err = true;
     return N_INF;
   }
-  return d2n(1/n2d(n), err);
+  return n_d2n(1/n_n2d(n), err);
 }
 
 n_t n_sqrt(n_t n, bool *err) {
@@ -49,7 +49,7 @@ n_t n_sqrt(n_t n, bool *err) {
     if (err) *err = true;
     n.mant = -n.mant;
   }
-  return d2n(sqrt(n2d(n)), NULL);
+  return n_d2n(sqrt(n_n2d(n)), NULL);
 }
 
 n_t n_ln(n_t n, bool *err) {
@@ -62,7 +62,7 @@ n_t n_ln(n_t n, bool *err) {
     if (err) *err = true;
     n.mant = -n.mant;
   }
-  return d2n(log(n2d(n)), NULL);
+  return n_d2n(log(n_n2d(n)), NULL);
 }
 
 n_t n_log(n_t n, bool *err) {
@@ -75,23 +75,23 @@ n_t n_log(n_t n, bool *err) {
     if (err) *err = true;
     n.mant = -n.mant;
   }
-  return d2n(log10(n2d(n)), NULL);
+  return n_d2n(log10(n_n2d(n)), NULL);
 }
 
 n_t n_exp(n_t n, bool *err) {
-  double d = n2d(n);
+  double d = n_n2d(n);
   if (ABS(d) > 231) {
     if (err) *err = true;
     return d < 0 ? N_EPS : N_INF;
   }
-  return d2n(exp(d), err);
+  return n_d2n(exp(d), err);
 }
 
 n_t n_pow10(n_t n, bool *err) {
-  double d = n2d(n);
+  double d = n_n2d(n);
   if (ABS(d) > 100) {
     if (err) *err = true;
     return d < 0 ? N_EPS : N_INF;
   }
-  return d2n(pow(10, d), err);
+  return n_d2n(pow(10, d), err);
 }

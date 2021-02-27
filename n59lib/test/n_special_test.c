@@ -11,28 +11,28 @@ static n_t N_Y =       {  1000000000000LL, -11 };
 
 static void test_dms(n_t n) {
   bool e;
-  n_t res = n_dms(n, 9, FLOAT, &e);
+  n_t res = n_dms(n, 9, N_FLOAT, &e);
   printf("%lld %d => %lld %d%s\n",
          n.mant, n.exp, res.mant, res.exp, e ? "?" : "");
 }
 
 static void test_idms(n_t n) {
   bool e;
-  n_t res = n_idms(n, 9, FLOAT, &e);
+  n_t res = n_idms(n, 9, N_FLOAT, &e);
   printf("%lld %d => %lld %d%s\n",
          n.mant, n.exp, res.mant, res.exp, e ? "?" : "");
 }
 
 static void test_idms_dms(n_t n) {
   bool e1, e2;
-  n_t res = n_idms(n_dms(n, 9, FLOAT, &e1), 9, FLOAT, &e2);
+  n_t res = n_idms(n_dms(n, 9, N_FLOAT, &e1), 9, N_FLOAT, &e2);
   printf("%lld %d => %lld %d%s\n",
          n.mant, n.exp, res.mant, res.exp, e1 || e2 ? "?" : "");
 }
 
 static void test_dms_idms(n_t n) {
   bool e1, e2;
-  n_t res = n_dms(n_idms(n, 9, FLOAT, &e1), 9, FLOAT, &e2);
+  n_t res = n_dms(n_idms(n, 9, N_FLOAT, &e1), 9, N_FLOAT, &e2);
   printf("%lld %d => %lld %d%s\n",
          n.mant, n.exp, res.mant, res.exp, e1 || e2 ? "?" : "");
 }

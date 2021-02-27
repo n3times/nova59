@@ -41,17 +41,17 @@ typedef struct n_s {
 
 /** Display formats. */
 typedef enum format_e {
-  FLOAT,  // Float if possible, scientific for small and big numbers.
-  SCI,    // Scientific notation.
-  ENG     // Engineering notation.
-} format_t;
+  N_FLOAT,  // Float if possible, scientific for small and big numbers.
+  N_SCI,    // Scientific notation.
+  N_ENG     // Engineering notation.
+} n_format_t;
 
 /** Trigonometric modes. */
 typedef enum trig_e {
-  RAD,  // Radians.
-  DEG,  // Degrees.
-  GRAD  // Gradians.
-} trig_t;
+  N_RAD,  // Radians.
+  N_DEG,  // Degrees.
+  N_GRAD  // Gradians.
+} n_trig_t;
 
 
 /******************************************************************************
@@ -162,22 +162,22 @@ n_t n_pow10(n_t n, bool *err_out);
  ******************************************************************************/
 
 /** sine. */
-n_t n_sin(n_t n, trig_t mode, bool *err_out);
+n_t n_sin(n_t n, n_trig_t mode, bool *err_out);
 
 /** cosine. */
-n_t n_cos(n_t n, trig_t mode, bool *err_out);
+n_t n_cos(n_t n, n_trig_t mode, bool *err_out);
 
 /** tangent. */
-n_t n_tan(n_t n, trig_t mode, bool *err_out);
+n_t n_tan(n_t n, n_trig_t mode, bool *err_out);
 
 /** arcsine. Range is -90..90 (in DEG mode). */
-n_t n_asin(n_t n, trig_t mode, bool *err_out);
+n_t n_asin(n_t n, n_trig_t mode, bool *err_out);
 
 /** arccossine. Range is 0..180 (in DEG mode). */
-n_t n_acos(n_t n, trig_t mode, bool *err_out);
+n_t n_acos(n_t n, n_trig_t mode, bool *err_out);
 
 /** arctangent. Range is -90..90 (in DEG mode). */
-n_t n_atan(n_t n, trig_t mode, bool *err_out);
+n_t n_atan(n_t n, n_trig_t mode, bool *err_out);
 
 
 /******************************************************************************
@@ -193,7 +193,7 @@ n_t n_atan(n_t n, trig_t mode, bool *err_out);
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
  * be first trimmed down to 3.15 and then converted to 3.25.
  */
-n_t n_dms(n_t n, int fix, format_t format, bool *err_out);
+n_t n_dms(n_t n, int fix, n_format_t format, bool *err_out);
 
 /**
  * Converts decimal degrees to degrees/minutes/seconds.
@@ -202,17 +202,17 @@ n_t n_dms(n_t n, int fix, format_t format, bool *err_out);
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
  * be first trimmed down to 3.25 and then converted to 3.15.
  */
-n_t n_idms(n_t n, int fix, format_t format, bool *err_out);
+n_t n_idms(n_t n, int fix, n_format_t format, bool *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
-void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err_out);
+void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err_out);
 
 /**
  * Converts rectangular coordinates to polar coordinates.
  *
  * theta_out is in range -90..270
  */
-void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_out);
+void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_out);
 
 
 /******************************************************************************
@@ -234,7 +234,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_ou
  * String 'str_out' must have at least 14 characters.
  * Sets error if overflow, that is when the display would blink on a TI-59.
  */
-void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
+void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err_out);
 
 /**
  * String to number.
@@ -251,7 +251,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
  *
  * Sets error if under/overflow or bad formatting. Returns 0 if bad formatting.
  */
-n_t s2n(char *s, bool *err_out);
+n_t n_s2n(char *s, bool *err_out);
 
 
 /******************************************************************************
@@ -261,13 +261,13 @@ n_t s2n(char *s, bool *err_out);
  ******************************************************************************/
 
 /** Number to double. */
-double n2d(n_t n);
+double n_n2d(n_t n);
 
 /**
  * Double to number.
  *
  * Sets error if under/overflow.
  */
-n_t d2n(double d, bool *err_out);
+n_t n_d2n(double d, bool *err_out);
 
 #endif  // N_H

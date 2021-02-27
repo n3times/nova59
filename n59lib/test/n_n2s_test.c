@@ -25,7 +25,7 @@ int main(void) {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 98, 99
   };
   int fixes[] = { 0, 5, 8, 9 };
-  format_t formats[] = { FLOAT, SCI, ENG };
+  n_format_t formats[] = { N_FLOAT, N_SCI, N_ENG };
 
   for (int i = 0; i < N_ELEMS(mants); i++) {
     printf("==========================================================\n\n");
@@ -33,13 +33,13 @@ int main(void) {
     for (int j = 0; j < N_ELEMS(formats); j++) {
       for (int k = 0; k < N_ELEMS(fixes); k++) {
         printf("=== mode %s | fix %d ===\n\n",
-               j == FLOAT ? "FLOAT" : j == SCI ? "EE" : "ENG", fixes[k]);
+               j == N_FLOAT ? "FLOAT" : j == N_SCI ? "EE" : "ENG", fixes[k]);
         for (int l = 0; l < N_ELEMS(exps); l++) {
           if (mants[i] == 0 && exps[l]) continue;
           n_t n = n_make(mants[i], exps[l]);
           char str[16];
           bool err;
-          n2s(n, fixes[k], formats[j], (char *)&str, &err);
+          n_n2s(n, fixes[k], formats[j], (char *)&str, &err);
           printf("%s%s\n", str, err ? " ?" : "");
         }
         printf("\n");

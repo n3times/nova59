@@ -8,7 +8,7 @@
 
 static void t(char *s) {
   bool err = false;
-  n_t n = s2n(s, &err);
+  n_t n = n_s2n(s, &err);
   printf("%30s: % 14lld%s%02d%s\n",
          s, n.mant, n.exp < 0 ? "-" : " ", ABS(n.exp), err ? " ?" : "");
 }

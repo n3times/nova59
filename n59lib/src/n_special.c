@@ -3,12 +3,12 @@
 #include <math.h>
 #include <stdbool.h>
 
-n_t n_dms(n_t n, int fix, format_t format, bool *err) {
+n_t n_dms(n_t n, int fix, n_format_t format, bool *err) {
   // Normalize.
   char str[16];
   bool err1, err2, err3;
-  n2s(n, fix, format, str, &err1);
-  n = s2n(str, &err2);
+  n_n2s(n, fix, format, str, &err1);
+  n = n_s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
@@ -24,23 +24,23 @@ n_t n_dms(n_t n, int fix, format_t format, bool *err) {
 
   if (neg) res = -res;
 
-  n = d2n(res, &err3);
+  n = n_d2n(res, &err3);
   if (err) *err = err1 || err2 || err3;
   return n;
 }
 
-n_t n_idms(n_t n, int fix, format_t format, bool *err) {
+n_t n_idms(n_t n, int fix, n_format_t format, bool *err) {
   // Normalize.
   char str[16];
   bool err1, err2, err3;
-  n2s(n, fix, format, str, &err1);
-  n = s2n(str, &err2);
+  n_n2s(n, fix, format, str, &err1);
+  n = n_s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
   bool neg = n.mant < 0;
   if (neg) n.mant = -n.mant;
-  double d = n2d(n);
+  double d = n_n2d(n);
   long long h = (long long) d;
   double total_s = (d - h) * 3600;
   int m = (int) (total_s / 60);
@@ -48,25 +48,25 @@ n_t n_idms(n_t n, int fix, format_t format, bool *err) {
   double res = h + m / 100. + s / 10000;
   if (neg) res = -res;
 
-  n = d2n(res, &err3);
+  n = n_d2n(res, &err3);
   if (err) *err = err1 || err2 || err3;
   return n;
 }
 
-void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, trig_t mode, bool *err) {
-  double d_rho = n2d(rho);
-  double d_theta = n2d(theta);
+void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err) {
+  double d_rho = n_n2d(rho);
+  double d_theta = n_n2d(theta);
   d_theta = normalize_angle(d_theta, mode);
-  d_theta = convert_trig_mode(d_theta, mode, RAD);
+  d_theta = convert_trig_mode(d_theta, mode, N_RAD);
   double x = d_rho * sin(d_theta);
   double y = d_rho * cos(d_theta);
-  *x_out = d2n(x, err);
-  *y_out = d2n(y, err);
+  *x_out = n_d2n(x, err);
+  *y_out = n_d2n(y, err);
 }
 
-void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err) {
-  double d_x = n2d(x);
-  double d_y = n2d(y);
+void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err) {
+  double d_x = n_n2d(x);
+  double d_y = n_n2d(y);
   double d_rho;
   double d_theta;
   if (d_x == 0) {
@@ -79,7 +79,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err) {
   }
   // theta in -pi/2 .. 3pi/2
   d_rho = sqrt(d_x * d_x + d_y * d_y);
-  d_theta = convert_trig_mode(d_theta, RAD, mode);
-  *rho_out = d2n(d_rho, err);
-  *theta_out = d2n(d_theta, err);
+  d_theta = convert_trig_mode(d_theta, N_RAD, mode);
+  *rho_out = n_d2n(d_rho, err);
+  *theta_out = n_d2n(d_theta, err);
 }

@@ -39,7 +39,7 @@ static bool is_digit(char c) {
  ******************************************************************************/
 
 /** Number to string. */
-void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
+void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err) {
   bool neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
@@ -47,10 +47,10 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
 
   bool is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
   bool is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
-  bool is_exp = format != FLOAT || is_big || (is_small && fix == 9);
+  bool is_exp = format != N_FLOAT || is_big || (is_small && fix == 9);
 
-  if (is_small && fix != 9 && format == FLOAT) {
-    return n2s(N_0, fix, FLOAT, str_out, err);
+  if (is_small && fix != 9 && format == N_FLOAT) {
+    return n_n2s(N_0, fix, N_FLOAT, str_out, err);
   }
 
   // Compute actual mantissa.
@@ -58,7 +58,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
   int int_len = 0;
   if (is_exp) {
     int_len = 1;
-    if (format == ENG) {
+    if (format == N_ENG) {
       int new_exp = (int)(3 * floor(exp / 3.0));
       int_len = 1 + exp - new_exp;
       exp = new_exp;
@@ -79,7 +79,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
       n_t n_1 = n_make(POW10_12 * (neg ? -1 : 1), n.exp + 1);
-      return n2s(n_1, fix, format, str_out, err);
+      return n_n2s(n_1, fix, format, str_out, err);
     }
   }
 
@@ -118,7 +118,7 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
   get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, str_out);
 }
 
-n_t s2n(char *s, bool *err) {
+n_t n_s2n(char *s, bool *err) {
   enum state_e {
     START,
     N_INT,
