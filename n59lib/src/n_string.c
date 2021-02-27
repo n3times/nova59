@@ -129,8 +129,9 @@ n_t s2n(char *s, bool *err) {
   };
   enum state_e state = START;
   bool format_err = false;
-  long long n = -1;
+  long long n = 0;
   int exp = 0;
+  bool has_n = false;
   bool has_exp = false;
   bool neg_n = false;
   bool neg_exp = false;
@@ -151,8 +152,9 @@ n_t s2n(char *s, bool *err) {
           index_dot = i;
           state = N_FRAC;
         } else if (is_digit(c)) {
-          state = N_INT;
+          has_n = true;
           n = c - '0';
+          state = N_INT;
         } else { format_err = true; }
         break;
       case N_INT:
@@ -163,7 +165,7 @@ n_t s2n(char *s, bool *err) {
           neg_exp = true;
           state = EXP;
         } else if (is_digit(c)) {
-          if (n == -1) n = 0;
+          has_n = true;
           if (n < POW10_12) n = 10 * n + c - '0';
           else exp += 1;
           index_end = i;
@@ -197,8 +199,8 @@ n_t s2n(char *s, bool *err) {
     }
     if (format_err) break;
   }
-  if (n == -1) format_err = true;
-  else if (!has_exp && neg_exp) format_err = true;
+
+  if (!has_n || (!has_exp && neg_exp)) format_err = true;
   if (format_err) {
     if (err) *err = true;
     return N_0;

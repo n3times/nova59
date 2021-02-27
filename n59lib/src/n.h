@@ -5,13 +5,13 @@
 
 
 /**
- * Library that defines TI-59 numbers as well as arithmetic operators and
- * mathematical functions on those numbers.
+ * Library that provides arithmetic operators and mathematical functions on
+ * TI-59 numbers.
  *
  * Note on errors:
  *
- * For functions, if 'err_out' parameter is non null, it will be set to true
- * if an error occurs, and false otherwise.
+ * If non null, 'err_out' parameter is set to true if an error occurs, and to
+ * false otherwise.
  * An error occurs when some parameter is not in the function domain ("square
  * root of -1") or because of underflow or overflow ("square of 10^80").
  */
@@ -241,9 +241,9 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
  *
  * String must be composed of:
  * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
- *   of at least 1 digit.
- * - followed, possibly, by an exponent: e or -e where e is a sequence of at
- *   least 1 digit.
+ *   of 1 digit or more.
+ * - followed, possibly, by an exponent: e or -e where e is a sequence of 1
+ *   digit or more.
  *
  * There may be spaces at the beginning and end of the string, and between the
  * float and the exponent. If the the exponent is positive, a space is required
