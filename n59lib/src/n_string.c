@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include <stdio.h>
 
 /******************************************************************************
  *
@@ -29,6 +30,9 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
+static bool is_digit(char c) {
+  return c >= '0' && c <= '9';
+}
 
 /******************************************************************************
  *
@@ -116,68 +120,112 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err) {
   get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, str_out);
 }
 
-/** String to number. */
 n_t s2n(char *s, bool *err) {
-  n_t n = N_0;
-  bool neg = false;
+  enum state_e {
+    START,
+    N_INT,
+    N_FRAC,
+    POST_N,
+    EXP,
+    POST_EXP
+  };
+  enum state_e state = START;
+  bool format_err = false;
+  long long n = -1;
+  int exp = 0;
+  bool has_exp = false;
+  bool neg_n = false;
   bool neg_exp = false;
   int index_dot = -1;
-  int index_end;
-  if (err) *err = false;
-  bool in_exp = false;
+  int index_end = 0;
 
   // Extract mantissa and exponent.
   for (int i = 0; ; i++) {
-    if (s[i] == '\0') break;
-    if (in_exp) {
-      if (s[i] == ' ')  continue;
-      if (s[i] == '-')  {
-        neg_exp = !neg_exp;
-        continue;
-      }
-      n.exp = n.exp * 10 + s[i] - '0';
-      if (n.exp >= 1000000) break;
-      continue;
+    char c = s[i];
+    if (c == '\0') break;
+    switch(state) {
+      case START:
+        if (c == ' ') continue;
+        if (c == '-') {
+          neg_n = true;
+          state = N_INT;
+        } else if (c == '.') {
+          index_dot = i;
+          state = N_FRAC;
+        } else if (is_digit(c)) {
+          state = N_INT;
+          n = c - '0';
+        } else { format_err = true; }
+        break;
+      case N_INT:
+      case N_FRAC:
+        if (c == ' ') {
+          state = POST_N;
+        } else if (c == '-') {
+          neg_exp = true;
+          state = EXP;
+        } else if (is_digit(c)) {
+          if (n == -1) n = 0;
+          if (n < POW10_12) n = 10 * n + c - '0';
+          else exp += 1;
+          index_end = i;
+        } else if (state == N_INT && c == '.') {
+          index_dot = i;
+          state = N_FRAC;
+        } else { format_err = true; }
+        break;
+      case POST_N:
+        if (c == ' ') continue;
+        if (c == '-') {
+          neg_exp = true;
+          state = EXP;
+        } else if (is_digit(c)) {
+          has_exp = true;
+          exp = c - '0';
+          state = EXP;
+        } else { format_err = true; }
+        break;
+      case EXP:
+	if (c == ' ') {
+          state = POST_EXP;
+        } else if (is_digit(c)) {
+          has_exp = true;
+          if (exp < 100000000) exp = 10 * exp + c - '0';
+        } else { format_err = true; }
+        break;
+      case POST_EXP:
+        if (c == ' ') continue;
+        format_err = true;
     }
-    if (i == 0 && s[i] == '-') {
-      neg = true;
-      continue;
-    }
-    if (s[i] == ' ' || s[i] == '-') {
-      in_exp = true;
-      neg_exp = s[i] == '-';
-      continue;
-    }
-    if (s[i] == '.') {
-      index_dot = i;
-      continue;
-    }
-    if (n.mant >= POW10_12) {
-      n.exp += 1;
-    } else {
-      n.mant = n.mant * 10 + s[i] - '0';
-    }
-    index_end = i;
+    if (format_err) break;
   }
-  if (n.mant == 0) return N_0;
-  if (neg_exp) n.exp = -n.exp;
+  if (n == -1) format_err = true;
+  else if (!has_exp && neg_exp) format_err = true;
+  if (format_err) {
+    if (err) *err = true;
+    return N_0;
+  }
+
+  if (n == 0) return N_0;
+  if (neg_exp) exp = -exp;
 
   // Normalize.
-  while (n.mant < POW10_12) {
-    n.mant *= 10;
-    n.exp -= 1;
+  while (n < POW10_12) {
+    n *= 10;
+    exp -= 1;
   }
-  if (neg) n.mant = -n.mant;
+  if (neg_n) n = -n;
   if (index_dot == -1) index_dot = index_end;
   if (index_dot > index_end) index_dot = index_end;
-  n.exp += 12 - index_end + index_dot;
+  exp += 12 - index_end + index_dot;
 
   // Overflow/underflow.
-  if (ABS(n.exp) > 99) {
+  if (ABS(exp) > 99) {
     if (err) *err = true;
-    n = n.exp < 0 ? N_EPS : N_INF;
-    return n.mant < 0 ? n_chs(n) : n;
+    n_t ret = exp < 0 ? N_EPS : N_INF;
+    return n < 0 ? n_chs(ret) : ret;
   }
 
-  return n;
+///printf("=> %lld %d\n", n, exp);
+  return n_make(n, exp);
 }

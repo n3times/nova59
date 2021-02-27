@@ -224,8 +224,8 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, trig_t mode, bool *err_ou
 /**
  * Number to string.
  *
- * This is the number as it would appear on the display with leading and
- * trailing spaces trimmed:
+ * The return string is the number as it would appear on the display with
+ * leading and trailing spaces trimmed:
  * - "-" if negative number
  * - followed by digits and exactly 1 "."
  *
@@ -239,15 +239,17 @@ void n2s(n_t n, int fix, format_t format, char *str_out, bool *err_out);
 /**
  * String to number.
  *
- * String should be composed of:
- * - a float number such as "1", "12.34", "-12.", "0.1" or "-.1"
- * - followed by an exponent such as "2", "04" or "-99"
+ * String must be composed of:
+ * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
+ *   of at least 1 digit.
+ * - followed, possibly, by an exponent: e or -e where e is a sequence of at
+ *   least 1 digit.
  *
  * There may be spaces at the beginning and end of the string, and between the
- * float number and the exponent. If the the exponent is positive, a space is
- * required between the float and the exponent.
+ * float and the exponent. If the the exponent is positive, a space is required
+ * between the float and the exponent.
  *
- * Sets error if under/overflow or wrong formatting.
+ * Sets error if under/overflow or bad formatting. Returns 0 if bad formatting.
  */
 n_t s2n(char *s, bool *err_out);
 
