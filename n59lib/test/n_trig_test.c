@@ -2,6 +2,8 @@
 
 #include "n.h"
 
+#define PI_MANT 3141592653590LL
+
 int main() {
   // Forensics.
   n_t n = n_make(9000000000000LL, 0);
@@ -16,13 +18,14 @@ int main() {
     printf("%f cos %e\n", i, n_n2d(n_cos(n_d2n(i, NULL), mode, NULL)));
     printf("%f tan %e\n", i, n_n2d(n_tan(n_d2n(i, NULL), mode, NULL)));
   }
-  n_t n2 = n_make(3141592653590LL, 0);
+
+  n = n_make(PI_MANT, 0);
   mode = N_RAD;
-  printf("%lld sin %e\n", n2.mant, n_n2d(n_sin(n2, mode, NULL)));
-  printf("%lld cos %e\n", n2.mant, n_n2d(n_cos(n2, mode, NULL)));
-  printf("%lld tan %e\n", n2.mant, n_n2d(n_tan(n2, mode, NULL)));
-  n2.mant /= 2;
-  printf("%lld sin %e\n", n2.mant, n_n2d(n_sin(n2, mode, NULL)));
-  printf("%lld cos %e\n", n2.mant, n_n2d(n_cos(n2, mode, NULL)));
-  printf("%lld tan %e\n", n2.mant, n_n2d(n_tan(n2, mode, NULL)));
+  printf("%lld sin %e\n", n.mant, n_n2d(n_sin(n, mode, NULL)));
+  printf("%lld cos %e\n", n.mant, n_n2d(n_cos(n, mode, NULL)));
+  printf("%lld tan %e\n", n.mant, n_n2d(n_tan(n, mode, NULL)));
+  n = n_make(PI_MANT / 2, 0);
+  printf("%lld sin %e\n", n.mant, n_n2d(n_sin(n, mode, NULL)));
+  printf("%lld cos %e\n", n.mant, n_n2d(n_cos(n, mode, NULL)));
+  printf("%lld tan %e\n", n.mant, n_n2d(n_tan(n, mode, NULL)));
 }

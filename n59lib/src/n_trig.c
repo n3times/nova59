@@ -22,13 +22,14 @@ double normalize_angle(double d, n_trig_t mode) {
     case N_DEG:  period = 360;    break;
     case N_GRAD: period = 400;    break;
   }
-  double angle = (d/period - floor(d/period)) * period;
+  double normalized_d = d - floor(d/period) * period;
+  assert(normalized_d >= 0);
   switch (mode) {
-    case N_RAD:  assert(angle < 2 * PI); break;
-    case N_DEG:  assert(angle < 360);    break;
-    case N_GRAD: assert(angle < 400);    break;
+    case N_RAD:  assert(normalized_d < 2 * PI); break;
+    case N_DEG:  assert(normalized_d < 360);    break;
+    case N_GRAD: assert(normalized_d < 400);    break;
   }
-  return angle;
+  return normalized_d;
 }
 
 double convert_trig_mode(double d, n_trig_t from, n_trig_t to) {
@@ -38,6 +39,13 @@ double convert_trig_mode(double d, n_trig_t from, n_trig_t to) {
   if (to   == N_DEG)  d = d / PI * 180;
   if (to   == N_GRAD) d = d / PI * 200;
   return (double) d;
+}
+
+static bool is_n_right_angles(double d, n_trig_t mode, int n) {
+  if (mode == N_DEG  &&   90 * n == d) return true;
+  if (mode == N_GRAD &&  100 * n == d) return true;
+  if (mode == N_RAD  && PI/2 * n == d) return true;
+  return false;
 }
 
 
@@ -53,9 +61,9 @@ n_t n_sin(n_t n, n_trig_t mode, bool *err) {
   d = normalize_angle(d, mode);
 
   if (d == 0) return N_0;
-  if (mode == N_DEG  && d == 180) return N_0;
-  if (mode == N_GRAD && d == 200) return N_0;
-  if (mode == N_RAD  && d == PI)  return N_0;
+  if (is_n_right_angles(d, mode, 1)) return N_1;
+  if (is_n_right_angles(d, mode, 2)) return N_0;
+  if (is_n_right_angles(d, mode, 3)) return n_chs(N_1);
 
   d = convert_trig_mode(d, mode, N_RAD);
   return n_d2n(sin(d), err);
@@ -66,9 +74,10 @@ n_t n_cos(n_t n, n_trig_t mode, bool *err) {
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
 
-  if (mode == N_DEG   && (d ==  90  || d == 270))    return N_0;
-  if (mode == N_GRAD  && (d == 100  || d == 300))    return N_0;
-  if (mode == N_RAD   && (d == PI/2 || d == 3*PI/2)) return N_0;
+  if (d == 0) return N_1;
+  if (is_n_right_angles(d, mode, 1)) return N_0;
+  if (is_n_right_angles(d, mode, 2)) return n_chs(N_1);
+  if (is_n_right_angles(d, mode, 3)) return N_0;
 
   d = convert_trig_mode(d, mode, N_RAD);
   return n_d2n(cos(d), err);
@@ -80,18 +89,9 @@ n_t n_tan(n_t n, n_trig_t mode, bool *err) {
   d = normalize_angle(d, mode);
 
   if (d == 0) return N_0;
-  if (mode == N_DEG  && d == 180) return N_0;
-  if (mode == N_GRAD && d == 200) return N_0;
-  if (mode == N_RAD  && d == PI)  return N_0;
-  if (mode == N_DEG  && (d == 90 || d == 270)) {
-    if (err) *err = true;
-    return N_INF;
-  }
-  if (mode == N_GRAD  && (d == 100 || d == 300)) {
-    if (err) *err = true;
-    return N_INF;
-  }
-  if (mode == N_RAD && (d == PI/2 || d == 3*PI/2)) {
+  if (is_n_right_angles(d, mode, 2)) return N_0;
+  if (is_n_right_angles(d, mode, 1) ||
+      is_n_right_angles(d, mode, 3)) {
     if (err) *err = true;
     return N_INF;
   }
