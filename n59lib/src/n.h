@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 
-// The size of the string that needs to be allocated when calling n2s.
+/** The size of the string that needs to be allocated when calling n2s. */
 #define N_STR_MAX_SIZE 14
 
 
@@ -237,7 +237,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_
  *
  * For example: for pi, with fix 2, format SCI: "3.14 00".
  *
- * String 'str_out' must have at least 14 characters.
+ * String 'str_out' must be of size at least 'N_STR_MAX_SIZE'.
  * Sets error if overflow, that is when the display would blink on a TI-59.
  */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err_out);
