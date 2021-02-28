@@ -74,9 +74,10 @@ extern n_t N_EPS;  // Epsilon, smallest positive number.
  ******************************************************************************/
 
 /**
- * Preferred method to make a TI-59 number.
+ * Returns a TI-59 number with the specified mantissa and exponent.
  *
- * Asserts that mant and exp are in the correct range.
+ * Asserts that either mant and exp are zero or mant has 13 digits and exp is in
+ * -99..99.
  */
 n_t n_make(long long mant, int exp);
 

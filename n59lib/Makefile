@@ -1,13 +1,10 @@
 all:
-	make lib
-	make tests
-
-lib:
 	gcc -Wall -c src/*.c
 	ar rcs libn59.a *.o
 
-tests:
-	make lib
+debug:
+	gcc -Wall -c -DNDEBUG src/*.c
+	ar rcs libn59.a *.o
 
 clean:
 	rm *.o *.a tmp a.out
