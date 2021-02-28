@@ -1,5 +1,11 @@
-C library that supports common operations on TI-59 numbers:
+C library that supports common operations on TI-59 numbers.
+
+Operations supported:
 - arithmetic operators
 - math functions
 - conversions between numbers and doubles
 - conversions between numbers and strings 
+
+Build library: make
+Build library in debug mode: make debug
+Run tests: ./runTests

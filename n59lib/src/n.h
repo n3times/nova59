@@ -4,6 +4,10 @@
 #include <stdbool.h>
 
 
+// The size of the string that needs to be allocated when calling n2s.
+#define N_STR_MAX_SIZE 14
+
+
 /**
  * Library that provides arithmetic operators and mathematical functions on
  * TI-59 numbers.
@@ -229,6 +233,7 @@ void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_
  * leading and trailing spaces trimmed:
  * - "-" if negative number
  * - followed by digits and exactly 1 "."
+ * - optionally followed by exponent: " " or "-", and exactly 2 digits
  *
  * For example: for pi, with fix 2, format SCI: "3.14 00".
  *

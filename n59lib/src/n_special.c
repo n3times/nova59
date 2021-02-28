@@ -5,7 +5,7 @@
 
 n_t n_dms(n_t n, int fix, n_format_t format, bool *err) {
   // Normalize.
-  char str[16];
+  char str[N_STR_MAX_SIZE];
   bool err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
@@ -31,7 +31,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, bool *err) {
 
 n_t n_idms(n_t n, int fix, n_format_t format, bool *err) {
   // Normalize.
-  char str[16];
+  char str[N_STR_MAX_SIZE];
   bool err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
@@ -53,7 +53,8 @@ n_t n_idms(n_t n, int fix, n_format_t format, bool *err) {
   return n;
 }
 
-void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err) {
+void n_p_r(
+    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err) {
   double d_rho = n_n2d(rho);
   double d_theta = n_n2d(theta);
   d_theta = normalize_angle(d_theta, mode);
@@ -64,7 +65,8 @@ void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err)
   *y_out = n_d2n(y, err);
 }
 
-void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err) {
+void n_r_p(
+    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err) {
   double d_x = n_n2d(x);
   double d_y = n_n2d(y);
   double d_rho;

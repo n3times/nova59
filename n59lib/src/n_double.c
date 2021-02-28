@@ -11,6 +11,7 @@ n_t n_d2n(double d, bool *err) {
   if (d == 0) return N_0;
   int exp = (int) floor(log10(ABS(d)));
   long long mant = (long long) (ABS(d) * pow(10, 12 - exp) + 0.5);
+
   if (mant >= POW10_13) {
     mant /= 10;
     exp += 1;
@@ -22,5 +23,6 @@ n_t n_d2n(double d, bool *err) {
     return n;
   }
   if (d < 0) mant = -mant;
+
   return n_make(mant, exp);
 }
