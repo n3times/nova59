@@ -1,7 +1,8 @@
 #include "n_internal.h"
 
-#include <stdbool.h>
+#include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 
 #define PI 3.14159265359
 
@@ -19,9 +20,15 @@ double normalize_angle(double d, n_trig_t mode) {
   switch (mode) {
     case N_RAD:  period = 2 * PI; break;
     case N_DEG:  period = 360;    break;
-    case N_GRAD: period = 400;;   break;
+    case N_GRAD: period = 400;    break;
   }
-  return (d/period - floor(d/period)) * period;
+  double angle = (d/period - floor(d/period)) * period;
+  switch (mode) {
+    case N_RAD:  assert(angle < 2 * PI); break;
+    case N_DEG:  assert(angle < 360);    break;
+    case N_GRAD: assert(angle < 400);    break;
+  }
+  return angle;
 }
 
 double convert_trig_mode(double d, n_trig_t from, n_trig_t to) {

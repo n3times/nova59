@@ -1,9 +1,9 @@
 all:
-	gcc -Wall -c src/*.c
+	gcc -Wall -c -DNDEBUG src/*.c
 	ar rcs libn59.a *.o
 
 debug:
-	gcc -Wall -c -DNDEBUG src/*.c
+	gcc -Wall -c src/*.c
 	ar rcs libn59.a *.o
 
 clean:
