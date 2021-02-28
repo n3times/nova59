@@ -4,10 +4,6 @@
 #include <stdbool.h>
 
 
-/** The size of the string that needs to be allocated when calling n2s. */
-#define N_STR_MAX_SIZE 14
-
-
 /**
  * Library that provides arithmetic operators and mathematical functions on
  * TI-59 numbers.
@@ -19,6 +15,10 @@
  * An error occurs when some parameter is not in the function domain ("square
  * root of -1") or because of underflow or overflow ("square of 10^80").
  */
+
+
+/** The size of the string that needs to be allocated when calling n2s. */
+#define N_STR_MAX_SIZE 14
 
 
 /******************************************************************************
@@ -247,9 +247,9 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err_out);
  *
  * String must be composed of:
  * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
- *   of 1 digit or more.
- * - followed, possibly, by an exponent: e or -e where e is a sequence of 1
- *   digit or more.
+ *   of 1 or more digits.
+ * - followed, possibly, by an exponent: e or -e where e is a sequence of 1 or
+ *   more digits.
  *
  * There may be spaces at the beginning and end of the string, and between the
  * float and the exponent. If the the exponent is positive, a space is required

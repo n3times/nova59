@@ -15,7 +15,7 @@
  * a TI-59 number, that is either 0 or a number whose mantissa has exactly 13
  * digits and whose exponent is in -99..99.
  */
-n_t normalize(long long mant, int exp, bool *err) {
+static n_t normalize(long long mant, int exp, bool *err) {
   if (err) *err = false;
   if (mant == 0) return N_0;
   bool neg = mant < 0;

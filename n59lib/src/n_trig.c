@@ -28,8 +28,8 @@ double convert_trig_mode(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
   if (from == N_DEG)  d = d / 180 * PI;
   if (from == N_GRAD) d = d / 200 * PI;
-  if (to == N_DEG)    d = d / PI * 180;
-  if (to == N_GRAD)   d = d / PI * 200;
+  if (to   == N_DEG)  d = d / PI * 180;
+  if (to   == N_GRAD) d = d / PI * 200;
   return (double) d;
 }
 
