@@ -1,7 +1,7 @@
 #ifndef N_INTERNAL_H
 #define N_INTERNAL_H
 
-#include "n.h"
+#include "n59.h"
 
 #define ABS(x)     ( (x) <  0  ? (-x) : (x) )
 #define MIN(x, y)  ( (x) < (y) ?  (x) : (y) )

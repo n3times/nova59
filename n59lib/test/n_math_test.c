@@ -1,6 +1,6 @@
-#include <stdio.h>
-
 #include "n_test.h"
+
+#include <stdio.h>
 
 typedef n_t (*fun_t)(n_t, bool *err);
 typedef n_t (*fun2_t)(n_t);

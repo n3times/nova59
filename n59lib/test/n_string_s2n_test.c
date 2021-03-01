@@ -1,10 +1,8 @@
+#include "n_test.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
-
-#include "n.h"
-
-#define ABS(x)  ( (x) < 0 ? (-x) : (x) )
 
 static void t(char *s) {
   bool err = false;

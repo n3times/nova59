@@ -1,24 +1,25 @@
-#ifndef N_H
-#define N_H
-
-#include <stdbool.h>
-
-
 /**
- * Library that provides arithmetic operators and mathematical functions on
- * TI-59 numbers.
+ * n59.h
  *
- * Note on errors:
- *
- * If non null, 'err_out' parameter is set to true if an error occurs, and to
- * false otherwise.
- * An error occurs when some parameter is not in the function domain ("square
- * root of -1") or because of underflow or overflow ("square of 10^80").
+ * Header file for libn59, a library that implements arithmetic operators and
+ * mathematical functions on TI-59 numbers.
  */
 
 
+#ifndef N59_H
+#define N59_H
+
+#include <stdbool.h>
+
 /** The size of the string that needs to be allocated when calling n2s. */
 #define N_STR_MAX_SIZE 14
+
+/**
+ * Note: Most functions have an 'err_out' parameter. If non null, it is set to
+ * true if an error occurs, and to false otherwise. An error occurs when some
+ * parameter is not in the function domain ("square root of -1") or because of
+ * underflow or overflow ("square of 10^80").
+ */
 
 
 /******************************************************************************
@@ -278,4 +279,4 @@ double n_n2d(n_t n);
  */
 n_t n_d2n(double d, bool *err_out);
 
-#endif  // N_H
+#endif  // N59_H

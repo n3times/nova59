@@ -1,6 +1,6 @@
-#include <stdio.h>
-
 #include "n_test.h"
+
+#include <stdio.h>
 
 #define PI_MANT 3141592653590LL
 #define PI 3.141592653590
