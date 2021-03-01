@@ -13,7 +13,6 @@
  *
  ******************************************************************************/
 
-// Returns angle in period interval [0, period[ for mode.
 double normalize_angle(double d, n_trig_t mode) {
   double period;
   if (ABS(d) >= POW10_13) return 0;
@@ -32,7 +31,7 @@ double normalize_angle(double d, n_trig_t mode) {
   return normalized_d;
 }
 
-double convert_trig_mode(double d, n_trig_t from, n_trig_t to) {
+double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
   if (from == N_DEG)  d = d / 180 * PI;
   if (from == N_GRAD) d = d / 200 * PI;
@@ -65,7 +64,7 @@ n_t n_sin(n_t n, n_trig_t mode, bool *err) {
   if (is_n_right_angles(d, mode, 2)) return N_0;
   if (is_n_right_angles(d, mode, 3)) return n_chs(N_1);
 
-  d = convert_trig_mode(d, mode, N_RAD);
+  d = convert_angle(d, mode, N_RAD);
   return n_d2n(sin(d), err);
 }
 
@@ -79,7 +78,7 @@ n_t n_cos(n_t n, n_trig_t mode, bool *err) {
   if (is_n_right_angles(d, mode, 2)) return n_chs(N_1);
   if (is_n_right_angles(d, mode, 3)) return N_0;
 
-  d = convert_trig_mode(d, mode, N_RAD);
+  d = convert_angle(d, mode, N_RAD);
   return n_d2n(cos(d), err);
 }
 
@@ -96,7 +95,7 @@ n_t n_tan(n_t n, n_trig_t mode, bool *err) {
     return N_INF;
   }
 
-  d = convert_trig_mode(d, mode, N_RAD);
+  d = convert_angle(d, mode, N_RAD);
   return n_d2n(tan(d), err);
 }
 
@@ -106,7 +105,7 @@ n_t n_asin(n_t n, n_trig_t mode, bool *err) {
     if (err) *err = true;
     return n;
   }
-  d = convert_trig_mode(d, N_RAD, mode);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }
 
@@ -116,12 +115,12 @@ n_t n_acos(n_t n, n_trig_t mode, bool *err) {
     if (err) *err = true;
     return n;
   }
-  d = convert_trig_mode(d, N_RAD, mode);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }
 
 n_t n_atan(n_t n, n_trig_t mode, bool *err) {
   double d = atan(n_n2d(n));
-  d = convert_trig_mode(d, N_RAD, mode);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }

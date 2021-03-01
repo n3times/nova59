@@ -138,7 +138,7 @@ n_t n_int(n_t n);
 /** The fractional part of n: n_frac(-3.6) == -0.6, n_frac(3.6) == 0.6. */
 n_t n_frac(n_t n);
 
-/** n * n. */
+/** n^2. */
 n_t n_square(n_t n, bool *err_out);
 
 /** 1/n. */
