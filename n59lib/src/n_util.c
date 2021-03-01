@@ -5,7 +5,7 @@
 #if !NDEBUG
 static bool n_is_number(long long mant, int exp) {
   return ( (mant == 0 && exp == 0) ||
-           (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13) );
+           (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99) );
 }
 #endif
 
