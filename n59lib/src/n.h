@@ -210,14 +210,16 @@ n_t n_dms(n_t n, int fix, n_format_t format, bool *err_out);
 n_t n_idms(n_t n, int fix, n_format_t format, bool *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
-void n_p_r(n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err_out);
+void n_p_r(
+    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err_out);
 
 /**
  * Converts rectangular coordinates to polar coordinates.
  *
  * theta_out is in range -90..270
  */
-void n_r_p(n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_out);
+void n_r_p(
+    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_out);
 
 
 /******************************************************************************

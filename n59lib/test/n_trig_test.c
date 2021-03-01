@@ -1,10 +1,9 @@
 #include <stdio.h>
 
-#include "n.h"
+#include "n_test.h"
 
 #define PI_MANT 3141592653590LL
 #define PI 3.141592653590
-#define N_ELEMS(array)  ( sizeof(array) / sizeof((array)[0]) )
 
 typedef n_t (*fun_t)(n_t, n_trig_t mode, bool *err);
 
@@ -18,7 +17,7 @@ int main() {
   n_t n = n_make(9000000000000LL, 0);
   n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n, N_DEG, NULL), N_DEG,
       NULL), N_DEG, NULL), N_DEG, NULL), N_DEG, NULL), N_DEG, NULL);
-  printf("Forensics asin(acos(atan(tan(cos(sin(9)))))):\n%lld %d => %lld %d\n\n",
+  printf("Forensics as(ac(at(t(c(s(9)))))):\n%lld %d => %lld %d\n\n",
      n.mant, n.exp, res.mant, res.exp);
 
   fun_t funs[] = { n_sin, n_cos, n_tan };

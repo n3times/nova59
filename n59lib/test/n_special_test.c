@@ -1,8 +1,6 @@
-#include "n_internal.h"
+#include "n_test.h"
 
 #include <stdio.h>
-
-#define N_ELEMS(array)  ( sizeof(array) / sizeof((array)[0]) )
 
 static n_t N_0_5 =     {  5000000000000LL,  -1 };
 static n_t N_0_5_NEG = { -5000000000000LL,  -1 };

@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+
 /******************************************************************************
  *
  *  HELPERS.
@@ -31,6 +32,7 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
 static bool is_digit(char c) {
   return c >= '0' && c <= '9';
 }
+
 
 /******************************************************************************
  *

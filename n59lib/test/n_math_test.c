@@ -1,8 +1,6 @@
 #include <stdio.h>
 
-#include "n.h"
-
-#define N_ELEMS(array)  ( sizeof(array) / sizeof((array)[0]) )
+#include "n_test.h"
 
 typedef n_t (*fun_t)(n_t, bool *err);
 typedef n_t (*fun2_t)(n_t);

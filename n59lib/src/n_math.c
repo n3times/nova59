@@ -4,13 +4,11 @@
 #include <math.h>
 
 n_t n_chs(n_t n) {
-  n.mant = -n.mant;
-  return n;
+  return n_make(-n.mant, n.exp);
 }
 
 n_t n_abs(n_t n) {
-  n.mant = ABS(n.mant);
-  return n;
+  return n_make(ABS(n.mant), n.exp);
 }
 
 n_t n_sign(n_t n) {
@@ -47,7 +45,7 @@ n_t n_sqrt(n_t n, bool *err) {
   if (err) *err = false;
   if (n.mant < 0) {
     if (err) *err = true;
-    n.mant = -n.mant;
+    n = n_chs(n);
   }
   return n_d2n(sqrt(n_n2d(n)), NULL);
 }
@@ -60,7 +58,7 @@ n_t n_ln(n_t n, bool *err) {
   }
   if (n.mant < 0) {
     if (err) *err = true;
-    n.mant = -n.mant;
+    n = n_chs(n);
   }
   return n_d2n(log(n_n2d(n)), NULL);
 }
@@ -73,7 +71,7 @@ n_t n_log(n_t n, bool *err) {
   }
   if (n.mant < 0) {
     if (err) *err = true;
-    n.mant = -n.mant;
+    n = n_chs(n);
   }
   return n_d2n(log10(n_n2d(n)), NULL);
 }
