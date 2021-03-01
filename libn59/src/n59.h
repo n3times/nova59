@@ -45,18 +45,31 @@ typedef struct n_s {
 } n_t;
 
 /** Display formats. */
-typedef enum format_e {
+typedef enum n_format_e {
   N_FLOAT,  // Float if possible, scientific for small and big numbers.
   N_SCI,    // Scientific notation.
   N_ENG     // Engineering notation.
 } n_format_t;
 
 /** Trigonometric modes. */
-typedef enum trig_e {
+typedef enum n_trig_e {
   N_RAD,  // Radians.
   N_DEG,  // Degrees.
   N_GRAD  // Gradians.
 } n_trig_t;
+
+/**
+ * Errors.
+ *
+ * Used as an out parameter by most functions from the library. If 'err_out' is
+ * null, it is ignored. Otherwise, it is set to one of the value in the enum.
+ */
+typedef enum n_err_e {
+  N_ERR_NONE = 0,   // No error.
+  N_ERR_DOMAIN,     // Input not in the domain of the function.
+  N_ERR_UNDERFLOW,  // Value too small, in absolute value, to be stored.
+  N_ERR_OVERFLOW,   // Value too big, in absolute value, to be displayed/stored.
+} n_err_t;
 
 
 /******************************************************************************
@@ -100,22 +113,22 @@ bool n_is_zero(n_t n);
  ******************************************************************************/
 
 /** Addition. */
-n_t n_plus(n_t n1, n_t n2, bool *err_out);
+n_t n_plus(n_t n1, n_t n2, n_err_t *err_out);
 
 /** Substraction. */
-n_t n_minus(n_t n1, n_t n2, bool *err_out);
+n_t n_minus(n_t n1, n_t n2, n_err_t *err_out);
 
 /** Multiplication. */
-n_t n_times(n_t n1, n_t n2, bool *err_out);
+n_t n_times(n_t n1, n_t n2, n_err_t *err_out);
 
 /** Division. */
-n_t n_div(n_t n1, n_t n2, bool *err_out);
+n_t n_div(n_t n1, n_t n2, n_err_t *err_out);
 
 /** Exponentiation. */
-n_t n_pow(n_t n1, n_t n2, bool *err_out);
+n_t n_pow(n_t n1, n_t n2, n_err_t *err_out);
 
 /** Root extraction. */
-n_t n_ipow(n_t n1, n_t n2, bool *err_out);
+n_t n_ipow(n_t n1, n_t n2, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -140,25 +153,25 @@ n_t n_int(n_t n);
 n_t n_frac(n_t n);
 
 /** n^2. */
-n_t n_square(n_t n, bool *err_out);
+n_t n_square(n_t n, n_err_t *err_out);
 
 /** 1/n. */
-n_t n_1_x(n_t n, bool *err_out);
+n_t n_1_x(n_t n, n_err_t *err_out);
 
 /** Square root of n. */
-n_t n_sqrt(n_t n, bool *err_out);
+n_t n_sqrt(n_t n, n_err_t *err_out);
 
 /** Natural log. */
-n_t n_ln(n_t n, bool *err_out);
+n_t n_ln(n_t n, n_err_t *err_out);
 
 /** Log in base 10. */
-n_t n_log(n_t n, bool *err_out);
+n_t n_log(n_t n, n_err_t *err_out);
 
 /** e^n. */
-n_t n_exp(n_t n, bool *err_out);
+n_t n_exp(n_t n, n_err_t *err_out);
 
 /** 10^n. */
-n_t n_pow10(n_t n, bool *err_out);
+n_t n_pow10(n_t n, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -168,22 +181,22 @@ n_t n_pow10(n_t n, bool *err_out);
  ******************************************************************************/
 
 /** sine. */
-n_t n_sin(n_t n, n_trig_t mode, bool *err_out);
+n_t n_sin(n_t n, n_trig_t mode, n_err_t *err_out);
 
 /** cosine. */
-n_t n_cos(n_t n, n_trig_t mode, bool *err_out);
+n_t n_cos(n_t n, n_trig_t mode, n_err_t *err_out);
 
 /** tangent. */
-n_t n_tan(n_t n, n_trig_t mode, bool *err_out);
+n_t n_tan(n_t n, n_trig_t mode, n_err_t *err_out);
 
 /** arcsine. Range is -90..90 (in DEG mode). */
-n_t n_asin(n_t n, n_trig_t mode, bool *err_out);
+n_t n_asin(n_t n, n_trig_t mode, n_err_t *err_out);
 
 /** arccossine. Range is 0..180 (in DEG mode). */
-n_t n_acos(n_t n, n_trig_t mode, bool *err_out);
+n_t n_acos(n_t n, n_trig_t mode, n_err_t *err_out);
 
 /** arctangent. Range is -90..90 (in DEG mode). */
-n_t n_atan(n_t n, n_trig_t mode, bool *err_out);
+n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -198,8 +211,10 @@ n_t n_atan(n_t n, n_trig_t mode, bool *err_out);
  * Only the digits of n that are visible on the TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
  * be first trimmed down to 3.15 and then converted to 3.25.
+ *
+ * Note: fix must be in 0..9
  */
-n_t n_dms(n_t n, int fix, n_format_t format, bool *err_out);
+n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
 /**
  * Converts decimal degrees to degrees/minutes/seconds.
@@ -207,12 +222,14 @@ n_t n_dms(n_t n, int fix, n_format_t format, bool *err_out);
  * Only the digits of n that are visible on the TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
  * be first trimmed down to 3.25 and then converted to 3.15.
+ *
+ * Note: fix must be in 0..9
  */
-n_t n_idms(n_t n, int fix, n_format_t format, bool *err_out);
+n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
 void n_p_r(
-    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err_out);
+    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, n_err_t *err_out);
 
 /**
  * Converts rectangular coordinates to polar coordinates.
@@ -220,7 +237,7 @@ void n_p_r(
  * theta_out is in range -90..270
  */
 void n_r_p(
-    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err_out);
+    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -243,7 +260,7 @@ void n_r_p(
  * String 'str_out' must be of size at least 'N_STR_MAX_SIZE'.
  * Sets error if overflow, that is when the display would blink on a TI-59.
  */
-void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err_out);
+void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 
 /**
  * String to number.
@@ -260,7 +277,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err_out);
  *
  * Sets error if under/overflow or bad formatting. Returns 0 if bad formatting.
  */
-n_t n_s2n(char *s, bool *err_out);
+n_t n_s2n(char *s, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -277,6 +294,6 @@ double n_n2d(n_t n);
  *
  * Sets error if under/overflow.
  */
-n_t n_d2n(double d, bool *err_out);
+n_t n_d2n(double d, n_err_t *err_out);
 
 #endif  // N59_H

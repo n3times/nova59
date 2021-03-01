@@ -4,14 +4,14 @@
 
 static void t1(n_t n) {
   double d = n_n2d(n);
-  bool err;
+  n_err_t err;
   n_t n2 = n_d2n(d, &err);
   printf("% 14lld % 3d  =>  %20.13e  =>  % 14lld % 3d%s\n",
          n.mant, n.exp, d, n2.mant, n2.exp, err ? " ?" : "");
 }
 
 static void t2(double d) {
-  bool err;
+  n_err_t err;
   n_t n = n_d2n(d, &err);
   double d2 = n_n2d(n);
   printf("%22.15e  =>  % 14lld % 3d%s  =>  %22.15e\n",

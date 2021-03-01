@@ -29,7 +29,7 @@ static void get_display(bool neg, long long mant, int int_len, int frac_len,
   str_out[i++] = '\0';
 }
 
-static bool is_digit(char c) {
+static n_err_t is_digit(char c) {
   return c >= '0' && c <= '9';
 }
 
@@ -41,15 +41,15 @@ static bool is_digit(char c) {
  ******************************************************************************/
 
 /** Number to string. */
-void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err) {
-  bool neg = n.mant < 0;
+void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
+  n_err_t neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
   if (err) *err = false;
 
-  bool is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
-  bool is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
-  bool is_exp = format != N_FLOAT || is_big || (is_small && fix == 9);
+  n_err_t is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
+  n_err_t is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
+  n_err_t is_exp = format != N_FLOAT || is_big || (is_small && fix == 9);
 
   if (is_small && fix != 9 && format == N_FLOAT) {
     return n_n2s(N_0, fix, N_FLOAT, str_out, err);
@@ -76,7 +76,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err) {
   int keep = mant_len;
   if (!is_exp && exp < 0) keep = frac_len + exp + 1;
   mant = mant / pow(10, 13 - keep);
-  bool round = ABS(n.mant) / (long long)pow(10, 12 - keep) % 10 >= 5;
+  n_err_t round = ABS(n.mant) / (long long)pow(10, 12 - keep) % 10 >= 5;
   if (round) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
@@ -124,7 +124,8 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, bool *err) {
   get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, str_out);
 }
 
-n_t n_s2n(char *s, bool *err) {
+n_t n_s2n(char *s, n_err_t *err) {
+  if (err) *err = false;
   enum state_e {
     START,
     N_INT,
@@ -134,13 +135,13 @@ n_t n_s2n(char *s, bool *err) {
     POST_EXP
   };
   enum state_e state = START;
-  bool format_err = false;
+  n_err_t format_err = false;
   long long n = 0;
   int exp = 0;
-  bool has_n = false;
-  bool has_exp = false;
-  bool neg_n = false;
-  bool neg_exp = false;
+  n_err_t has_n = false;
+  n_err_t has_exp = false;
+  n_err_t neg_n = false;
+  n_err_t neg_exp = false;
   int index_dot = -1;
   int index_end = 0;
 

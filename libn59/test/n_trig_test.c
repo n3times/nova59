@@ -5,11 +5,13 @@
 #define PI_MANT 3141592653590LL
 #define PI 3.141592653590
 
-typedef n_t (*fun_t)(n_t, n_trig_t mode, bool *err);
+typedef n_t (*fun_t)(n_t, n_trig_t mode, n_err_t *err);
 
-static void t(char *mode_str, n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, bool *)) {
+static void t(char *mode_str, n_t n, n_trig_t mode, char *str,
+              n_t (op)(n_t, n_trig_t, n_err_t *)) {
   n_t res = op(n, mode, NULL);
-  printf("%s %s % 12f => % 014lld% 03d\n", mode_str, str, n_n2d(n), res.mant, res.exp);
+  printf("%s %s % 12f => % 014lld% 03d\n",
+         mode_str, str, n_n2d(n), res.mant, res.exp);
 }
 
 int main() {
@@ -18,7 +20,7 @@ int main() {
   n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n, N_DEG, NULL), N_DEG,
       NULL), N_DEG, NULL), N_DEG, NULL), N_DEG, NULL), N_DEG, NULL);
   printf("Forensics as(ac(at(t(c(s(9)))))):\n%lld %d => %lld %d\n\n",
-     n.mant, n.exp, res.mant, res.exp);
+         n.mant, n.exp, res.mant, res.exp);
 
   fun_t funs[] = { n_sin, n_cos, n_tan };
   char *ops[] = { "sin", "cos", "tan" };

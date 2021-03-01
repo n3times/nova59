@@ -6,7 +6,7 @@ double n_n2d(n_t n) {
   return n.mant * pow(10, n.exp - 12);
 }
 
-n_t n_d2n(double d, bool *err) {
+n_t n_d2n(double d, n_err_t *err) {
   if (err) *err = false;
   if (d == 0) return N_0;
   int exp = (int) floor(log10(ABS(d)));

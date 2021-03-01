@@ -40,7 +40,7 @@ double convert_angle(double d, n_trig_t from, n_trig_t to) {
   return (double) d;
 }
 
-static bool is_n_right_angles(double d, n_trig_t mode, int n) {
+static n_err_t is_n_right_angles(double d, n_trig_t mode, int n) {
   if (mode == N_DEG  &&   90 * n == d) return true;
   if (mode == N_GRAD &&  100 * n == d) return true;
   if (mode == N_RAD  && PI/2 * n == d) return true;
@@ -54,7 +54,7 @@ static bool is_n_right_angles(double d, n_trig_t mode, int n) {
  *
  ******************************************************************************/
 
-n_t n_sin(n_t n, n_trig_t mode, bool *err) {
+n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = false;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
@@ -68,7 +68,7 @@ n_t n_sin(n_t n, n_trig_t mode, bool *err) {
   return n_d2n(sin(d), err);
 }
 
-n_t n_cos(n_t n, n_trig_t mode, bool *err) {
+n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = false;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
@@ -82,7 +82,7 @@ n_t n_cos(n_t n, n_trig_t mode, bool *err) {
   return n_d2n(cos(d), err);
 }
 
-n_t n_tan(n_t n, n_trig_t mode, bool *err) {
+n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = false;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
@@ -99,7 +99,7 @@ n_t n_tan(n_t n, n_trig_t mode, bool *err) {
   return n_d2n(tan(d), err);
 }
 
-n_t n_asin(n_t n, n_trig_t mode, bool *err) {
+n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
   double d = asin(n_n2d(n));
   if (ABS(d) > 1) {
     if (err) *err = true;
@@ -109,7 +109,7 @@ n_t n_asin(n_t n, n_trig_t mode, bool *err) {
   return n_d2n(d, err);
 }
 
-n_t n_acos(n_t n, n_trig_t mode, bool *err) {
+n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
   double d = acos(n_n2d(n));
   if (ABS(d) > 1) {
     if (err) *err = true;
@@ -119,7 +119,7 @@ n_t n_acos(n_t n, n_trig_t mode, bool *err) {
   return n_d2n(d, err);
 }
 
-n_t n_atan(n_t n, n_trig_t mode, bool *err) {
+n_t n_atan(n_t n, n_trig_t mode, n_err_t *err) {
   double d = atan(n_n2d(n));
   d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);

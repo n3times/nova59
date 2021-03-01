@@ -3,16 +3,16 @@
 #include <math.h>
 #include <stdbool.h>
 
-n_t n_dms(n_t n, int fix, n_format_t format, bool *err) {
+n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   // Normalize.
   char str[N_STR_MAX_SIZE];
-  bool err1, err2, err3;
+  n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
-  bool neg = n.mant < 0;
+  n_err_t neg = n.mant < 0;
   if (neg) n.mant = -n.mant;
 
   long long h = (long long) (n.mant / pow(10, 12 - n.exp));
@@ -29,16 +29,16 @@ n_t n_dms(n_t n, int fix, n_format_t format, bool *err) {
   return n;
 }
 
-n_t n_idms(n_t n, int fix, n_format_t format, bool *err) {
+n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   // Normalize.
   char str[N_STR_MAX_SIZE];
-  bool err1, err2, err3;
+  n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
 
   if (n.exp >= 10) return n;
 
-  bool neg = n.mant < 0;
+  n_err_t neg = n.mant < 0;
   if (neg) n.mant = -n.mant;
   double d = n_n2d(n);
   long long h = (long long) d;
@@ -54,7 +54,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, bool *err) {
 }
 
 void n_p_r(
-    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, bool *err) {
+    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, n_err_t *err) {
   double d_rho = n_n2d(rho);
   double d_theta = n_n2d(theta);
   d_theta = normalize_angle(d_theta, mode);
@@ -66,7 +66,7 @@ void n_p_r(
 }
 
 void n_r_p(
-    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, bool *err) {
+    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, n_err_t *err) {
   double d_x = n_n2d(x);
   double d_y = n_n2d(y);
   double d_rho;

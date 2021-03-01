@@ -2,9 +2,9 @@
 
 #include <stdio.h>
 
-typedef n_t (*fun_t)(n_t, n_t, bool *);
+typedef n_t (*fun_t)(n_t, n_t, n_err_t *);
 
-static void p(n_t n1, n_t n2, n_t res, bool err, char *op) {
+static void p(n_t n1, n_t n2, n_t res, n_err_t err, char *op) {
   printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d%s\n",
          n1.mant, n1.exp,
          op,
@@ -14,7 +14,7 @@ static void p(n_t n1, n_t n2, n_t res, bool err, char *op) {
 }
 
 int main() {
-  bool err;
+  n_err_t err;
   n_t n;
   n_t ns[] = {
     N_0, N_1, N_PI, N_EPS, N_INF,
