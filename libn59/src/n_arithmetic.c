@@ -16,7 +16,7 @@
  * digits and whose exponent is in -99..99.
  */
 static n_t normalize_number(long long mant, int exp, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (mant == 0) return N_0;
   n_err_t neg = mant < 0;
   if (neg) mant = -mant;
@@ -30,7 +30,7 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
   }
   if (neg) mant = -mant;
   if (ABS(exp > 99)) {
-    if (err) *err = true;
+    if (err) *err = exp < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
     n_t n = exp < 0 ? N_EPS : N_INF;
     return neg ? n_chs(n) : n;
   }
@@ -45,7 +45,7 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  ******************************************************************************/
 
 n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1)) return n2;
   if (n_is_zero(n2)) return n1;
   if (n1.exp < n2.exp) {
@@ -79,7 +79,7 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
   if (d2 != 0) return n_d2n(d1/d2, err);
-  if (err) *err = true;
+  if (err) *err = N_ERR_DOMAIN;
   if (d1 == 0) return N_1;
   return (d1 > 0) ? N_INF : n_chs(N_INF);
 }
@@ -87,7 +87,7 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
 n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
 
   if (d1 == 0) {
     if (d2 == 0) {
@@ -95,35 +95,35 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
     } else if (d2 > 0) {
       return N_0;
     } else {
-      if (err) *err = true;
+      if (err) *err = N_ERR_DOMAIN;
       return N_INF;
     }
   }
   if (d1 < 0) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     d1 = -d1;
   }
   double exp = (double) (d2 * log10(d1));
   if (exp >= 100) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_OVERFLOW;
     return N_INF;
   } else if (exp < -99) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_UNDERFLOW;
     return N_EPS;
   }
 
   n_err_t err2;
   n_t res = n_d2n(pow(d1, d2), &err2);
-  if (err) *err = *err || err2;
+  if (err) *err = *err ? *err : err2;
   return res;
 }
 
 n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (d2 == 0) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     d1 = ABS(d1);
     if (d1 == 0 || d1 == 1) {
       return N_1;

@@ -35,42 +35,42 @@ n_t n_square(n_t n, n_err_t *err) {
 
 n_t n_1_x(n_t n, n_err_t *err) {
   if (n_is_zero(n)) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return N_INF;
   }
   return n_d2n(1/n_n2d(n), err);
 }
 
 n_t n_sqrt(n_t n, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (n.mant < 0) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     n = n_chs(n);
   }
   return n_d2n(sqrt(n_n2d(n)), NULL);
 }
 
 n_t n_ln(n_t n, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (n_is_zero(n)) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return n_chs(N_INF);
   }
   if (n.mant < 0) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     n = n_chs(n);
   }
   return n_d2n(log(n_n2d(n)), NULL);
 }
 
 n_t n_log(n_t n, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   if (n_is_zero(n)) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return n_chs(N_INF);
   }
   if (n.mant < 0) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     n = n_chs(n);
   }
   return n_d2n(log10(n_n2d(n)), NULL);
@@ -79,7 +79,7 @@ n_t n_log(n_t n, n_err_t *err) {
 n_t n_exp(n_t n, n_err_t *err) {
   double d = n_n2d(n);
   if (ABS(d) > 231) {
-    if (err) *err = true;
+    if (err) *err = d < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
     return d < 0 ? N_EPS : N_INF;
   }
   return n_d2n(exp(d), err);
@@ -88,7 +88,7 @@ n_t n_exp(n_t n, n_err_t *err) {
 n_t n_pow10(n_t n, n_err_t *err) {
   double d = n_n2d(n);
   if (ABS(d) > 100) {
-    if (err) *err = true;
+    if (err) *err = d < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
     return d < 0 ? N_EPS : N_INF;
   }
   return n_d2n(pow(10, d), err);

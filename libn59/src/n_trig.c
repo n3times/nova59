@@ -44,7 +44,7 @@ static n_err_t is_n_right_angles(double d, n_trig_t mode, int n) {
   if (mode == N_DEG  &&   90 * n == d) return true;
   if (mode == N_GRAD &&  100 * n == d) return true;
   if (mode == N_RAD  && PI/2 * n == d) return true;
-  return false;
+  return N_ERR_NONE;
 }
 
 
@@ -55,7 +55,7 @@ static n_err_t is_n_right_angles(double d, n_trig_t mode, int n) {
  ******************************************************************************/
 
 n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
 
@@ -69,7 +69,7 @@ n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
 
@@ -83,7 +83,7 @@ n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
   d = normalize_angle(d, mode);
 
@@ -91,7 +91,7 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
   if (is_n_right_angles(d, mode, 2)) return N_0;
   if (is_n_right_angles(d, mode, 1) ||
       is_n_right_angles(d, mode, 3)) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_OVERFLOW;
     return N_INF;
   }
 
@@ -102,7 +102,7 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
   double d = asin(n_n2d(n));
   if (ABS(d) > 1) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return n;
   }
   d = convert_angle(d, N_RAD, mode);
@@ -112,7 +112,7 @@ n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
   double d = acos(n_n2d(n));
   if (ABS(d) > 1) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return n;
   }
   d = convert_angle(d, N_RAD, mode);

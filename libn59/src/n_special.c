@@ -1,5 +1,6 @@
 #include "n_internal.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -8,7 +9,9 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   char str[N_STR_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
+  assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
   n = n_s2n(str, &err2);
+  assert(err2 == N_ERR_NONE);
 
   if (n.exp >= 10) return n;
 
@@ -25,7 +28,8 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (neg) res = -res;
 
   n = n_d2n(res, &err3);
-  if (err) *err = err1 || err2 || err3;
+  assert(err3 == N_ERR_NONE);
+  if (err) *err = err1;
   return n;
 }
 
@@ -34,7 +38,9 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   char str[N_STR_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
+  assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
   n = n_s2n(str, &err2);
+  assert(err2 == N_ERR_NONE);
 
   if (n.exp >= 10) return n;
 
@@ -49,7 +55,12 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (neg) res = -res;
 
   n = n_d2n(res, &err3);
-  if (err) *err = err1 || err2 || err3;
+  assert(err3 == N_ERR_NONE || err3 == N_ERR_UNDERFLOW);
+  assert(err1 == N_ERR_NONE || err3 == N_ERR_NONE);
+  if (err) {
+    if (err1 != N_ERR_NONE) *err = err1;
+    else *err = err3;
+  }
   return n;
 }
 

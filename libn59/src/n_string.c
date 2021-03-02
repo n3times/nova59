@@ -45,7 +45,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
   n_err_t neg = n.mant < 0;
   long long mant = ABS(n.mant);
   int exp = n.exp;
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
 
   n_err_t is_big = exp >= 10; // || (exp == 9 && mant >= POW10_13 - 500);
   n_err_t is_small = exp <= -12 || (exp == -11 && mant < 5 * POW10_12);
@@ -118,14 +118,14 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
     frac_len = MIN(fix, 7);
     mant = (int) pow(10, 1 + frac_len) - 1;
     exp = 99;
-    if (err) *err = true;
+    if (err) *err = N_ERR_OVERFLOW;
   }
 
   get_display(neg, mant, int_len, frac_len, is_exp ? exp : -100, str_out);
 }
 
 n_t n_s2n(char *s, n_err_t *err) {
-  if (err) *err = false;
+  if (err) *err = N_ERR_NONE;
   enum state_e {
     START,
     N_INT,
@@ -209,7 +209,7 @@ n_t n_s2n(char *s, n_err_t *err) {
 
   if (!has_n || (!has_exp && neg_exp)) format_err = true;
   if (format_err) {
-    if (err) *err = true;
+    if (err) *err = N_ERR_DOMAIN;
     return N_0;
   }
 
@@ -228,7 +228,7 @@ n_t n_s2n(char *s, n_err_t *err) {
 
   // Overflow/underflow.
   if (ABS(exp) > 99) {
-    if (err) *err = true;
+    if (err) *err = exp < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
     n_t ret = exp < 0 ? N_EPS : N_INF;
     return n < 0 ? n_chs(ret) : ret;
   }
