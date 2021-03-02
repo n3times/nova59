@@ -18,7 +18,7 @@
  * Note: Most functions have an 'err_out' parameter. If non null, it is set to
  * true if an error occurs, and to false otherwise. An error occurs when some
  * parameter is not in the function domain ("square root of -1") or because of
- * underflow or overflow ("square of 10^80"). An a TI-59, the display would
+ * underflow or overflow ("square of 10^80"). In a TI-59, the display would
  * blink in case of error.
  */
 

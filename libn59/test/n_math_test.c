@@ -16,10 +16,7 @@ static void p(n_t n, n_t res, n_err_t err, char *op) {
 int main() {
   n_err_t err;
   n_t n;
-  n_t ns[] = {
-    N_0, N_1, N_PI, N_EPS, N_INF,
-    n_chs(N_1), n_chs(N_PI), n_chs(N_EPS), n_chs(N_INF)
-  };
+  n_t ns[] = { TEST_NUMBERS };
 
   fun_t funs[] = { n_square, n_sqrt, n_log, n_ln, n_1_over_x, n_exp, n_pow10 };
   char *ops[] = { "square", "sqrt", "log", "ln", "1/x" , "exp", "pow10" };

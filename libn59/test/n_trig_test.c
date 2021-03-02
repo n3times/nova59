@@ -5,13 +5,12 @@
 #define PI_MANT 3141592653590LL
 #define PI 3.141592653590
 
-typedef n_t (*fun_t)(n_t, n_trig_t mode, n_err_t *err);
+typedef n_t (*trig_fun_t)(n_t, n_trig_t mode, n_err_t *err);
 
-static void t(char *mode_str, n_t n, n_trig_t mode, char *str,
-              n_t (op)(n_t, n_trig_t, n_err_t *)) {
+static void t(n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *)) {
   n_t res = op(n, mode, NULL);
-  printf("%s %s % 12f => % 014lld% 03d\n",
-         mode_str, str, n_n2d(n), res.mant, res.exp);
+  printf("%4s % 014lld% 03d => % 014lld% 03d\n",
+         str, n.mant, n.exp, res.mant, res.exp);
 }
 
 int main() {
@@ -22,27 +21,53 @@ int main() {
   printf("Forensics as(ac(at(t(c(s(9)))))):\n%lld %d => %lld %d\n\n",
          n.mant, n.exp, res.mant, res.exp);
 
-  fun_t funs[] = { n_sin, n_cos, n_tan };
-  char *ops[] = { "sin", "cos", "tan" };
+  trig_fun_t funs[] = { n_sin, n_cos, n_tan, n_asin, n_acos, n_atan };
+  char *ops[] = { "sin", "cos", "tan", "asin", "acos", "atan" };
 
-  for (int k = 0; k < N_ELEMS(funs); k++) {
-    for (double i = -720; i < 720; i += 45) {
-      t("Deg: ", n_d2n(i, NULL), N_DEG, ops[k], funs[k]);
+  printf("DEGREES: -720 .. -90 -45 0 45 90 .. 720\n");
+  printf("=======================================\n\n");
+  for (int k = 0; k < N_ELEMS(funs) / 2; k++) {
+    for (int i = -16; i < 16; i += 1) {
+      n = n_d2n(i * 45, NULL);
+      t(n, N_DEG, ops[k], funs[k]);
     }
     printf("\n");
   }
+  printf("\n");
 
-  for (int k = 0; k < N_ELEMS(funs); k++) {
-    for (double i = -800; i < 800; i += 50) {
-      t("Grad:", n_d2n(i, NULL), N_GRAD, ops[k], funs[k]);
+  printf("GRADIANS -800 .. -100 -50 0 50 100 .. 800\n");
+  printf("=========================================\n\n");
+  for (int k = 0; k < N_ELEMS(funs) / 2; k++) {
+    for (int i = -16; i < 16; i += 1) {
+      n = n_d2n(i * 50, NULL);
+      t(n, N_GRAD, ops[k], funs[k]);
     }
     printf("\n");
   }
+  printf("\n");
 
-  for (int k = 0; k < N_ELEMS(funs); k++) {
+  printf("RADIANS -4PI .. -PI/2 -PI/4 0 PI/4 PI/2 .. 4PI\n");
+  printf("==============================================\n\n");
+  for (int k = 0; k < N_ELEMS(funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
       double d = (i/2)*PI/2 + (i%2)*PI/4;
-      t("Rad: ", n_d2n(d, NULL), N_RAD, ops[k], funs[k]);
+      t(n_d2n(d, NULL), N_RAD, ops[k], funs[k]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  n_t ns[] = { TEST_NUMBERS };
+  n_trig_t modes[] = { N_DEG, N_GRAD, N_RAD };
+  char *mode_strs[] = { "Deg ", "Grad", "Rad "};
+  for (int j = 0; j < N_ELEMS(modes); j++) {
+    printf("%s: 0 1 pi eps inf -1 -pi -eps -inf\n", mode_strs[j]);
+    printf("=====================================\n\n");
+    for (int k = 0; k < N_ELEMS(funs); k++) {
+      for (int i = 0; i < N_ELEMS(ns); i++) {
+        t(ns[i], modes[j], ops[k], funs[k]);
+      }
+      printf("\n");
     }
     printf("\n");
   }
