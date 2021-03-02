@@ -157,7 +157,7 @@ n_t n_frac(n_t n);
 n_t n_square(n_t n, n_err_t *err_out);
 
 /** 1/n. */
-n_t n_1_x(n_t n, n_err_t *err_out);
+n_t n_1_over_x(n_t n, n_err_t *err_out);
 
 /** Square root of n. */
 n_t n_sqrt(n_t n, n_err_t *err_out);

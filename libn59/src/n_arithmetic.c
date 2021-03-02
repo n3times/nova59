@@ -64,6 +64,7 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
     n2.exp += 1;
     n2.mant /= 10;
   }
+
   return normalize_number(n1.mant + n2.mant, n1.exp, err);
 }
 
@@ -132,5 +133,5 @@ n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
     }
     return N_INF;
   }
-  return n_pow(n1, n_1_x(n2, NULL), err);
+  return n_pow(n1, n_1_over_x(n2, NULL), err);
 }

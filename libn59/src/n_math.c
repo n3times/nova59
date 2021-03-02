@@ -33,7 +33,7 @@ n_t n_square(n_t n, n_err_t *err) {
   return n_d2n(d * d, err);
 }
 
-n_t n_1_x(n_t n, n_err_t *err) {
+n_t n_1_over_x(n_t n, n_err_t *err) {
   if (n_is_zero(n)) {
     if (err) *err = N_ERR_DOMAIN;
     return N_INF;
