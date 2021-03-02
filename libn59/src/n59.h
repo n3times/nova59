@@ -18,7 +18,8 @@
  * Note: Most functions have an 'err_out' parameter. If non null, it is set to
  * true if an error occurs, and to false otherwise. An error occurs when some
  * parameter is not in the function domain ("square root of -1") or because of
- * underflow or overflow ("square of 10^80").
+ * underflow or overflow ("square of 10^80"). An a TI-59, the display would
+ * blink in case of error.
  */
 
 
@@ -31,9 +32,9 @@
 /**
  * TI-59 number.
  *
- * For non zero numbers,
- * - the mantissa is a positive or negative integer, with exactly 13 digits
- * - the exponent is an integer in -99..99
+ * For nonzero numbers:
+ * - the mantissa is a positive or negative integer, with exactly 13 digits.
+ * - the exponent is an integer in -99..99.
  *
  * 0 is represented as { 0, 0 }.
  *
@@ -62,13 +63,13 @@ typedef enum n_trig_e {
  * Errors.
  *
  * Used as an out parameter by most functions from the library. If 'err_out' is
- * null, it is ignored. Otherwise, it is set to one of the value in the enum.
+ * null, it is ignored. Otherwise, it is set to one of the values in the enum.
  */
 typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
   N_ERR_DOMAIN,     // Input not in the domain of the function.
   N_ERR_UNDERFLOW,  // Value too small, in absolute value, to be stored.
-  N_ERR_OVERFLOW,   // Value too big, in absolute value, to be displayed/stored.
+  N_ERR_OVERFLOW    // Value too big, in absolute value, to be displayed/stored.
 } n_err_t;
 
 
@@ -210,9 +211,10 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
  *
  * Only the digits of n that are visible on the TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
- * be first trimmed down to 3.15 and then converted to 3.25.
+ * be first trimmed down to 3.15 (3 hours and 15 minutes) and then converted to
+ * 3.25.
  *
- * Note: fix must be in 0..9
+ * Note: fix must be in 0..9.
  */
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
@@ -221,9 +223,10 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
  *
  * Only the digits of n that are visible on the TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
- * be first trimmed down to 3.25 and then converted to 3.15.
+ * be first trimmed down to 3.25 and then converted to 3.15 (3 hours and 15
+ * minutes)..
  *
- * Note: fix must be in 0..9
+ * Note: fix must be in 0..9.
  */
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
@@ -234,7 +237,7 @@ void n_p_r(
 /**
  * Converts rectangular coordinates to polar coordinates.
  *
- * theta_out is in range -90..270
+ * Angle theta_out is in range -90..270.
  */
 void n_r_p(
     n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, n_err_t *err_out);
@@ -242,7 +245,7 @@ void n_r_p(
 
 /******************************************************************************
  *
- *  CONVERSION TO/FROM STRINGS.
+ *  CONVERSION FROM/TO STRINGS.
  *
  ******************************************************************************/
 
@@ -251,14 +254,14 @@ void n_r_p(
  *
  * The return string is the number as it would appear on the display with
  * leading and trailing spaces trimmed:
- * - "-" if negative number
- * - followed by digits and exactly 1 "."
- * - optionally followed by exponent: " " or "-", and exactly 2 digits
+ * - "-" if negative number,
+ * - followed by digits and exactly 1 ".",
+ * - optionally followed by exponent: " " or "-", and exactly 2 digits.
  *
  * For example: for pi, with fix 2, format SCI: "3.14 00".
  *
  * String 'str_out' must be of size at least 'N_STR_MAX_SIZE'.
- * Sets error if overflow, that is when the display would blink on a TI-59.
+ * Sets error if overflow.
  */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 
@@ -267,7 +270,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  *
  * String must be composed of:
  * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
- *   of 1 or more digits.
+ *   of 1 or more digits,
  * - followed, possibly, by an exponent: e or -e where e is a sequence of 1 or
  *   more digits.
  *
@@ -275,14 +278,15 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  * float and the exponent. If the the exponent is positive, a space is required
  * between the float and the exponent.
  *
- * Sets error if under/overflow or bad formatting. Returns 0 if bad formatting.
+ * Sets error N_ERR_DOMAIN if s is incorrectly formatted.
+ * Sets error if underflow or overflow.
  */
 n_t n_s2n(char *s, n_err_t *err_out);
 
 
 /******************************************************************************
  *
- *  CONVERSION TO/FROM DOUBLES.
+ *  CONVERSION FROM/TO DOUBLES.
  *
  ******************************************************************************/
 
