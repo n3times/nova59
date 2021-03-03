@@ -5,11 +5,14 @@
 typedef n_t (*fun_t)(n_t, n_t, n_err_t *);
 
 static void p(n_t n1, n_t n2, n_t res, n_err_t err, char *op) {
-  printf("% 014lld% 03d %s % 014lld% 03d   =   % 014lld% 03d%s\n",
-         n1.mant, n1.exp,
+  char s1[N_PRINT_MAX_SIZE];
+  char s2[N_PRINT_MAX_SIZE];
+  char s_res[N_PRINT_MAX_SIZE];
+  printf("%s %s %s   =   %s%s\n",
+         n_print(n1, s1),
          op,
-         n2.mant, n2.exp,
-         res.mant, res.exp,
+         n_print(n2, s2),
+         n_print(res, s_res),
          err ? "?" : "");
 }
 

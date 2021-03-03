@@ -1,6 +1,7 @@
 #include "n_internal.h"
 
 #include <assert.h>
+#include <stdio.h>
 
 #if !NDEBUG
 static bool n_is_number(long long mant, int exp) {
@@ -21,4 +22,9 @@ bool n_equals(n_t n1, n_t n2) {
 
 bool n_is_zero(n_t n) {
   return (n.mant == 0) && (n.exp == 0);
+}
+
+char *n_print(n_t n, char *str_out) {
+  sprintf(str_out, "% 014lld% 03d", n.mant, n.exp);
+  return str_out;
 }

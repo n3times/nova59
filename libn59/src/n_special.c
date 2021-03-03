@@ -6,7 +6,7 @@
 
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   // Normalize.
-  char str[N_STR_MAX_SIZE];
+  char str[N_N2S_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
@@ -35,7 +35,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   // Normalize.
-  char str[N_STR_MAX_SIZE];
+  char str[N_N2S_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
   assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
@@ -64,24 +64,25 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   return n;
 }
 
-void n_p_r(
-    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, n_err_t *err) {
-  double d_rho = n_n2d(rho);
-  double d_theta = n_n2d(theta);
+void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
+           n_t *n_x_out, n_t *n_y_out, n_err_t *err) {
+  double d_rho = n_n2d(n_rho);
+  double d_theta = n_n2d(n_theta);
+
   d_theta = normalize_angle(d_theta, mode);
   d_theta = convert_angle(d_theta, mode, N_RAD);
-  double x = d_rho * sin(d_theta);
-  double y = d_rho * cos(d_theta);
-  *x_out = n_d2n(x, err);
-  *y_out = n_d2n(y, err);
+
+  *n_x_out = n_d2n(d_rho * sin(d_theta), err);
+  *n_y_out = n_d2n(d_rho * cos(d_theta), err);
 }
 
-void n_r_p(
-    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, n_err_t *err) {
-  double d_x = n_n2d(x);
-  double d_y = n_n2d(y);
+void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
+           n_t *n_rho_out, n_t *n_theta_out, n_err_t *err) {
+  double d_x = n_n2d(n_x);
+  double d_y = n_n2d(n_y);
   double d_rho;
   double d_theta;
+
   if (d_x == 0) {
     if (d_y == 0) d_theta =  M_PI / 4;
     if (d_y > 0)  d_theta =  M_PI / 2;
@@ -93,6 +94,7 @@ void n_r_p(
   // theta in -pi/2 .. 3pi/2
   d_rho = sqrt(d_x * d_x + d_y * d_y);
   d_theta = convert_angle(d_theta, N_RAD, mode);
-  *rho_out = n_d2n(d_rho, err);
-  *theta_out = n_d2n(d_theta, err);
+
+  *n_rho_out = n_d2n(d_rho, err);
+  *n_theta_out = n_d2n(d_theta, err);
 }

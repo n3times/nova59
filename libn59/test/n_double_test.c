@@ -6,16 +6,19 @@ static void t1(n_t n) {
   double d = n_n2d(n);
   n_err_t err;
   n_t n2 = n_d2n(d, &err);
-  printf("% 14lld % 3d  =>  %20.13e  =>  % 14lld % 3d%s\n",
-         n.mant, n.exp, d, n2.mant, n2.exp, err ? " ?" : "");
+  char s[N_PRINT_MAX_SIZE];
+  char s2[N_PRINT_MAX_SIZE];
+  printf("%s  =>  %20.13e  =>  %s%s\n",
+         n_print(n, s), d, n_print(n2, s2), err ? " ?" : "");
 }
 
 static void t2(double d) {
   n_err_t err;
   n_t n = n_d2n(d, &err);
+  char s[N_PRINT_MAX_SIZE];
   double d2 = n_n2d(n);
-  printf("%22.15e  =>  % 14lld % 3d%s  =>  %22.15e\n",
-         d, n.mant, n.exp, err ? " ?" : "  ", d2);
+  printf("%22.15e  =>  %s%s  =>  %22.15e\n",
+         d, n_print(n, s), err ? " ?" : "  ", d2);
 }
 
 int main(void) {

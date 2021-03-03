@@ -11,8 +11,11 @@
 
 #include <stdbool.h>
 
-/** The size of the string that needs to be allocated when calling n2s. */
-#define N_STR_MAX_SIZE 14
+/** The size of the string that needs to be allocated when calling n_n2s. */
+#define N_N2S_MAX_SIZE 14
+
+/** The size of the string that needs to be allocated when calling n_print. */
+#define N_PRINT_MAX_SIZE 18
 
 /**
  * Note: Most functions have an 'err_out' parameter. If non null, it is set to
@@ -105,6 +108,18 @@ bool n_equals(n_t n1, n_t n2);
 
 /** Returns true if n is zero. */
 bool n_is_zero(n_t n);
+
+/**
+ * Returns a representation of n as a string for debugging purposes.
+ *
+ * For example n_print(N_PI) returns " 3141592653590 00". 
+ * Note that this method returns all the 13 digits of the mantissa, unlike
+ * n_n2s which returns only the digits on the display.
+ *
+ * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For convenience
+ * str_out is also returned directly by this function.
+ */
+char *n_print(n_t n, char *str_out);
 
 
 /******************************************************************************
@@ -231,16 +246,16 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
 /** Converts polar coordinates to rectangular coordinates. */
-void n_p_r(
-    n_t rho, n_t theta, n_t *x_out, n_t *y_out, n_trig_t mode, n_err_t *err_out);
+void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
+           n_t *n_x_out, n_t *n_y_out, n_err_t *err_out);
 
 /**
  * Converts rectangular coordinates to polar coordinates.
  *
  * Angle theta_out is in range -90..270.
  */
-void n_r_p(
-    n_t x, n_t y, n_t *rho_out, n_t *theta_out, n_trig_t mode, n_err_t *err_out);
+void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
+           n_t *n_rho_out, n_t *n_theta_out, n_err_t *err_out);
 
 
 /******************************************************************************
@@ -260,7 +275,7 @@ void n_r_p(
  *
  * For example: for pi, with fix 2, format SCI: "3.14 00".
  *
- * String 'str_out' must be of size at least 'N_STR_MAX_SIZE'.
+ * String 'str_out' must be of size at least 'N_N2S_MAX_SIZE'.
  * Sets error if overflow.
  */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);

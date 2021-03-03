@@ -35,7 +35,7 @@ int main(void) {
         for (int l = 0; l < N_ELEMS(exps); l++) {
           if (mants[i] == 0 && exps[l]) continue;
           n_t n = n_make(mants[i], exps[l]);
-          char str[N_STR_MAX_SIZE];
+          char str[N_N2S_MAX_SIZE];
           n_err_t err;
           n_n2s(n, fixes[k], formats[j], (char *)&str, &err);
           printf("%s%s\n", str, err ? " ?" : "");

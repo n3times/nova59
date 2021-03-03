@@ -6,10 +6,12 @@ typedef n_t (*fun_t)(n_t, n_err_t *err);
 typedef n_t (*fun2_t)(n_t);
 
 static void p(n_t n, n_t res, n_err_t err, char *op) {
-  printf("% 014lld% 03d %s   =   % 014lld% 03d%s\n",
-         n.mant, n.exp,
+  char s[N_PRINT_MAX_SIZE];
+  char s_res[N_PRINT_MAX_SIZE];
+  printf("%s %s   =   %s%s\n",
+         n_print(n, s),
          op,
-         res.mant, res.exp,
+         n_print(res, s_res),
          err ? "?" : "");
 }
 
