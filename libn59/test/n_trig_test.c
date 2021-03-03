@@ -7,10 +7,11 @@
 typedef n_t (*trig_fun_t)(n_t, n_trig_t mode, n_err_t *err);
 
 static void t(n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *)) {
-  n_t res = op(n, mode, NULL);
+  n_err_t err;
+  n_t res = op(n, mode, &err);
   char s[N_PRINT_MAX_SIZE];
   char s_res[N_PRINT_MAX_SIZE];
-  printf("%4s %s => %s\n", str, n_print(n, s), n_print(res, s_res));
+  printf("%4s %s => %s%s\n", str, n_print(n, s), n_print(res, s_res), err ? " ?" : "");
 }
 
 int main() {
