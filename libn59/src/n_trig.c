@@ -61,20 +61,29 @@ static n_err_t is_n_right_angles(double d, n_trig_t mode, int n) {
 n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
+
+  // Ensure that sin(-d) = -sin(d).
+  bool neg = d < 0;
+  d = ABS(d);
   d = normalize_angle(d, mode);
 
   if (d == 0) return N_0;
-  if (is_n_right_angles(d, mode, 1)) return N_1;
+  if (is_n_right_angles(d, mode, 1)) return neg ? n_chs(N_1) : N_1;
   if (is_n_right_angles(d, mode, 2)) return N_0;
-  if (is_n_right_angles(d, mode, 3)) return n_chs(N_1);
+  if (is_n_right_angles(d, mode, 3)) return neg ? N_1 : n_chs(N_1);
 
   d = convert_angle(d, mode, N_RAD);
+  d = neg ? -d : d;
   return n_d2n(sin(d), err);
 }
 
 n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
+
+  // Ensure that cos(-d) = cos(d).
+  d = ABS(d);
+
   d = normalize_angle(d, mode);
 
   if (d == 0) return N_1;
@@ -89,6 +98,10 @@ n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   double d = n_n2d(n);
+
+  // Ensure that tan(-d) = -tan(d).
+  bool neg = d < 0;
+  d = ABS(d);
   d = normalize_angle(d, mode);
 
   if (d == 0) return N_0;
@@ -100,6 +113,7 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
   }
 
   d = convert_angle(d, mode, N_RAD);
+  d = neg ? -d : d;
   return n_d2n(tan(d), err);
 }
 
