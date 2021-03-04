@@ -109,6 +109,9 @@ bool n_equals(n_t n1, n_t n2);
 /** Returns true if n is zero. */
 bool n_is_zero(n_t n);
 
+/** Returns 1, 0 or -1, depending on whether n1 > n2, n1 == n2 or n1 < n2. */
+int n_cmp(n_t n1, n_t n2);
+
 /**
  * Returns a representation of n as a string for debugging purposes.
  *
