@@ -12,29 +12,6 @@
  *
  ******************************************************************************/
 
-double normalize_angle(double d, n_trig_t mode) {
-  double period;
-  if (ABS(d) >= POW10_13) return 0;
-  switch (mode) {
-    case N_RAD:  period = 2 * PI; break;
-    case N_DEG:  period = 360;    break;
-    case N_GRAD: period = 400;    break;
-  }
-  double normalized_d = d - floor(d/period) * period;
-  assert(normalized_d >= 0);
-  switch (mode) {
-    case N_RAD:  if (normalized_d == 2 * PI) normalized_d = 0; break;
-    case N_DEG:  if (normalized_d == 360)    normalized_d = 0; break;
-    case N_GRAD: if (normalized_d == 400)    normalized_d = 0; break;
-  }
-  switch (mode) {
-    case N_RAD:  assert(normalized_d < 2 * PI); break;
-    case N_DEG:  assert(normalized_d < 360);    break;
-    case N_GRAD: assert(normalized_d < 400);    break;
-  }
-  return normalized_d;
-}
-
 double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
   if (from == N_DEG)  d = d / 180 * PI;
@@ -101,11 +78,16 @@ n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
 
   long long t;
   if (is_t_right_angles(n, mode, &t)) {
-    if (t % 4 == -3) return N_1;
-    if (t % 4 == -1) return n_chs(N_1);
-    if (t % 2 == 0)  return N_0;
-    if (t % 4 == 1)  return N_1;
-    if (t % 4 == 3)  return n_chs(N_1);
+    switch(t % 4) {
+      case -3: return N_1;
+      case -2: return N_0;
+      case -1: return n_chs(N_1);
+      case  0: return N_0;
+      case  1: return N_1;
+      case  2: return N_0;
+      case  3: return n_chs(N_1);
+      default: assert(false);
+    }
   }
 
   double d = n_n2d(n);
@@ -119,10 +101,13 @@ n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
 
   long long t;
   if (is_t_right_angles(n, mode, &t)) {
-    if (ABS(t % 4) == 0) return N_1;
-    if (ABS(t % 4) == 1) return N_0;
-    if (ABS(t % 4) == 2) return n_chs(N_1);
-    if (ABS(t % 4) == 3) return N_0;
+    switch(ABS(t % 4)) {
+      case 0: return N_1;
+      case 1: return N_0;
+      case 2: return n_chs(N_1);
+      case 3: return N_0;
+      default: assert(false);
+    }
   }
 
   double d = n_n2d(n);

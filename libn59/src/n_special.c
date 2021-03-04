@@ -69,7 +69,6 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
   double d_rho = n_n2d(n_rho);
   double d_theta = n_n2d(n_theta);
 
-  d_theta = normalize_angle(d_theta, mode);
   d_theta = convert_angle(d_theta, mode, N_RAD);
 
   *n_x_out = n_d2n(d_rho * sin(d_theta), err);
