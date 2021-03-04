@@ -73,4 +73,31 @@ int main() {
     }
     printf("\n");
   }
+
+  n_t ns2[] = {
+                n_make(3141592000000LL, 0),
+                n_make(3141592600000LL, 0),
+                n_make(3141592653589LL, 0),
+                n_make(3141592653590LL, 0),
+                n_make(3141592653591LL, 0),
+                n_make(3141592700000LL, 0),
+                n_make(3141593000000LL, 0),
+
+                n_make(1570796000000LL, 0),
+                n_make(1570796300000LL, 0),
+                n_make(1570796326794LL, 0),
+                n_make(1570796326795LL, 0),
+                n_make(1570796326796LL, 0),
+                n_make(1570796400000LL, 0),
+                n_make(1570797000000LL, 0),
+              };
+  printf("Values around pi and pi/2 RADIANS\n");
+  printf("=================================\n\n");
+  for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
+    for (int i = 0; i < N_ELEMS(ns2); i++) {
+      t(ns2[i], N_RAD, trig_fun_strs[k], trig_funs[k]);
+    }
+    printf("\n");
+  }
+  printf("\n");
 }
