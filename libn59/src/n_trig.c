@@ -14,10 +14,15 @@
 
 double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
-  if (from == N_DEG)  d = d / 180 * PI;
-  if (from == N_GRAD) d = d / 200 * PI;
-  if (to   == N_DEG)  d = d / PI * 180;
-  if (to   == N_GRAD) d = d / PI * 200;
+
+  // Convert to radians.
+  if (from == N_DEG) d = d / 180 * PI;
+  else if (from == N_GRAD) d = d / 200 * PI;
+
+  // Convert from radians.
+  if (to == N_DEG)  d = d / PI * 180;
+  else if (to == N_GRAD) d = d / PI * 200;
+
   return (double) d;
 }
 
@@ -47,21 +52,19 @@ static bool is_multiple(n_t n1, n_t n2, n_t *n3) {
   return false;
 }
 
-static bool is_t_right_angles(n_t n, n_trig_t mode, long long *t) {
-  n_t N_90      = n_make(9000000000000LL, 1);
-  n_t N_100     = n_make(1000000000000LL, 2);
-  n_t N_HALF_PI = n_div(N_PI, n_make(2000000000000LL, 0), NULL);
-  n_t f;
+static bool is_multiple_of_right_angle(n_t n, n_trig_t mode, long long *ratio) {
+  n_t right_angle;
   switch (mode) {
-    case N_DEG:  f = N_90;      break;
-    case N_GRAD: f = N_100;     break;
-    case N_RAD:  f = N_HALF_PI; break;
+    case N_DEG:  right_angle = n_make(9000000000000LL, 1); break;
+    case N_GRAD: right_angle = n_make(1000000000000LL, 2); break;
+    case N_RAD:  right_angle = n_make(1570796326795LL, 0); break;
   }
-  n_t nt;
-  if (!is_multiple(n, f, &nt)) return false;
-  *t = nt.mant;
-  for (int i = 0; i < 12 - nt.exp; i++) {
-    *t /= 10;
+
+  n_t n_ratio;
+  if (!is_multiple(n, right_angle, &n_ratio)) return false;
+  *ratio = n_ratio.mant;
+  for (int i = 0; i < 12 - n_ratio.exp; i++) {
+    *ratio /= 10;
   }
   return true;
 }
@@ -77,7 +80,7 @@ n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
   if (n.exp >= 13) return N_0;
 
   long long t;
-  if (is_t_right_angles(n, mode, &t)) {
+  if (is_multiple_of_right_angle(n, mode, &t)) {
     switch(t % 4) {
       case -3: return N_1;
       case -2: return N_0;
@@ -100,7 +103,7 @@ n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
   if (n.exp >= 13) return N_1;
 
   long long t;
-  if (is_t_right_angles(n, mode, &t)) {
+  if (is_multiple_of_right_angle(n, mode, &t)) {
     switch(ABS(t % 4)) {
       case 0: return N_1;
       case 1: return N_0;
@@ -120,7 +123,7 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
   if (n.exp >= 13) return N_0;
 
   long long t;
-  if (is_t_right_angles(n, mode, &t)) {
+  if (is_multiple_of_right_angle(n, mode, &t)) {
     if (t % 2 == 0) return N_0;
     *err = N_ERR_DOMAIN;
     return N_INF;
