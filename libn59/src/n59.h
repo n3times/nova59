@@ -227,7 +227,7 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
 /**
  * Converts degrees/minutes/seconds to decimal degrees.
  *
- * Only the digits of n that are visible on the TI-59 display are considered
+ * Only the digits of n that are visible on TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
  * be first trimmed down to 3.15 (3 hours and 15 minutes) and then converted to
  * 3.25.
@@ -239,7 +239,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 /**
  * Converts decimal degrees to degrees/minutes/seconds.
  *
- * Only the digits of n that are visible on the TI-59 display are considered
+ * Only the digits of n that are visible on TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
  * be first trimmed down to 3.25 and then converted to 3.15 (3 hours and 15
  * minutes)..

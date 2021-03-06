@@ -61,13 +61,14 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
     n2 = tmp;
   }
 
-  // Note that, as in the TI-59, we do not round up:
-  //       9999999999.999
-  //     +           .0009
-  //     = 9999999999.999
+  // Optimization.
   if (n1.exp - n2.exp >= 13) return n1;
 
   // Align n1 and n2 digits as is basic addition.
+  // Note that, as in TI-59, we do not round up:
+  //       9999999999.999
+  //     +           .0009
+  //     = 9999999999.999
   while (n2.exp < n1.exp) {
     n2.exp += 1;
     n2.mant /= 10;

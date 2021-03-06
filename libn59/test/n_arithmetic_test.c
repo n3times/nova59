@@ -1,5 +1,6 @@
 #include "n_test.h"
 
+#include <assert.h>
 #include <stdio.h>
 
 typedef n_t (*fun_t)(n_t, n_t, n_err_t *);
@@ -35,12 +36,52 @@ int main() {
     printf("\n\n\n");
   }
 
-  // No rounding.
-  n_t n1 = n_make(1000000000000L, 1);
-  n_t n2 = n_make(9000000000000L, 0);
-  n_t n3 = n_make(9900000000000L, 1);
-  n_t res = n_div(n1, n2, NULL);
+  // Truncation in addition.
 
-  p(n1, n2, res, N_ERR_NONE, "/"); 
-  p(res, n3, n_times(res, n3, NULL), N_ERR_NONE, "*"); 
+  n_t n1 = n_make(9999999999999LL, 13);
+  n_t n2 = n_make(9999999999999LL, 0);
+  n_t res = n_plus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "+");
+
+  // Truncation in substraction.
+
+  n1 = n_make(1000000000000LL, 13);
+  n2 = n_make(1000000000000LL, 0);
+  res = n_minus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "-");
+
+  // No rounding in multiplication.
+
+  n1 = n_make(1111111111111LL, 0);
+  n2 = n_make(9900000000000LL, 1);
+  res = n_times(n1, n2, NULL);
+  assert(n_equals(res, n_make(1099999999999LL, 2)));
+  p(n1, n2, res, N_ERR_NONE, "*");
+
+  res = N_1;
+  for (int i = 0; i < 100; i++) {
+    res = n_times(res, N_PI, NULL);
+  }
+  p(N_PI, N_PI, res, N_ERR_NONE, "?");
+
+  // No rounding in division.
+  n1 = n_make(7000000000000LL, 0);
+  n2 = n_make(9000000000000LL, 0);
+  res = n_div(n1, n2, NULL);
+  //assert(n_equals(res, n_make(7777777777777LL, -1)));
+  p(n1, n2, res, N_ERR_NONE, "/");
+
+  n1 = n_make(9999999999999LL, 0);
+  res = n_times(n1, n1, NULL);
+  p(n1, n1, res, N_ERR_NONE, "*");
+
+
+
+  res = N_0;
+  for (int i = 0; i < 100; i++) {
+    res = n_plus(res, N_PI, NULL);
+  }
+  p(N_PI, N_PI, res, N_ERR_NONE, "?");
 }
