@@ -34,4 +34,13 @@ int main() {
     }
     printf("\n\n\n");
   }
+
+  // No rounding.
+  n_t n1 = n_make(1000000000000L, 1);
+  n_t n2 = n_make(9000000000000L, 0);
+  n_t n3 = n_make(9900000000000L, 1);
+  n_t res = n_div(n1, n2, NULL);
+
+  p(n1, n2, res, N_ERR_NONE, "/"); 
+  p(res, n3, n_times(res, n3, NULL), N_ERR_NONE, "*"); 
 }

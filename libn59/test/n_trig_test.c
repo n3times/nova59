@@ -52,8 +52,11 @@ int main() {
   printf("==============================================\n\n");
   for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
-      double d = (i/2)*PI/2 + (i%2)*PI/4;
-      t(n_d2n(d, NULL), N_RAD, trig_fun_strs[k], trig_funs[k]);
+      n_t two = n_make(2000000000000LL, 0);
+      n_t four = n_make(4000000000000LL, 0);
+      n = n_times(n_div(N_PI, two, NULL), n_d2n(i/2, NULL), NULL);
+      n = n_plus(n, n_times(n_div(N_PI, four, NULL), n_d2n(i%2, NULL), NULL), NULL);
+      t(n, N_RAD, trig_fun_strs[k], trig_funs[k]);
     }
     printf("\n");
   }
