@@ -85,21 +85,22 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
   return n_plus(n1, n_chs(n2), err);
 }
 
+// As far as we know, this method computes multiplication with the exact same
+// accuracy as TI-59's, even if this means that the last decimal is not rounded.
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
 
-  bool neg = (n1.mant > 0) != (n2.mant > 0);
-  n1 = n_abs(n1);
-  n2 = n_abs(n2);
+  long long m1 = ABS(n1.mant);
+  long long m2 = ABS(n2.mant);
 
   // Perform double precision multiplication. The first 13 or 14 digits will be
   // stored in l and the last 12 in r.
   long long f = 1000000LL;
-  long long l1 = n1.mant / f;
-  long long r1 = n1.mant % f;
-  long long l2 = n2.mant / f;
-  long long r2 = n2.mant % f;
+  long long l1 = m1 / f;
+  long long r1 = m1 % f;
+  long long l2 = m2 / f;
+  long long r2 = m2 % f;
   long long l = l1 * l2;
   long long m = l1 * r2 + l2 * r1;
   long long r = r1 * r2;
@@ -107,7 +108,8 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   l = l + m / f + r / f / f;
   r = r % (f * f);
 
-  // Normalize. Note that TI-59 does not appear to do any rounding.
+  // Normalize. We could consider r and possibly round up but TI-59 does not
+  // seem to do that.
   int exp = n1.exp + n2.exp;
   if (l >= 10000000000000LL) {  // 14 digits.
     l /= 10;
@@ -115,9 +117,49 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   }
   n_t res = normalize_number(l, exp, err);
 
+  bool neg = (n1.mant > 0) != (n2.mant > 0);
   res = neg ? n_chs(res) : res;
   return res;
 }
+
+#if 0
+// Alternative division with no rounding. Doesn't look like TI-59 does this.
+n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
+  if (err) *err = N_ERR_NONE;
+
+  // n1 or n2 is zero.
+  if (n_is_zero(n1) && n_is_zero(n2)) {
+    if (err) *err = N_ERR_DOMAIN;
+    return N_1;
+  } else if (n_is_zero(n1)) {
+    return N_0;
+  } else if (n_is_zero(n2)) {
+    return (n_cmp(n1, N_0) > 0) ? N_INF : n_chs(N_INF);
+  }
+
+  long long m1 = ABS(n1.mant);
+  long long m2 = ABS(n2.mant);
+  long long div = 0;
+  int exp = n1.exp - n2.exp;
+  if (m1 < m2) m1 *= 10;
+  int i = 0;
+  while (i < 14) {
+    if (m1 >= m2) {
+      m1 = m1 - m2;
+      div += 1;
+    } else {
+      i += 1;
+      m1 *= 10;
+      div *= 10;
+    }
+  }
+
+  n_t res = normalize_number(div, exp, err);
+  bool neg = (n1.mant > 0) != (n2.mant > 0);
+  res = neg ? n_chs(res) : res;
+  return res;
+}
+#endif
 
 n_t n_div(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;

@@ -37,9 +37,46 @@ int main() {
   for (int k = 0; k < N_ELEMS(fun2s); k++) {
     for (int i = 0; i < N_ELEMS(ns); i++) {
       n = fun2s[k](ns[i]);
-      p(ns[i], n, false, ops2[k]);
+      p(ns[i], n, N_ERR_NONE, ops2[k]);
     }
     printf("\n\n\n");
   }
 
+  // n_int.
+  for (int i = -1; i < 14; i++) {
+    n = n_make(1000000000000LL, i);
+    p(n, n_int(n), N_ERR_NONE, "int");
+  }
+  for (int i = -2; i < 14; i++) {
+    n = n_make(9999999999999LL, i);
+    p(n, n_int(n), N_ERR_NONE, "int");
+  }
+  for (int i = -1; i < 14; i++) {
+    n = n_make(1234567890123LL, i);
+    p(n, n_int(n), N_ERR_NONE, "int");
+  }
+  for (int i = -1; i < 14; i++) {
+    n = n_make(-1234567890123LL, i);
+    p(n, n_int(n), N_ERR_NONE, "int");
+  }
+
+  printf("\n");
+
+  // n_frac.
+  for (int i = -1; i < 14; i++) {
+    n = n_make(1000000000000LL, i);
+    p(n, n_frac(n), N_ERR_NONE, "frac");
+  }
+  for (int i = -2; i < 14; i++) {
+    n = n_make(9999999999999LL, i);
+    p(n, n_frac(n), N_ERR_NONE, "frac");
+  }
+  for (int i = -1; i < 14; i++) {
+    n = n_make(1234567890123LL, i);
+    p(n, n_frac(n), N_ERR_NONE, "frac");
+  }
+  for (int i = -1; i < 14; i++) {
+    n = n_make(-1234567890123LL, i);
+    p(n, n_frac(n), N_ERR_NONE, "frac");
+  }
 }
