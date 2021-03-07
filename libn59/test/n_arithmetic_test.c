@@ -77,8 +77,6 @@ int main() {
   res = n_times(n1, n1, NULL);
   p(n1, n1, res, N_ERR_NONE, "*");
 
-
-
   res = N_0;
   for (int i = 0; i < 100; i++) {
     res = n_plus(res, N_PI, NULL);

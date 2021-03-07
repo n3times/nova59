@@ -12,8 +12,8 @@ static bool n_is_number(long long mant, int exp) {
 
 n_t n_make(long long mant, int exp) {
   assert(n_is_number(mant, exp));
-  n_t n = { mant, exp };
-  return n;
+
+  return (n_t) { mant, exp };
 }
 
 bool n_equals(n_t n1, n_t n2) {
@@ -27,6 +27,7 @@ bool n_is_zero(n_t n) {
 int n_cmp(n_t n1, n_t n2) {
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
+
   if (d1 > d2) return 1;
   if (d1 < d2) return -1;
   return 0;

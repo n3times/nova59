@@ -171,12 +171,14 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
     if (err) *err = N_ERR_DOMAIN;
     if (d1 == 0) {
       return N_1;
+    } else if (d1 > 0) {
+      return N_INF;
     } else {
-      return (d1 > 0) ? N_INF : n_chs(N_INF);
+      return n_chs(N_INF);
     }
   }
 
-  return n_d2n(d1/d2, err);
+  return n_d2n(d1 / d2, err);
 }
 
 n_t n_pow(n_t n1, n_t n2, n_err_t *err) {

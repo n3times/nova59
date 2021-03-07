@@ -115,7 +115,7 @@ int n_cmp(n_t n1, n_t n2);
 /**
  * Returns a representation of n as a string for debugging purposes.
  *
- * For example n_print(N_PI) returns " 3141592653590 00". 
+ * For example n_print(N_PI, str) returns " 3141592653590 00".
  * Note that this method returns all the 13 digits of the mantissa, unlike
  * n_n2s which returns only the digits on the display.
  *
@@ -272,11 +272,11 @@ void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
  *
  * The return string is the number as it would appear on the display with
  * leading and trailing spaces trimmed:
- * - "-" if negative number,
- * - followed by digits and exactly 1 ".",
- * - optionally followed by exponent: " " or "-", and exactly 2 digits.
+ * - '-' if negative number,
+ * - followed by digits and exactly 1 '.',
+ * - optionally followed by exponent: ' ' or '-', and exactly 2 digits.
  *
- * For example: for pi, with fix 2, format SCI: "3.14 00".
+ * For example, for pi, with fix 2, format SCI: '3.14 00'.
  *
  * String 'str_out' must be of size at least 'N_N2S_MAX_SIZE'.
  * Sets error if overflow.
