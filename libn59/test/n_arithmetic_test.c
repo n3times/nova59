@@ -46,14 +46,14 @@ int main() {
 
   // TI-59 accurate substraction.
   n1 = n_make(1000000000000LL, 13);
-  n2 = n_make(1000000000000LL, 0);
+  n2 = N_1;
   res = n_minus(n1, n2, NULL);
   assert(n_equals(res, n1));  // Note that n2 is ignored
   p(n1, n2, res, N_ERR_NONE, "-");
 
   // TI-59 accurate multiplication.
   n1 = n_make(1111111111111LL, 0);
-  n2 = n_make(9900000000000LL, 1);
+  n2 = n_d2n(99, NULL);
   res = n_times(n1, n2, NULL);
   assert(n_equals(res, n_make(1099999999999LL, 2)));  // And not 101.
   p(n1, n2, res, N_ERR_NONE, "*");

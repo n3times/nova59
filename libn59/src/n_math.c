@@ -84,27 +84,9 @@ n_t n_log(n_t n, n_err_t *err) {
 }
 
 n_t n_exp(n_t n, n_err_t *err) {
-  double d = n_n2d(n);
-
-  if (ABS(d) > 231) {
-    if (err) {
-      *err = d < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
-    }
-    return d < 0 ? N_EPS : N_INF;
-  }
-
-  return n_d2n(exp(d), err);
+  return n_pow(N_E, n, err);
 }
 
 n_t n_pow10(n_t n, n_err_t *err) {
-  double d = n_n2d(n);
-
-  if (ABS(d) > 100) {
-    if (err) {
-      *err = d < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
-    }
-    return d < 0 ? N_EPS : N_INF;
-  }
-
-  return n_d2n(pow(10, d), err);
+  return n_pow(N_10, n, err);
 }

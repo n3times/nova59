@@ -84,10 +84,12 @@ typedef enum n_err_e {
 
 extern n_t N_0;    // 0.
 extern n_t N_1;    // 1.
-extern n_t N_PI;   // Pi.
-extern n_t N_INF;  // Infinity, largest number.
-extern n_t N_EPS;  // Epsilon, smallest positive number.
+extern n_t N_PI;   // pi.
+extern n_t N_INF;  // infinity, largest number.
+extern n_t N_EPS;  // epsilon, smallest positive number.
 
+extern n_t N_10;   // 10.
+extern n_t N_E;    // e.
 
 /******************************************************************************
  *
