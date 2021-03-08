@@ -11,13 +11,13 @@
  *
  ******************************************************************************/
 
-static n_t keep_visible_digits(n_t n, int fix, n_format_t format,
-                               n_err_t *err) {
+static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
+                                     n_err_t *err) {
+  n_err_t err1, err2;
   char str[N_N2S_MAX_SIZE];
-  n_n2s(n, fix, format, str, err);  // May overflow.
-  n_err_t no_err;
-  n = n_s2n(str, &no_err);
-  assert(no_err == N_ERR_NONE);
+  n_n2s(n, fix, format, str, &err1);
+  n = n_s2n(str, &err2);
+  if (err) *err = combine_errors(err1, err2);
   return n;
 }
 
@@ -36,7 +36,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   else if (fix > 9) fix = 9;
 
   // Only consider the digits visible on the display.
-  n = keep_visible_digits(n, fix, format, err);
+  n = discard_nonvisible_digits(n, fix, format, err);
 
   if (n.exp >= 9) return n;  // Optimization.
 
@@ -53,9 +53,9 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
   // Convert result to number.
   if (n.mant < 0) res = -res;
-  n_err_t no_err;
-  n = n_d2n(res, &no_err);
-  assert(no_err == N_ERR_NONE);
+  n_err_t err2;
+  n = n_d2n(res, &err2);
+  if (err) *err = combine_errors(*err, err2);
 
   return n;
 }
@@ -68,7 +68,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   else if (fix > 9) fix = 9;
 
   // Only consider the digits visible on the display.
-  n = keep_visible_digits(n, fix, format, err);
+  n = discard_nonvisible_digits(n, fix, format, err);
 
   if (n.exp >= 9) return n;  // Optimization.
 
@@ -86,10 +86,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (n.mant < 0) res = -res;
   n_err_t err2;
   n = n_d2n(res, &err2);  // May underflow.
-  if (err) {
-    assert(*err == N_ERR_NONE || err2 == N_ERR_NONE);
-    if (*err == N_ERR_NONE) *err = err2;
-  }
+  if (err) *err = combine_errors(*err, err2);
 
   return n;
 }
@@ -101,8 +98,10 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
 
   d_theta = convert_angle(d_theta, mode, N_RAD);
 
-  *n_x_out = n_d2n(d_rho * sin(d_theta), err);
-  *n_y_out = n_d2n(d_rho * cos(d_theta), err);
+  n_err_t err1, err2;
+  *n_x_out = n_d2n(d_rho * sin(d_theta), &err1);
+  *n_y_out = n_d2n(d_rho * cos(d_theta), &err2);
+  if (err) *err = combine_errors(err1, err2);
 }
 
 void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
@@ -124,6 +123,8 @@ void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
   d_rho = sqrt(d_x * d_x + d_y * d_y);
   d_theta = convert_angle(d_theta, N_RAD, mode);
 
-  *n_rho_out = n_d2n(d_rho, err);
-  *n_theta_out = n_d2n(d_theta, err);
+  n_err_t err1, err2;
+  *n_rho_out = n_d2n(d_rho, &err1);
+  *n_theta_out = n_d2n(d_theta, &err2);
+  if (err) *err = combine_errors(err1, err2);
 }

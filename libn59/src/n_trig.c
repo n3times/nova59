@@ -4,28 +4,12 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define PI 3.14159265359
-
 
 /******************************************************************************
  *
  *  HELPERS.
  *
  ******************************************************************************/
-
-double convert_angle(double d, n_trig_t from, n_trig_t to) {
-  if (from == to) return d;
-
-  // Convert to radians.
-  if (from == N_DEG) d = d / 180 * PI;
-  else if (from == N_GRAD) d = d / 200 * PI;
-
-  // Convert from radians.
-  if (to == N_DEG)  d = d / PI * 180;
-  else if (to == N_GRAD) d = d / PI * 200;
-
-  return (double) d;
-}
 
 /** Returns true if there is an integer n3 such that n1 = n2 * n3. */
 static bool is_multiple(n_t n1, n_t n2, n_t *n3) {

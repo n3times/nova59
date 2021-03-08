@@ -14,5 +14,12 @@
 
 /** Converts angle between 2 measuring units. */
 double convert_angle(double d, n_trig_t from, n_trig_t to);
- 
+
+/**
+ * Returns the most severe order between err1, err2.
+ *
+ * See n_err_t.
+ */
+n_err_t combine_errors(n_err_t err1, n_err_t err2);
+
 #endif  // N_INTERNAL_H

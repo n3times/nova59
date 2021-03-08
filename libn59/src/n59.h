@@ -63,16 +63,16 @@ typedef enum n_trig_e {
 } n_trig_t;
 
 /**
- * Errors.
+ * Errors by order of severity.
  *
  * Used as an out parameter by most functions from the library. If 'err_out' is
  * null, it is ignored. Otherwise, it is set to one of the values in the enum.
  */
 typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
-  N_ERR_DOMAIN,     // Input not in the domain of the function.
   N_ERR_UNDERFLOW,  // Value too small, in absolute value, to be stored.
-  N_ERR_OVERFLOW    // Value too big, in absolute value, to be displayed/stored.
+  N_ERR_OVERFLOW,   // Value too big, in absolute value, to be displayed/stored.
+  N_ERR_DOMAIN,     // Input not in the domain of the function.
 } n_err_t;
 
 
