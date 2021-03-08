@@ -17,7 +17,7 @@ static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
   char str[N_N2S_MAX_SIZE];
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
-  if (err) *err = combine_errors(err1, err2);
+  if (err) *err = max_error(err1, err2);
   return n;
 }
 
@@ -55,7 +55,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (n.mant < 0) res = -res;
   n_err_t err2;
   n = n_d2n(res, &err2);
-  if (err) *err = combine_errors(*err, err2);
+  if (err) *err = max_error(*err, err2);
 
   return n;
 }
@@ -86,7 +86,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (n.mant < 0) res = -res;
   n_err_t err2;
   n = n_d2n(res, &err2);  // May underflow.
-  if (err) *err = combine_errors(*err, err2);
+  if (err) *err = max_error(*err, err2);
 
   return n;
 }
@@ -101,7 +101,7 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
   n_err_t err1, err2;
   *n_x_out = n_d2n(d_rho * sin(d_theta), &err1);
   *n_y_out = n_d2n(d_rho * cos(d_theta), &err2);
-  if (err) *err = combine_errors(err1, err2);
+  if (err) *err = max_error(err1, err2);
 }
 
 void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
@@ -126,5 +126,5 @@ void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
   n_err_t err1, err2;
   *n_rho_out = n_d2n(d_rho, &err1);
   *n_theta_out = n_d2n(d_theta, &err2);
-  if (err) *err = combine_errors(err1, err2);
+  if (err) *err = max_error(err1, err2);
 }

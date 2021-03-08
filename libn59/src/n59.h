@@ -3,6 +3,18 @@
  *
  * Header file for libn59, a library that implements arithmetic operators and
  * mathematical functions on TI-59 numbers.
+ *
+ * Note on errors: Most functions have an 'err_out' parameter, which is ignored
+ * if null. If nonnull, err_out will be set to N_ERR_NONE if there is no error.
+ * Otherwise, it will be set to the most severe error that occurred while
+ * evaluating the function. In an actual TI-59, the display would blink in case
+ * of error.
+ *
+ * Note on accuracy: In general this library computes functions and operators
+ * at least as accurately as TI-59. We typically use C operators and math.h
+ * functions on doubles. In rare occasions, for example for addition and
+ * substraction, we implement our own algorithms to better match TI-59
+ * accuracy.
  */
 
 
@@ -16,14 +28,6 @@
 
 /** The size of the string that needs to be allocated when calling n_print. */
 #define N_PRINT_MAX_SIZE 18
-
-/**
- * Note: Most functions have an 'err_out' parameter. If non null, it is set to
- * true if an error occurs, and to false otherwise. An error occurs when some
- * parameter is not in the function domain ("square root of -1") or because of
- * underflow or overflow ("square of 10^80"). In a TI-59, the display would
- * blink in case of error.
- */
 
 
 /******************************************************************************
