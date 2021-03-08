@@ -4,21 +4,41 @@
 #include <math.h>
 #include <stdbool.h>
 
+
+/******************************************************************************
+ *
+ *  HELPERS.
+ *
+ ******************************************************************************/
+
+static n_t keep_visible_digits(n_t n, int fix, n_format_t format,
+                               n_err_t *err) {
+  char str[N_N2S_MAX_SIZE];
+  n_n2s(n, fix, format, str, err);  // May overflow.
+  n_err_t no_err;
+  n = n_s2n(str, &no_err);
+  assert(no_err == N_ERR_NONE);
+  return n;
+}
+
+
+/******************************************************************************
+ *
+ *  IMPLEMENTATION.
+ *
+ ******************************************************************************/
+
+// D.MS to decimal degrees.
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
+  if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
   if (fix < 0) fix = 0;
   else if (fix > 9) fix = 9;
 
   // Only consider the digits visible on the display.
-  char str[N_N2S_MAX_SIZE];
-  n_err_t err1, err2, err3;
-  n_n2s(n, fix, format, str, &err1);
-  assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
-  n = n_s2n(str, &err2);
-  assert(err2 == N_ERR_NONE);
+  n = keep_visible_digits(n, fix, format, err);
 
-  // Optimization.
-  if (n.exp >= 9) return n;
+  if (n.exp >= 9) return n;  // Optimization.
 
   // Split n into hours, minutes and seconds.
   long long mant = ABS(n.mant);
@@ -33,28 +53,24 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
   // Convert result to number.
   if (n.mant < 0) res = -res;
-  n = n_d2n(res, &err3);
-  assert(err3 == N_ERR_NONE);
-  if (err) *err = err1;
+  n_err_t no_err;
+  n = n_d2n(res, &no_err);
+  assert(no_err == N_ERR_NONE);
 
   return n;
 }
 
+// Decimal degrees to D.MS.
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
+  if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
   if (fix < 0) fix = 0;
   else if (fix > 9) fix = 9;
 
   // Only consider the digits visible on the display.
-  char str[N_N2S_MAX_SIZE];
-  n_err_t err1, err2, err3;
-  n_n2s(n, fix, format, str, &err1);
-  assert(err1 == N_ERR_NONE || err1 == N_ERR_OVERFLOW);
-  n = n_s2n(str, &err2);
-  assert(err2 == N_ERR_NONE);
+  n = keep_visible_digits(n, fix, format, err);
 
-  // Optimization.
-  if (n.exp >= 9) return n;
+  if (n.exp >= 9) return n;  // Optimization.
 
   // Get hours, minutes and seconds from decimal degrees.
   double d = ABS(n_n2d(n));
@@ -68,12 +84,11 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
   // Convert result to number.
   if (n.mant < 0) res = -res;
-  n = n_d2n(res, &err3);
-  assert(err3 == N_ERR_NONE || err3 == N_ERR_UNDERFLOW);
-  assert(err1 == N_ERR_NONE || err3 == N_ERR_NONE);
+  n_err_t err2;
+  n = n_d2n(res, &err2);  // May underflow.
   if (err) {
-    if (err1 != N_ERR_NONE) *err = err1;
-    else *err = err3;
+    assert(*err == N_ERR_NONE || err2 == N_ERR_NONE);
+    if (*err == N_ERR_NONE) *err = err2;
   }
 
   return n;
