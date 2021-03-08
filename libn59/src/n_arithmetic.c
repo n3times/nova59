@@ -50,10 +50,15 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  *
  ******************************************************************************/
 
-// As far as we know, this method computes addition with the exact same accuracy
-// as TI-59's, even if this means that the last decimal may be 1 off. For
-// example: 9999999999.999 + .0009 gives 9999999999.999, even if 10000000000.00
-// is more accurate.
+// We use what seems to be TI-59 algorithm.
+//
+// This method may truncate one of the 2 numbers before performing addition. For
+// example:
+//   10000000000000      <=  has 13 digits.
+// +              1.9    <=  gets truncated down to 1, before addition.
+// ------------------
+//   10000000000001
+// even if 1000000000002 would be more accurate.
 n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1)) return n2;
@@ -81,18 +86,18 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   return res;
 }
 
-// As far as we know, this method computes substraction with the exact same
-// accuracy as TI-59's, even if this means that the last decimal may be 1 off.
-// For example: 1000000000.000 - .0001 gives 1000000000.000, even if the exact
-// result 999999999.9999 fits within 13 digits.
+// Same remark as for addition.
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
   return n_plus(n1, n_chs(n2), err);
 }
 
-// As far as we know, this method computes multiplication with the exact same
-// accuracy as TI-59's, even if this means that the last decimal may be 1 off.
-// For example: 1.111111111111 * 99 gives 109.9999999999, even if 110.0000000000
-// is more accurate.
+// This method guarantees that all the 13 digits of the result are correct and
+// does not perform any rounding up.
+//
+// TI-59 appears to perform a similar strategy (no rounding up) getting all 13
+// digits right, most of the time. When the 2 numbers have 13 significant
+// digits, TI-59 appears to truncate the last digit before multiplication,
+// getting a less accurate result.
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
