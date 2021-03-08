@@ -5,7 +5,11 @@
 #include <stdbool.h>
 
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
-  // Normalize.
+  assert(fix >= 0 && fix <= 9);
+  if (fix < 0) fix = 0;
+  else if (fix > 9) fix = 9;
+
+  // Only consider the digits visible on the display.
   char str[N_N2S_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
@@ -13,28 +17,35 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   n = n_s2n(str, &err2);
   assert(err2 == N_ERR_NONE);
 
-  if (n.exp >= 10) return n;
+  // Optimization.
+  if (n.exp >= 9) return n;
 
-  n_err_t neg = n.mant < 0;
-  if (neg) n.mant = -n.mant;
+  // Split n into hours, minutes and seconds.
+  long long mant = ABS(n.mant);
+  long long h = (long long) (mant / pow(10, 12 - n.exp));
+  mant -= h * pow(10, 12 - n.exp);
+  int m = (int) (mant / pow(10, 10 - n.exp));
+  mant -= m * pow(10, 10 - n.exp);
+  double s = mant / pow(10,  8 - n.exp);
 
-  long long h = (long long) (n.mant / pow(10, 12 - n.exp));
-  n.mant -= h * pow(10, 12 - n.exp);
-  int m = (int) (n.mant / pow(10, 10 - n.exp));
-  n.mant -= m * pow(10, 10 - n.exp);
-  double s = n.mant / pow(10,  8 - n.exp);
+  // Scale and re-combine hours, minutes and seconds.
   double res = h + m/60. + s/3600.;
 
-  if (neg) res = -res;
-
+  // Convert result to number.
+  if (n.mant < 0) res = -res;
   n = n_d2n(res, &err3);
   assert(err3 == N_ERR_NONE);
   if (err) *err = err1;
+
   return n;
 }
 
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
-  // Normalize.
+  assert(fix >= 0 && fix <= 9);
+  if (fix < 0) fix = 0;
+  else if (fix > 9) fix = 9;
+
+  // Only consider the digits visible on the display.
   char str[N_N2S_MAX_SIZE];
   n_err_t err1, err2, err3;
   n_n2s(n, fix, format, str, &err1);
@@ -42,18 +53,21 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   n = n_s2n(str, &err2);
   assert(err2 == N_ERR_NONE);
 
-  if (n.exp >= 10) return n;
+  // Optimization.
+  if (n.exp >= 9) return n;
 
-  n_err_t neg = n.mant < 0;
-  if (neg) n.mant = -n.mant;
-  double d = n_n2d(n);
+  // Get hours, minutes and seconds from decimal degrees.
+  double d = ABS(n_n2d(n));
   long long h = (long long) d;
   double total_s = (d - h) * 3600;
   int m = (int) (total_s / 60);
   double s = total_s - m * 60;
-  double res = h + m / 100. + s / 10000;
-  if (neg) res = -res;
 
+  // Combine hours, minutes and seconds into result.
+  double res = h + m / 100. + s / 10000;
+
+  // Convert result to number.
+  if (n.mant < 0) res = -res;
   n = n_d2n(res, &err3);
   assert(err3 == N_ERR_NONE || err3 == N_ERR_UNDERFLOW);
   assert(err1 == N_ERR_NONE || err3 == N_ERR_NONE);
@@ -61,6 +75,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
     if (err1 != N_ERR_NONE) *err = err1;
     else *err = err3;
   }
+
   return n;
 }
 

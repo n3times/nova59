@@ -257,7 +257,7 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
 /**
  * Converts rectangular coordinates to polar coordinates.
  *
- * Angle theta_out is in range -90..270.
+ * Angle theta_out is in range -90..270 (in DEG mode).
  */
 void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
            n_t *n_rho_out, n_t *n_theta_out, n_err_t *err_out);

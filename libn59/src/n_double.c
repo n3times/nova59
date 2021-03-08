@@ -1,9 +1,14 @@
 #include "n_internal.h"
 
+#include <assert.h>
 #include <math.h>
 
+// We should have n_d2n(n_n2d(n)) == n.
+
 double n_n2d(n_t n) {
-  return n.mant * pow(10, n.exp - 12);
+  double d = n.mant * pow(10, n.exp - 12);
+  assert(n_equals(n, n_d2n(d, NULL)));
+  return d;
 }
 
 n_t n_d2n(double d, n_err_t *err) {
