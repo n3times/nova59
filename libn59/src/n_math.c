@@ -27,8 +27,6 @@ n_t n_int(n_t n) {
 }
 
 n_t n_frac(n_t n) {
-  if (n.exp >= 12) return N_0;
-
   return n_minus(n, n_int(n), NULL);
 }
 

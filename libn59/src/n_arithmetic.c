@@ -50,10 +50,11 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  *
  ******************************************************************************/
 
-// We use what seems to be TI-59 algorithm.
+// Gives 13 accurate digits (no rounding up) when adding 2 numbers of the same
+// sign. This appears to be TI-59's algorithm.
 //
-// This method may truncate one of the 2 numbers before performing addition. For
-// example:
+// This method may truncate one of the 2 numbers before performing addition or
+// substraction. For example:
 //   10000000000000      <=  has 13 digits.
 // +              1.9    <=  gets truncated down to 1, before addition.
 // ------------------
@@ -73,7 +74,7 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   // Optimization.
   if (n1.exp - n2.exp >= 13) return n1;
 
-  // Align n1 and n2 digits as is basic addition.
+  // Align n1 and n2 digits as in basic addition.
   while (n2.exp < n1.exp) {
     n2.exp += 1;
     n2.mant /= 10;
@@ -86,18 +87,17 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   return res;
 }
 
-// Same remark as for addition.
+// See n_plus.
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
   return n_plus(n1, n_chs(n2), err);
 }
 
-// This method guarantees that all the 13 digits of the result are correct and
-// does not perform any rounding up.
+// Gives 13 accurate digits (no rounding up) when multiplying 2 numbers.
 //
 // TI-59 appears to perform a similar strategy (no rounding up) getting all 13
-// digits right, most of the time. When the 2 numbers have 13 significant
-// digits, TI-59 appears to truncate the last digit before multiplication,
-// getting a less accurate result.
+// digits right most of the time. When all the 13 digits are significant, TI-59
+// appears to truncate the last digit before multiplication, getting a less
+// accurate result than we do.
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
@@ -213,9 +213,7 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
   // d1 and d2 are nonzero.
 
   bool d1_neg = d1 < 0;
-  if (d1_neg) {
-    d1 = -d1;
-  }
+  d1 = ABS(d1);
 
   // Overflow.
   double exp = (double) (d2 * log10(d1));

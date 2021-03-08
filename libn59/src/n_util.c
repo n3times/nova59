@@ -25,12 +25,34 @@ bool n_is_zero(n_t n) {
 }
 
 int n_cmp(n_t n1, n_t n2) {
-  double d1 = n_n2d(n1);
-  double d2 = n_n2d(n2);
+  int n1_sign = (n1.mant > 0) - (n1.mant < 0);
+  int n2_sign = (n2.mant > 0) - (n2.mant < 0);
 
-  if (d1 > d2) return 1;
-  if (d1 < d2) return -1;
-  return 0;
+  // Different signs.
+  if (n1_sign > n2_sign) return 1;
+  if (n1_sign < n2_sign) return -1;
+
+  // Same sign.
+  int ret;
+  int e1 = n1.exp;
+  int e2 = n2.exp;
+  long long m1 = ABS(n1.mant);
+  long long m2 = ABS(n2.mant);
+  if (e1 > e2) {
+    ret = 1;
+  } else if (e1 < e2) {
+    ret = -1;
+  } else {
+    if (m1 > m2) {
+      ret = 1;
+    } else if (m1 < m2) {
+      ret = -1;
+    } else {
+      ret = 0;
+    }
+  }
+
+  return n1_sign < 0 ? -ret : ret;
 }
 
 char *n_print(n_t n, char *str_out) {
