@@ -44,8 +44,10 @@ static n_err_t is_digit(char c) {
 /** Number to string. */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
   assert(fix >= 0 && fix <= 9);
-  if (fix < 0) fix = 0;
-  else if (fix > 9) fix = 9;
+  if (fix < 0 || fix > 9) {
+    if (err) *err = N_ERR_DOMAIN;
+    return;
+  }
 
   n_err_t neg = n.mant < 0;
   long long mant = ABS(n.mant);

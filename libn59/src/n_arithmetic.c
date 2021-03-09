@@ -50,16 +50,25 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  *
  ******************************************************************************/
 
-// Gives 13 accurate digits (no rounding up) when adding 2 numbers of the same
-// sign. This appears to be TI-59's algorithm.
-//
-// This method may truncate one of the 2 numbers before performing addition or
-// substraction. For example:
-//   10000000000000      <=  has 13 digits.
-// +              1.9    <=  gets truncated down to 1, before addition.
-// ------------------
-//   10000000000001
-// even if 1000000000002 would be more accurate.
+/**
+ * Adds 2 numbers.
+ *
+ * If both numbers are of the same sign, the 13 digits of the result are
+ * guaranteed to be accurate (no rounding up). If they have different signs, the
+ * result may be 1 off.
+ *
+ * This appears to be same algorithm TI-59 uses.
+ *
+ * Note that unless both numbers have same exp, this method truncates one of the
+ * 2 numbers before adding or substracting. For example:
+ *
+ *     10000000000000      <=  has 13 digits.
+ *  +               1.9    <=  gets truncated down to 1, before addition.
+ *  -------------------
+ *     10000000000001
+ *
+ * even if 1000000000002 (13 digits) would be more accurate.
+ */
 n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1)) return n2;
@@ -92,12 +101,16 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
   return n_plus(n1, n_chs(n2), err);
 }
 
-// Gives 13 accurate digits (no rounding up) when multiplying 2 numbers.
-//
-// TI-59 appears to perform a similar strategy (no rounding up) getting all 13
-// digits right most of the time. When all the 13 digits are significant, TI-59
-// appears to truncate the last digit before multiplication, getting a less
-// accurate result than we do.
+/**
+ * Multiplies 2 numbers.
+ *
+ * The 13 digits of the result are guaranteed to be accurate (no rounding up).
+ *
+ * TI-59 appears to follow the same strategy (no rounding up) most of the time.
+ * If all the digits of both numbers are significant, TI-59 appears to truncate
+ * the last digit before multiplication, getting a less accurate result than
+ * this method.
+ */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
@@ -212,24 +225,24 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
 
   // d1 and d2 are nonzero.
 
-  bool d1_neg = d1 < 0;
-  d1 = ABS(d1);
+  if (d1 < 0) {
+    if (err) *err = N_ERR_DOMAIN;
+    d1 = ABS(d1);
+  }
 
   // Overflow.
   double exp = (double) (d2 * log10(d1));
   if (exp >= 100) {
-    if (err) *err = d1_neg ? N_ERR_DOMAIN : N_ERR_OVERFLOW;
+    if (err) *err = max_error(*err, N_ERR_OVERFLOW);
     return N_INF;
   } else if (exp < -99) {
-    if (err) *err = d1_neg ? N_ERR_DOMAIN : N_ERR_UNDERFLOW;
+    if (err) *err = max_error(*err, N_ERR_UNDERFLOW);
     return N_EPS;
   }
 
-  n_t res = n_d2n(pow(d1, d2), err);
-  if (err) {
-    // Prioritize N_ERR_DOMAIN.
-    if (d1_neg) *err = N_ERR_DOMAIN;
-  }
+  n_err_t err2;
+  n_t res = n_d2n(pow(d1, d2), &err2);
+  if (err) *err = max_error(*err, err2);
   return res;
 }
 

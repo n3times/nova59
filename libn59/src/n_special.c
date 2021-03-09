@@ -32,8 +32,10 @@ static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
-  if (fix < 0) fix = 0;
-  else if (fix > 9) fix = 9;
+  if (fix < 0 || fix > 9) {
+    if (err) *err = N_ERR_DOMAIN;
+    return n;
+  }
 
   // Only consider the digits visible on the display.
   n = discard_nonvisible_digits(n, fix, format, err);
@@ -64,8 +66,10 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
-  if (fix < 0) fix = 0;
-  else if (fix > 9) fix = 9;
+  if (fix < 0 || fix > 9) {
+    if (err) *err = N_ERR_DOMAIN;
+    return n;
+  }
 
   // Only consider the digits visible on the display.
   n = discard_nonvisible_digits(n, fix, format, err);
