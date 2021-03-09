@@ -12,11 +12,11 @@
 #define POW10_12   1000000000000LL
 #define POW10_13  10000000000000LL
 
-/** Converts angle between 2 measuring units. */
+/** Converts angle from one measuring unit to another one. */
 double convert_angle(double d, n_trig_t from, n_trig_t to);
 
 /**
- * Returns the most severe order between err1, err2.
+ * Returns the most severe error between err1, err2.
  *
  * See n_err_t.
  */

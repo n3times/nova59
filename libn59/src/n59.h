@@ -127,6 +127,11 @@ int n_cmp(n_t n1, n_t n2);
  *
  * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For convenience
  * str_out is also returned directly by this function.
+ *
+ * Example:
+ *   n_t n = n_square(N_PI, NULL);
+ *   char str[N_PRINT_MAX_SIZE];
+ *   printf("pi^2 = %s\n", n_print(n));  // Prints "pi^2 =  9869604401090 00".
  */
 char *n_print(n_t n, char *str_out);
 

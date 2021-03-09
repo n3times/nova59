@@ -122,28 +122,31 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
 
 n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
   double d = n_n2d(n);
+
   if (ABS(d) > 1) {
     if (err) *err = N_ERR_DOMAIN;
     return n;
   }
-  d = asin(d);
-  d = convert_angle(d, N_RAD, mode);
+
+  d = convert_angle(asin(d), N_RAD, mode);
   return n_d2n(d, err);
 }
 
 n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
   double d = n_n2d(n);
+
   if (ABS(d) > 1) {
     if (err) *err = N_ERR_DOMAIN;
     return n;
   }
-  d = acos(d);
-  d = convert_angle(d, N_RAD, mode);
+
+  d = convert_angle(acos(d), N_RAD, mode);
   return n_d2n(d, err);
 }
 
 n_t n_atan(n_t n, n_trig_t mode, n_err_t *err) {
-  double d = atan(n_n2d(n));
-  d = convert_angle(d, N_RAD, mode);
+  double d = n_n2d(n);
+
+  d = convert_angle(atan(d), N_RAD, mode);
   return n_d2n(d, err);
 }

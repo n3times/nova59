@@ -3,15 +3,9 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if !NDEBUG
-static bool n_is_number(long long mant, int exp) {
-  return ( (mant == 0 && exp == 0) ||
-           (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99) );
-}
-#endif
-
 n_t n_make(long long mant, int exp) {
-  assert(n_is_number(mant, exp));
+  assert( (mant == 0 && exp == 0) ||
+          (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99) );
 
   return (n_t) { mant, exp };
 }
