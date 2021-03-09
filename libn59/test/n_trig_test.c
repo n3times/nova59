@@ -21,7 +21,7 @@ int main() {
   n_trig_t D = N_DEG;
   n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(N_9, D, 0), D,
       0), D, 0), D, 0), D, 0), D, 0);
-  char str[18];
+  char str[N_PRINT_MAX_SIZE];
   printf("Forensics:\n  asin(acos(atan(tan(cos(sin(9)))))) = %s\n\n\n",
          n_print(res, str));
 

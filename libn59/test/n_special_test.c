@@ -2,37 +2,42 @@
 
 #include <stdio.h>
 
+#define MAX(x, y)  ( (x) > (y) ?  (x) : (y) )
+
 static n_t N_0_5 =     {  5000000000000LL,  -1 };
 static n_t N_0_5_NEG = { -5000000000000LL,  -1 };
 static n_t N_X =       {  1420000000000LL,   0 };
 static n_t N_Y =       {  1000000000000LL, -11 };
 
+static void p(n_t n, n_t res, n_err_t e) {
+  char str_n[N_PRINT_MAX_SIZE];
+  char str_res[N_PRINT_MAX_SIZE];
+  printf("%s => %s%s\n",
+         n_print(n, str_n), n_print(res, str_res), e ? "?" : "");
+}
+
 static void test_dms(n_t n) {
   n_err_t e;
   n_t res = n_dms(n, 9, N_FLOAT, &e);
-  printf("%lld %d => %lld %d%s\n",
-         n.mant, n.exp, res.mant, res.exp, e ? "?" : "");
+  p(n, res, e);
 }
 
 static void test_idms(n_t n) {
   n_err_t e;
   n_t res = n_idms(n, 9, N_FLOAT, &e);
-  printf("%lld %d => %lld %d%s\n",
-         n.mant, n.exp, res.mant, res.exp, e ? "?" : "");
+  p(n, res, e);
 }
 
 static void test_idms_dms(n_t n) {
   n_err_t e1, e2;
   n_t res = n_idms(n_dms(n, 9, N_FLOAT, &e1), 9, N_FLOAT, &e2);
-  printf("%lld %d => %lld %d%s\n",
-         n.mant, n.exp, res.mant, res.exp, e1 || e2 ? "?" : "");
+  p(n, res, MAX(e1, e2));
 }
 
 static void test_dms_idms(n_t n) {
   n_err_t e1, e2;
   n_t res = n_dms(n_idms(n, 9, N_FLOAT, &e1), 9, N_FLOAT, &e2);
-  printf("%lld %d => %lld %d%s\n",
-         n.mant, n.exp, res.mant, res.exp, e1 || e2 ? "?" : "");
+  p(n, res, MAX(e1, e2));
 }
 
 int  main() {
