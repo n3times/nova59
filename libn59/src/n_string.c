@@ -145,6 +145,7 @@ n_t n_s2n(char *s, n_err_t *err) {
   n_err_t format_err = false;
   long long n = 0;
   int exp = 0;
+  int extra_exp = 0;
   n_err_t has_n = false;
   n_err_t has_exp = false;
   n_err_t neg_n = false;
@@ -181,7 +182,7 @@ n_t n_s2n(char *s, n_err_t *err) {
         } else if (is_digit(c)) {
           has_n = true;
           if (n < POW10_12) n = 10 * n + c - '0';
-          else exp += 1;
+          else extra_exp += 1;
           index_end = i;
         } else if (state == N_INT && c == '.') {
           index_dot = i;
@@ -222,6 +223,7 @@ n_t n_s2n(char *s, n_err_t *err) {
 
   if (n == 0) return N_0;
   if (neg_exp) exp = -exp;
+  exp += extra_exp;
 
   // Normalize.
   while (n < POW10_12) {

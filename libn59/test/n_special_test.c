@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 
-#define MAX(x, y)  ( (x) > (y) ?  (x) : (y) )
-
 static n_t N_0_5 =     {  5000000000000LL,  -1 };
 static n_t N_0_5_NEG = { -5000000000000LL,  -1 };
 static n_t N_X =       {  1420000000000LL,   0 };
