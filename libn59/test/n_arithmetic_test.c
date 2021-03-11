@@ -17,6 +17,62 @@ static void p(n_t n1, n_t n2, n_t res, n_err_t err, char *op) {
          err ? "?" : "");
 }
 
+static void test_multiplication() {
+  // We truncate result to 13 digits with no rounding. Same as TI-59.
+  n_t n1 = n_make(1111111111111LL, 0);
+  n_t n2 = n_d2n(99, NULL);
+  n_t res = n_times(n1, n2, NULL);
+  assert(n_equals(res, n_make(1099999999999LL, 2)));  // And not 101.
+  p(n1, n2, res, N_ERR_NONE, "*");
+
+  // We always give 13 accurate digits unlike TI-59.
+  // TI-59 gets (9999999999989, 1) while we get (9999999999998, 1).
+  n1 = n_make(9999999999999LL, 0);
+  res = n_times(n1, n1, NULL);
+  p(n1, n1, res, N_ERR_NONE, "*");
+
+  // Same accuracy as TI-59 in mantissas with less than 13 significant digits:
+  // pi^100 using multiplication. Note that pi = (3141592653590, 0), its
+  // mantissa ending in 0.
+  res = N_1;
+  for (int i = 0; i < 100; i++) {
+    res = n_times(res, N_PI, NULL);
+  }
+  p(N_PI, N_PI, res, N_ERR_NONE, "?");
+
+  // Same accuracy as TI-59 in mantissas with less than 13 significant digits:
+  // 69! (See Pgm 16, from Master Library).
+  res = N_1;
+  for (int i = 69; i >= 1; i--) {
+    res = n_times(res, n_d2n(i, NULL), NULL);
+  }
+  assert(n_equals(res, n_make(1711224524264LL, 98)));
+  p(n_d2n(69, NULL), N_1, res, N_ERR_NONE, "!");
+}
+
+static void test_addition() {
+  // Truncation before addition, as in TI-59.
+  n_t n1 = n_make(9999999999999LL, 13);
+  n_t n2 = n_make(9999999999999LL, 0);
+  n_t res = n_plus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "+");
+
+  // Truncation before substraction, as in TI-59.
+  n1 = n_make(1000000000000LL, 13);
+  n2 = N_1;
+  res = n_minus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "-");
+
+  // TI-59 accurate addition: pi*100 using addition.
+  res = N_0;
+  for (int i = 0; i < 100; i++) {
+    res = n_plus(res, N_PI, NULL);
+  }
+  p(N_PI, N_PI, res, N_ERR_NONE, "?");
+}
+
 int main() {
   n_err_t err;
   n_t res;
@@ -37,52 +93,6 @@ int main() {
     printf("\n\n\n");
   }
 
-  // Truncation before addition.
-  n_t n1 = n_make(9999999999999LL, 13);
-  n_t n2 = n_make(9999999999999LL, 0);
-  res = n_plus(n1, n2, NULL);
-  assert(n_equals(res, n1));  // Note that n2 is ignored
-  p(n1, n2, res, N_ERR_NONE, "+");
-
-  // Truncation before substraction.
-  n1 = n_make(1000000000000LL, 13);
-  n2 = N_1;
-  res = n_minus(n1, n2, NULL);
-  assert(n_equals(res, n1));  // Note that n2 is ignored
-  p(n1, n2, res, N_ERR_NONE, "-");
-
-  // No rounding up multiplication.
-  n1 = n_make(1111111111111LL, 0);
-  n2 = n_d2n(99, NULL);
-  res = n_times(n1, n2, NULL);
-  assert(n_equals(res, n_make(1099999999999LL, 2)));  // And not 101.
-  p(n1, n2, res, N_ERR_NONE, "*");
-
-  // True-to-the-original but inaccurate multiplication.
-  // Gives (9999999999989, 1) instead of (9999999999998, 1)
-  n1 = n_make(9999999999999LL, 0);
-  res = n_times(n1, n1, NULL);
-  p(n1, n1, res, N_ERR_NONE, "*");
-
-  // TI-59 accurate addition: pi*100 using addition.
-  res = N_0;
-  for (int i = 0; i < 100; i++) {
-    res = n_plus(res, N_PI, NULL);
-  }
-  p(N_PI, N_PI, res, N_ERR_NONE, "?");
-
-  // TI-59 accurate multiplication: pi^100 using multiplication.
-  res = N_1;
-  for (int i = 0; i < 100; i++) {
-    res = n_times(res, N_PI, NULL);
-  }
-  p(N_PI, N_PI, res, N_ERR_NONE, "?");
-
-  // TI-59 accurate multiplication: 69! (See Pgm 16, from Master Library).
-  res = N_1;
-  for (int i = 69; i >= 1; i--) {
-    res = n_times(res, n_d2n(i, NULL), NULL);
-  }
-  assert(n_equals(res, n_make(1711224524264LL, 98)));
-  p(n_d2n(69, NULL), N_1, res, N_ERR_NONE, "!");
+  test_addition();
+  test_multiplication();
 }
