@@ -1,5 +1,6 @@
 #include "n_test.h"
 
+#include <assert.h>
 #include <stdio.h>
 
 int main(void) {
@@ -49,6 +50,31 @@ int main(void) {
           printf("%s%s\n", str, err ? " ?" : "");
         }
         printf("\n");
+      }
+    }
+  }
+
+  // Make sure that n_n2s(n_s2n(s)) = s, for numbers on the display.
+  // For example "3.1415-12" => (3141500000000, -12) => "3.1415-12".
+
+  n_t ns[] = { TEST_NUMBERS, N_E, N_10 };
+  for (int i = 0; i < N_ELEMS(ns); i++) {
+    printf("\n\n\n");
+    for (int j = 0; j < N_ELEMS(formats); j++) {
+      printf("\n%s (fix 0, 5, 8, 9)\n", format_strs[j]);
+      for (int k = 0; k < N_ELEMS(fixes); k++) {
+        n_t n1 = ns[i];
+        char str_n1[18];  // Loss of precision.
+        n_n2s(n1, fixes[k], formats[j], str_n1, NULL);
+        n_t n2 = n_s2n(str_n1, NULL);
+        char str_n2[18];
+        n_n2s(n2, fixes[k], formats[j], str_n2, NULL);
+        char str1[18];
+        char str2[18];
+        printf("%s => %14s => %s => %14s\n",
+               n_print(n1,str1), str_n1, n_print(n2, str2), str_n2);
+        n_t n3 = n_s2n(str_n2, NULL);
+        assert(n_equals(n2, n3));
       }
     }
   }

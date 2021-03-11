@@ -4,17 +4,14 @@
  * Header file for libn59, a library that implements arithmetic operators and
  * mathematical functions on TI-59 numbers.
  *
+ * This library computes functions and operators at least as accurately as
+ * TI-59. In some occasions, for example for addition and substraction, we are
+ * able to match exactly TI-59's accuracy.
+ *
  * Note on errors: Most functions have an 'err_out' parameter, which is ignored
  * if null. If nonnull, err_out will be set to N_ERR_NONE if there is no error.
  * Otherwise, it will be set to the most severe error that occurred while
- * evaluating the function. In an actual TI-59, the display would blink in case
- * of error.
- *
- * Note on accuracy: In general this library computes functions and operators
- * at least as accurately as TI-59. We typically use C operators and math.h
- * functions on doubles. In rare occasions, for example for addition and
- * substraction, we implement our own algorithms to better match TI-59
- * accuracy.
+ * evaluating the function.
  */
 
 
@@ -66,12 +63,7 @@ typedef enum n_trig_e {
   N_GRAD  // Gradians.
 } n_trig_t;
 
-/**
- * Errors by order of severity.
- *
- * Used as an out parameter by most functions from the library. If 'err_out' is
- * null, it is ignored. Otherwise, it is set to one of the values in the enum.
- */
+/** Errors by order of severity. */
 typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
   N_ERR_UNDERFLOW,  // Value too small, in absolute value, to be stored.
@@ -95,6 +87,7 @@ extern n_t N_EPS;  // epsilon, smallest positive number.
 extern n_t N_10;   // 10.
 extern n_t N_E;    // e.
 
+
 /******************************************************************************
  *
  *  UTILITY METHODS.
@@ -104,8 +97,8 @@ extern n_t N_E;    // e.
 /**
  * Returns a TI-59 number with the specified mantissa and exponent.
  *
- * Asserts that either mant and exp are zero or mant has 13 digits and exp is in
- * -99..99.
+ * In debug mode, asserts that either mant and exp are zero or mant has 13
+ * digits and exp is in -99..99.
  */
 n_t n_make(long long mant, int exp);
 
@@ -123,7 +116,7 @@ int n_cmp(n_t n1, n_t n2);
  *
  * For example n_print(N_PI, str) returns " 3141592653590 00".
  * Note that this method returns all the 13 digits of the mantissa, unlike
- * n_n2s which returns only the digits on the display.
+ * n_n2s which returns only the digits visible on the display.
  *
  * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For convenience
  * str_out is also returned directly by this function.
@@ -131,7 +124,7 @@ int n_cmp(n_t n1, n_t n2);
  * Example:
  *   n_t n = n_square(N_PI, NULL);
  *   char str[N_PRINT_MAX_SIZE];
- *   printf("pi^2 = %s\n", n_print(n));  // Prints "pi^2 =  9869604401090 00".
+ *   printf("pi^2 = %s\n", n_print(n, str));  // "pi^2 =  9869604401090 00".
  */
 char *n_print(n_t n, char *str_out);
 
@@ -259,12 +252,12 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
  */
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 
-/** Converts polar coordinates to rectangular coordinates. */
+/** Converts polar coordinates into rectangular coordinates. */
 void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
            n_t *n_x_out, n_t *n_y_out, n_err_t *err_out);
 
 /**
- * Converts rectangular coordinates to polar coordinates.
+ * Converts rectangular coordinates into polar coordinates.
  *
  * Angle theta_out is in range -90..270 (in DEG mode).
  */
@@ -297,7 +290,10 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 /**
  * String to number.
  *
- * String must be composed of:
+ * This method converts the display, see as a string, into a number. For
+ * example: "1234.5-01" => 1234500000000 02
+ *
+ * More generally it can convert into a number any string composed of:
  * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
  *   of 1 or more digits,
  * - followed, possibly, by an exponent: e or -e where e is a sequence of 1 or
