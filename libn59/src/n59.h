@@ -6,7 +6,7 @@
  *
  * This library computes functions and operators at least as accurately as
  * TI-59. In some occasions, for example for addition and substraction, we are
- * able to match exactly TI-59's accuracy.
+ * able to match TI-59's accuracy, exactly.
  *
  * Note on errors: Most functions have an 'err_out' parameter, which is ignored
  * if null. If nonnull, err_out will be set to N_ERR_NONE if there is no error.
@@ -66,8 +66,8 @@ typedef enum n_trig_e {
 /** Errors by order of severity. */
 typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
-  N_ERR_UNDERFLOW,  // Value too small, in absolute value, to be stored.
-  N_ERR_OVERFLOW,   // Value too big, in absolute value, to be displayed/stored.
+  N_ERR_UNDERFLOW,  // Too small, in absolute value, to be stored.
+  N_ERR_OVERFLOW,   // Too large, in absolute value, to be stored or displayed.
   N_ERR_DOMAIN,     // Input not in the domain of the function.
 } n_err_t;
 
@@ -114,7 +114,7 @@ int n_cmp(n_t n1, n_t n2);
 /**
  * Returns a representation of n as a string for debugging purposes.
  *
- * For example n_print(N_PI, str) returns " 3141592653590 00".
+ * For example n_print(N_PI, str) returns ' 3141592653590 00'.
  * Note that this method returns all the 13 digits of the mantissa, unlike
  * n_n2s which returns only the digits visible on the display.
  *
@@ -124,7 +124,7 @@ int n_cmp(n_t n1, n_t n2);
  * Example:
  *   n_t n = n_square(N_PI, NULL);
  *   char str[N_PRINT_MAX_SIZE];
- *   printf("pi^2 = %s\n", n_print(n, str));  // "pi^2 =  9869604401090 00".
+ *   printf("pi^2 = %s\n", n_print(n, str));  // 'pi^2 =  9869604401090 00'.
  */
 char *n_print(n_t n, char *str_out);
 
@@ -291,7 +291,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  * String to number.
  *
  * This method converts the display, see as a string, into a number. For
- * example: "1234.5-01" => 1234500000000 02
+ * example: '1234.5-01' -> 1234500000000 02
  *
  * More generally it can convert into a number any string composed of:
  * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences

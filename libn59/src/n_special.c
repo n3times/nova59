@@ -28,7 +28,7 @@ static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
  *
  ******************************************************************************/
 
-// D.MS to decimal degrees.
+/** D.MS to decimal degrees. */
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   assert(n_is_number(n));
 
@@ -64,7 +64,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   return n;
 }
 
-// Decimal degrees to D.MS.
+/** Decimal degrees to D.MS. */
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   assert(n_is_number(n));
 

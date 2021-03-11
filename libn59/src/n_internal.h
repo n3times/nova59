@@ -3,9 +3,9 @@
 
 #include "n59.h"
 
-#define ABS(x)     ( (x) <  0  ? (-x) : (x) )
-#define MIN(x, y)  ( (x) < (y) ?  (x) : (y) )
-#define MAX(x, y)  ( (x) > (y) ?  (x) : (y) )
+#define ABS(x)     ((x) <  0  ? (-x) : (x))
+#define MIN(x, y)  ((x) < (y) ?  (x) : (y))
+#define MAX(x, y)  ((x) > (y) ?  (x) : (y))
 
 #define NULL 0
 
@@ -13,10 +13,11 @@
 #define POW10_13  10000000000000LL
 
 #if !NDEBUG
+/** Returns true is n.mant and n.exp are in the appropriate range. */
 bool n_is_number(n_t n);
 #endif
 
-/** Converts angle from one measuring unit to another one. */
+/** Converts angle from one measuring unit to another. */
 double convert_angle(double d, n_trig_t from, n_trig_t to);
 
 /**

@@ -55,8 +55,8 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  * Adds 2 numbers.
  *
  * If both numbers are of the same sign, the 13 digits of the result are
- * guaranteed to be accurate (no rounding up). If they have different signs, the
- * result may be 1 off.
+ * guaranteed to be accurate (with no rounding up). If they have different
+ * signs, the result may be off by 1.
  *
  * This appears to be same algorithm TI-59 uses.
  *
@@ -100,7 +100,7 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   return res;
 }
 
-// See n_plus.
+/** See n_plus. */
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n1));
   assert(n_is_number(n2));
@@ -111,12 +111,13 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
 /**
  * Multiplies 2 numbers.
  *
- * The 13 digits of the result are guaranteed to be accurate (no rounding up).
+ * The 13 digits of the result are guaranteed to be accurate (with no rounding
+ * up).
  *
- * TI-59 appears to follow the same strategy (no rounding up) most of the time.
- * If all the digits of both numbers are significant, TI-59 appears to truncate
- * the last digit before multiplication, getting a less accurate result than
- * this method.
+ * TI-59 appears to follow the same strategy most of the time. If all the digits
+ * of both numbers are significant, TI-59 appears to truncate the last digit of
+ * of least one of the numbers, before multiplication. In this case, TI-59 gets
+ * gets a result less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n1));
