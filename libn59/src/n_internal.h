@@ -12,6 +12,10 @@
 #define POW10_12   1000000000000LL
 #define POW10_13  10000000000000LL
 
+#if !NDEBUG
+bool n_is_number(n_t n);
+#endif
+
 /** Converts angle from one measuring unit to another one. */
 double convert_angle(double d, n_trig_t from, n_trig_t to);
 

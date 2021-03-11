@@ -2,6 +2,15 @@
 
 #define PI 3.14159265359
 
+#if !NDEBUG
+bool n_is_number(n_t n) {
+  return (n.mant == 0 && n.exp == 0)
+         ||
+         (ABS(n.mant) >= POW10_12
+             && ABS(n.mant) < POW10_13 && ABS(n.exp) <= 99);
+}
+#endif
+
 double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
 

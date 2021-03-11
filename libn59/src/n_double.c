@@ -6,6 +6,8 @@
 // We should have n_d2n(n_n2d(n)) == n.
 
 double n_n2d(n_t n) {
+  assert(n_is_number(n));
+
   double d = n.mant * pow(10, n.exp - 12);
   assert(n_equals(n, n_d2n(d, NULL)));
   return d;

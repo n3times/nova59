@@ -1,5 +1,6 @@
 #include "n_internal.h"
 
+#include <assert.h>
 #include <math.h>
 
 
@@ -70,6 +71,9 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  * even if 1000000000002 (13 digits) would be more accurate.
  */
 n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1)) return n2;
   if (n_is_zero(n2)) return n1;
@@ -98,6 +102,9 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
 
 // See n_plus.
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   return n_plus(n1, n_chs(n2), err);
 }
 
@@ -112,6 +119,9 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  * this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
 
@@ -149,6 +159,9 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
 #if 0
 // Alternative division with no rounding. Doesn't look like TI-59 does this.
 n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
 
   // n1 or n2 is zero.
@@ -186,6 +199,9 @@ n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
 #endif
 
 n_t n_div(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
@@ -206,6 +222,9 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
 }
 
 n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
@@ -247,6 +266,9 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
 }
 
 n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
+  assert(n_is_number(n1));
+  assert(n_is_number(n2));
+
   if (err) *err = N_ERR_NONE;
 
   // Note that some of these return values are somewhat arbitrary. We follow,
