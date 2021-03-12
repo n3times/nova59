@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 n_t n_make(long long mant, int exp) {
-  assert((mant == 0 && exp == 0) ||
-         (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99));
+  n_t n = { mant, exp };
+  assert(n_is_number(n));
 
-  return (n_t) { mant, exp };
+  return n;
 }
 
 bool n_equals(n_t n1, n_t n2) {

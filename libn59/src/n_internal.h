@@ -3,14 +3,16 @@
 
 #include "n59.h"
 
-#define ABS(x)     ((x) <  0  ? (-x) : (x))
-#define MIN(x, y)  ((x) < (y) ?  (x) : (y))
-#define MAX(x, y)  ((x) > (y) ?  (x) : (y))
-
 #define NULL 0
+
+#define PI 3.14159265359
 
 #define POW10_12   1000000000000LL
 #define POW10_13  10000000000000LL
+
+#define ABS(x)     ((x) <  0  ? (-x) : (x))
+#define MIN(x, y)  ((x) < (y) ?  (x) : (y))
+#define MAX(x, y)  ((x) > (y) ?  (x) : (y))
 
 #if !NDEBUG
 /** Returns true is n.mant and n.exp are in the appropriate range. */

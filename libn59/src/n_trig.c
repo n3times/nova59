@@ -166,7 +166,9 @@ n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
     return n;
   }
 
-  d = convert_angle(asin(d), N_RAD, mode);
+  d = asin(d);
+  assert(ABS(d) <= PI/2);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }
 
@@ -180,7 +182,9 @@ n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
     return n;
   }
 
-  d = convert_angle(acos(d), N_RAD, mode);
+  d = acos(d);
+  assert(d >= 0 && d <= PI);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }
 
@@ -189,6 +193,8 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err) {
 
   double d = n_n2d(n);
 
-  d = convert_angle(atan(d), N_RAD, mode);
+  d = atan(d);
+  assert(ABS(d) <= PI/2);
+  d = convert_angle(d, N_RAD, mode);
   return n_d2n(d, err);
 }

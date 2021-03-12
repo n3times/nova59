@@ -1,7 +1,5 @@
 #include "n_internal.h"
 
-#define PI 3.14159265359
-
 #if !NDEBUG
 bool n_is_number(n_t n) {
   return (n.mant == 0 && n.exp == 0)
