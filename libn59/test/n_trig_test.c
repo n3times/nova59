@@ -109,18 +109,20 @@ int main() {
   }
   printf("\n");
 
-  for (int i = -10; i <= 10; i++) {
-    t(n_d2n(i/10., NULL), N_RAD, "asin", n_asin);
+  n_trig_t trig_modes[] = { N_RAD, N_DEG, N_GRAD };
+  for (int i = 0; i < N_ELEMS(trig_modes); i++) {
+    printf("\n%s: input -1.0 -0.9 -0.8 ... 1.0\n\n", mode_strs[i]);
+    for (int j = -10; j <= 10; j++) {
+      t(n_d2n(j/10., NULL), trig_modes[i], "asin", n_asin);
+    }
+    printf("\n");
+    for (int j = -10; j <= 10; j++) {
+      t(n_d2n(j/10., NULL), trig_modes[i], "acos", n_acos);
+    }
+    printf("\n");
+    for (int j = -10; j <= 10; j++) {
+      t(n_d2n(j/10., NULL), trig_modes[i], "atan", n_atan);
+    }
+    printf("\n");
   }
-  printf("\n");
-
-  for (int i = -10; i <= 10; i++) {
-    t(n_d2n(i/10., NULL), N_RAD, "acos", n_acos);
-  }
-  printf("\n");
-
-  for (int i = -10; i <= 10; i++) {
-    t(n_d2n(i/10., NULL), N_RAD, "atan", n_atan);
-  }
-  printf("\n");
 }
