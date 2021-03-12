@@ -286,7 +286,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 /**
  * String to number.
  *
- * This method converts the display, see as a string, into a number. For
+ * This method converts the display, seen as a string, into a number. For
  * example: '1234.5-01' -> 1234500000000 02
  *
  * More generally it can convert into a number any string composed of:

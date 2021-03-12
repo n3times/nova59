@@ -126,14 +126,14 @@ void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
   double d_theta;
 
   if (d_x == 0) {
-    if (d_y == 0) d_theta =  M_PI / 4;
-    if (d_y > 0)  d_theta =  M_PI / 2;
-    if (d_y < 0)  d_theta = -M_PI / 2;
+    if (d_y == 0) d_theta =  PI / 4;
+    if (d_y > 0)  d_theta =  PI / 2;
+    if (d_y < 0)  d_theta = -PI / 2;
   } else {
-    d_theta = atan(d_y/d_x);  // -pi/2 .. pi/2
-    if (d_x < 0) d_theta += M_PI;
+    d_theta = atan(d_y/d_x);  // -pi/2 .. pi/2.
+    if (d_x < 0) d_theta += PI;
   }
-  // theta in -pi/2 .. 3pi/2
+  assert(d_theta >= -PI / 2 && d_theta <= 3 * PI / 2);
   d_rho = sqrt(d_x * d_x + d_y * d_y);
   d_theta = convert_angle(d_theta, N_RAD, mode);
 

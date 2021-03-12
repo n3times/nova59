@@ -108,4 +108,19 @@ int main() {
     printf("\n");
   }
   printf("\n");
+
+  for (int i = -10; i <= 10; i++) {
+    t(n_d2n(i/10., NULL), N_RAD, "asin", n_asin);
+  }
+  printf("\n");
+
+  for (int i = -10; i <= 10; i++) {
+    t(n_d2n(i/10., NULL), N_RAD, "acos", n_acos);
+  }
+  printf("\n");
+
+  for (int i = -10; i <= 10; i++) {
+    t(n_d2n(i/10., NULL), N_RAD, "atan", n_atan);
+  }
+  printf("\n");
 }
