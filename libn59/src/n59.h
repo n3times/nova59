@@ -5,8 +5,9 @@
  * mathematical functions on TI-59 numbers.
  *
  * Note on accuracy: In some occasions, such as addition and substraction, we
- * are able to replicate TI-59's behavior, exactly. The rest of the time, we
- * produce results of similar of better precision than TI-59.
+ * are able to replicate TI-59's behavior, matching all the digits of the
+ * result. The rest of the time, we produce results at least as accurate as
+ * TI-59's.
  *
  * Note on return errors: Most functions have an 'err_out' parameter, which is
  * ignored if null. If nonnull, err_out is set to the most severe error that
@@ -293,14 +294,14 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  * example: '1234.5-01' -> 1234500000000 02
  *
  * More generally it can convert into a number any string composed of:
- * - a float: a, a., .b, a.b, -a, -a., -.b or -a.b  where a and b are sequences
- *   of 1 or more digits,
- * - followed, possibly, by an exponent: e or -e where e is a sequence of 1 or
- *   more digits.
+ * - a float: 'a', 'a.', '.b', 'a.b', '-a', '-a.', '-.b' or '-a.b'  where 'a'
+ *   and 'b' are sequences of 1 or more digits,
+ * - followed, possibly, by an exponent: 'e' or '-e' where 'e' is a sequence
+ *   of 1 or more digits.
  *
  * There may be spaces at the beginning and end of the string, and between the
- * float and the exponent. If the the exponent is positive, a space is required
- * between the float and the exponent.
+ * float and the exponent. If the the exponent is nonnegative, a space is
+ * required between the float and the exponent.
  *
  * Sets error N_ERR_DOMAIN if s is incorrectly formatted.
  * Sets error if underflow or overflow.

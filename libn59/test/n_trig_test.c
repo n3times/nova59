@@ -109,7 +109,7 @@ int main() {
   }
   printf("\n");
 
-  n_trig_t trig_modes[] = { N_RAD, N_DEG, N_GRAD };
+  n_trig_t trig_modes[] = { N_DEG, N_GRAD, N_RAD };
   for (int i = 0; i < N_ELEMS(trig_modes); i++) {
     printf("\n%s: input -1.0 -0.9 -0.8 ... 1.0\n\n", mode_strs[i]);
     for (int j = -10; j <= 10; j++) {
