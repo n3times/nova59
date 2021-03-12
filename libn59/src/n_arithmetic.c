@@ -116,8 +116,8 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  *
  * TI-59 appears to follow the same strategy most of the time. If all the digits
  * of both numbers are significant, TI-59 appears to truncate the last digit of
- * of least one of the numbers, before multiplication. In this case, TI-59 gets
- * gets a result less accurate than this method.
+ * of at least one of the numbers, before multiplication. In this case, TI-59
+ * gets slightly less result less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n1));
@@ -272,20 +272,23 @@ n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
 
   if (err) *err = N_ERR_NONE;
 
+  double d1 = n_n2d(n1);
+  double d2 = n_n2d(n2);
+
+  // Special cases: d1 or d2 are zero.
   // Note that some of these return values are somewhat arbitrary. We follow,
   // here, TI-59's conventions.
-  if (n_is_zero(n2)) {
+  if (d2 == 0) {
     if (err) *err = N_ERR_DOMAIN;
-    if (n_is_zero(n1)) return N_1;  // 0 ipow 0 = 1.
-    n1 = n_abs(n1);
-    int cmp = n_cmp(n1, N_1);
-    if (cmp == 0) {
-      return N_1;                   // 1 ipow 0 = 1.
-    } else if (cmp < 0) {
-      return n_chs(N_INF);          // 0.5 ipow 0 = -inf, e.g.
-    } else {
-      return N_INF;                 // 2 ipow 0 = inf, e.g.
-    }
+  }
+  if (d2 == 0 && d1 == 0) return N_1;
+  if (d2 == 0 && ABS(d1) > 1) return N_INF;
+  if (d2 == 0 && ABS(d1) < 1) return n_chs(N_INF);
+  if (d2 == 0 && ABS(d1) == 1) return N_1;
+  if (d1 == 0 && d2 > 0) return N_0;
+  if (d1 == 0 && d2 < 0) {
+    if (err) *err = N_ERR_DOMAIN;
+    return N_INF;
   }
 
   return n_pow(n1, n_1_over_x(n2, NULL), err);

@@ -4,14 +4,13 @@
  * Header file for libn59, a library that implements arithmetic operators and
  * mathematical functions on TI-59 numbers.
  *
- * This library computes functions and operators at least as accurately as
- * TI-59. In some occasions, for example for addition and substraction, we are
- * able to match TI-59's accuracy, exactly.
+ * Note on accuracy: In some occasions, such as addition and substraction, we
+ * are able to replicate exactly TI-59's behavior. The rest of the time, we
+ * produce results of similar of better precision than TI-59.
  *
  * Note on errors: Most functions have an 'err_out' parameter, which is ignored
- * if null. If nonnull, err_out will be set to N_ERR_NONE if there is no error.
- * Otherwise, it will be set to the most severe error that occurred while
- * evaluating the function.
+ * if null. If nonnull, err_out is set to the most severe error that occurred
+ * while evaluating the function.
  */
 
 
@@ -80,12 +79,14 @@ typedef enum n_err_e {
 
 extern n_t N_0;    // 0.
 extern n_t N_1;    // 1.
-extern n_t N_PI;   // pi.
-extern n_t N_INF;  // infinity, largest number.
-extern n_t N_EPS;  // epsilon, smallest positive number.
-
 extern n_t N_10;   // 10.
+
 extern n_t N_E;    // e.
+extern n_t N_PI;   // pi.
+
+extern n_t N_EPS;  // epsilon, smallest positive number.
+extern n_t N_INF;  // infinity, largest number.
+
 
 
 /******************************************************************************
@@ -94,12 +95,7 @@ extern n_t N_E;    // e.
  *
  ******************************************************************************/
 
-/**
- * Returns a TI-59 number with the specified mantissa and exponent.
- *
- * In debug mode, asserts that either mant and exp are zero or mant has 13
- * digits and exp is in -99..99.
- */
+/** Returns a TI-59 number with the specified mantissa and exponent. */
 n_t n_make(long long mant, int exp);
 
 /** Returns true if n1 and n2 are equal. */
@@ -118,8 +114,8 @@ int n_cmp(n_t n1, n_t n2);
  * Note that this method returns all the 13 digits of the mantissa, unlike
  * n_n2s which returns only the digits visible on the display.
  *
- * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For convenience
- * str_out is also returned directly by this function.
+ * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For
+ * convenience, str_out is also returned directly by this function.
  *
  * Example:
  *   n_t n = n_square(N_PI, NULL);
