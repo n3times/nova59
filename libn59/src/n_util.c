@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 n_t n_make(long long mant, int exp) {
-  assert( (mant == 0 && exp == 0) ||
-          (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99) );
+  assert((mant == 0 && exp == 0) ||
+         (ABS(mant) >= POW10_12 && ABS(mant) < POW10_13 && ABS(exp) <= 99));
 
   return (n_t) { mant, exp };
 }

@@ -5,6 +5,36 @@
 #include <stdbool.h>
 
 
+/**
+ * Implementation of trigonometric functions on TI-59 numbers.
+ *
+ * Note:
+ *
+ * We mimic TI-59 on very large angles and on multiples of right angles, when
+ * computing sin, cos and tan.
+ *
+ * Angles >= 10^12, in absolute value, are reduced to 0 in any trig mode. For
+ * example:
+ *
+ *   cos(10^20) = cos(0) = 1.
+ *
+ * Indeed 13 digits are not precise enough to represent meaningfully very large
+ * angles, so TI-59 just reduces these angles to 0.
+ *
+ * For smaller numbers, multiples of a right angle are always calculated
+ * accurately. For example, in DEG:
+ *
+ *   sin(1234567 * 90) = (-1000000000000, 0).
+ *
+ * In RAD, pi_2 = (1570796326795, 0) is considered to be the right angle and:
+ *
+ *   sin(1234567 * pi_2) = (-1000000000000, 0),
+ *
+ * Note that, in RAD, this is not totally accurate, since pi_2 is only an
+ * approximation of pi/2.
+ */
+
+
 /******************************************************************************
  *
  *  HELPERS.

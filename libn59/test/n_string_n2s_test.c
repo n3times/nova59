@@ -64,13 +64,13 @@ int main(void) {
       printf("\n%s (fix 0, 5, 8, 9)\n", format_strs[j]);
       for (int k = 0; k < N_ELEMS(fixes); k++) {
         n_t n1 = ns[i];
-        char str_n1[18];  // Loss of precision.
+        char str_n1[N_N2S_MAX_SIZE];  // Loss of precision.
         n_n2s(n1, fixes[k], formats[j], str_n1, NULL);
         n_t n2 = n_s2n(str_n1, NULL);
-        char str_n2[18];
+        char str_n2[N_N2S_MAX_SIZE];
         n_n2s(n2, fixes[k], formats[j], str_n2, NULL);
-        char str1[18];
-        char str2[18];
+        char str1[N_PRINT_MAX_SIZE];
+        char str2[N_PRINT_MAX_SIZE];
         printf("%s => %14s => %s => %14s\n",
                n_print(n1,str1), str_n1, n_print(n2, str2), str_n2);
         n_t n3 = n_s2n(str_n2, NULL);

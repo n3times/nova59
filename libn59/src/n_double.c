@@ -16,7 +16,8 @@ n_t n_d2n(double d, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (d == 0) return N_0;
 
-  // Compute mantissa and exponent.
+  // Compute mantissa and exponent. Do round the mantissa to ensure that if
+  // d = n_n2d(n) for some n, then n_d2n(d) = n.
   int exp = (int) floor(log10(ABS(d)));
   long long mant = (long long) (ABS(d) * pow(10, 12 - exp) + 0.5);
   if (mant >= POW10_13) {
