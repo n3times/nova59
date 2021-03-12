@@ -117,7 +117,7 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  * TI-59 appears to follow the same strategy most of the time. If all the digits
  * of both numbers are significant, TI-59 appears to truncate the last digit of
  * of at least one of the numbers, before multiplication. In this case, TI-59
- * gets slightly less result less accurate than this method.
+ * gets results slightly less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n1));

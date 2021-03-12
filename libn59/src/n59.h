@@ -5,12 +5,13 @@
  * mathematical functions on TI-59 numbers.
  *
  * Note on accuracy: In some occasions, such as addition and substraction, we
- * are able to replicate exactly TI-59's behavior. The rest of the time, we
+ * are able to replicate TI-59's behavior, exactly. The rest of the time, we
  * produce results of similar of better precision than TI-59.
  *
- * Note on errors: Most functions have an 'err_out' parameter, which is ignored
- * if null. If nonnull, err_out is set to the most severe error that occurred
- * while evaluating the function.
+ * Note on return errors: Most functions have an 'err_out' parameter, which is
+ * ignored if null. If nonnull, err_out is set to the most severe error that
+ * occurred while evaluating the function. In a TI-59, in case of error, the
+ * display would typically blink.
  */
 
 
@@ -227,7 +228,7 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
 /**
  * Converts degrees/minutes/seconds to decimal degrees.
  *
- * Only the digits of n that are visible on TI-59 display are considered
+ * Only the digits of n that are visible on TI-59's display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
  * be first trimmed down to 3.15 (3 hours and 15 minutes) and then converted to
  * 3.25.
@@ -280,6 +281,8 @@ void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
  *
  * String 'str_out' must be of size at least 'N_N2S_MAX_SIZE'.
  * Sets error if overflow.
+ *
+ * Note: fix must be in 0..9.
  */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 
