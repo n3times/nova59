@@ -54,7 +54,7 @@ static void test_exhaustive() {
 }
 
 /**
- * Verifies n_n2s(n_s2n(s)) = s, for numbers display numbers n.
+ * Verifies n_n2s(n_s2n(s)) = s, for display numbers n.
  * For example '3.1415-12' => (3141500000000, -12) => '3.1415-12'.
  */
 static void test_n2s_s2n() {
