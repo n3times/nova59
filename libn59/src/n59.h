@@ -4,13 +4,11 @@
  * Header file for libn59, a library that implements arithmetic operators and
  * mathematical functions on TI-59 numbers.
  *
- * Note on accuracy: In some occasions, such as addition and substraction, we
- * are able to replicate TI-59's behavior, matching all the digits of the
- * result. The rest of the time, we produce results at least as accurate as
- * TI-59's.
+ * Note on precision: the ouput of our operations is either identical to TI-59's
+ * or of comparable or better accuracy.
  *
  * Note on return errors: Most functions have an 'err_out' parameter, which is
- * ignored if null. If nonnull, err_out is set to the most severe error that
+ * ignored if null. If nonnull, 'err_out' is set to the most severe error that
  * occurred while evaluating the function. In a TI-59, in case of error, the
  * display would typically blink.
  */

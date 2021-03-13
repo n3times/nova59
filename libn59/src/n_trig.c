@@ -67,13 +67,20 @@ static bool is_multiple(n_t n1, n_t n2, n_t *n3) {
   return false;
 }
 
-static bool is_multiple_of_right_angle(n_t n, n_trig_t mode, long long *ratio) {
+static n_t get_right_angle(n_trig_t mode) {
   n_t right_angle;
+
   switch (mode) {
     case N_DEG:  right_angle = n_make(9000000000000LL, 1); break;
     case N_GRAD: right_angle = n_make(1000000000000LL, 2); break;
     case N_RAD:  right_angle = n_make(1570796326795LL, 0); break;
   }
+
+  return right_angle;
+}
+
+static bool is_multiple_of_right_angle(n_t n, n_trig_t mode, long long *ratio) {
+  n_t right_angle = get_right_angle(mode);
 
   n_t n_ratio;
   if (!is_multiple(n, right_angle, &n_ratio)) return false;
@@ -159,11 +166,19 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
   assert(n_is_number(n));
 
+  if (err) *err = N_ERR_NONE;
+
   double d = n_n2d(n);
 
   if (ABS(d) > 1) {
     if (err) *err = N_ERR_DOMAIN;
     return n;
+  } else if (d == -1) {
+    return n_chs(get_right_angle(mode));
+  } else if (d == 0) {
+    return N_0;
+  } else if (d == 1) {
+    return get_right_angle(mode);
   }
 
   d = asin(d);
@@ -175,11 +190,19 @@ n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
   assert(n_is_number(n));
 
+  if (err) *err = N_ERR_NONE;
+
   double d = n_n2d(n);
 
   if (ABS(d) > 1) {
     if (err) *err = N_ERR_DOMAIN;
     return n;
+  } else if (d == -1) {
+    return n_times(get_right_angle(mode), n_make(2000000000000, 0), NULL);
+  } else if (d == 0) {
+    return get_right_angle(mode);
+  } else if (d == 1) {
+    return N_0;
   }
 
   d = acos(d);
@@ -191,7 +214,17 @@ n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
 n_t n_atan(n_t n, n_trig_t mode, n_err_t *err) {
   assert(n_is_number(n));
 
+  if (err) *err = N_ERR_NONE;
+
   double d = n_n2d(n);
+
+  if (d == -1) {
+    return n_chs(n_div(get_right_angle(mode), n_make(2000000000000, 0), NULL));
+  } else if (d == 0) {
+    return N_0;
+  } else if (d == 1) {
+    return n_div(get_right_angle(mode), n_make(2000000000000, 0), NULL);
+  }
 
   d = atan(d);
   assert(ABS(d) <= PI/2);
