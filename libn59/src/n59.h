@@ -294,7 +294,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  *
  * There may be spaces at the beginning and end of the string, and between the
  * float and the exponent. If the exponent is nonnegative, a space is required
- *  between the float and the exponent.
+ * between the float and the exponent.
  *
  * Sets error N_ERR_DOMAIN if s is incorrectly formatted.
  * Sets error if underflow or overflow.

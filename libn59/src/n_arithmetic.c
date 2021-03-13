@@ -34,6 +34,7 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
     if (err) {
       *err = exp < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
     }
+
     if (exp < 0) {
       return mant < 0 ? n_chs(N_EPS) : N_EPS;
     } else {
@@ -75,6 +76,7 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n2));
 
   if (err) *err = N_ERR_NONE;
+
   if (n_is_zero(n1)) return n2;
   if (n_is_zero(n2)) return n1;
 
@@ -94,9 +96,9 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
   }
 
   long long mant = n1.mant + n2.mant;
-
   n_t res = normalize_number(ABS(mant), n1.exp, err);
   if (mant < 0) res.mant = -res.mant;
+
   return res;
 }
 
@@ -116,14 +118,15 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  *
  * TI-59 appears to follow the same strategy most of the time. If all the digits
  * of both numbers are significant, TI-59 appears to truncate the last digit of
- * of at least one of the numbers, before multiplication. In this case, TI-59
- * gets results slightly less accurate than this method.
+ * at least one of the numbers, before multiplication. In this case, TI-59 gets
+ * results slightly less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n1));
   assert(n_is_number(n2));
 
   if (err) *err = N_ERR_NONE;
+
   if (n_is_zero(n1) || n_is_zero(n2)) return N_0;
 
   long long m1 = ABS(n1.mant);
@@ -154,6 +157,7 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
 
   bool neg = (n1.mant > 0) != (n2.mant > 0);
   res = neg ? n_chs(res) : res;
+
   return res;
 }
 
@@ -204,6 +208,7 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n2));
 
   if (err) *err = N_ERR_NONE;
+
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
 
@@ -227,10 +232,12 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
   assert(n_is_number(n2));
 
   if (err) *err = N_ERR_NONE;
+
   double d1 = n_n2d(n1);
   double d2 = n_n2d(n2);
 
   // Special cases: d1 or d2 are zero.
+
   if (d1 == 0 && d2 == 0) return N_1;
   if (d1 == 0 && d2 > 0) return N_0;
   if (d1 == 0 && d2 < 0) {
@@ -263,6 +270,7 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
   n_err_t err2;
   n_t res = n_d2n(pow(d1, d2), &err2);
   if (err) *err = max_error(*err, err2);
+
   return res;
 }
 

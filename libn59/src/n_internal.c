@@ -1,5 +1,7 @@
 #include "n_internal.h"
 
+#include <math.h>
+
 #if !NDEBUG
 bool n_is_number(n_t n) {
   return (n.mant == 0 && n.exp == 0)
@@ -13,12 +15,12 @@ double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;
 
   // Convert to radians.
-  if (from == N_DEG) d = d / 180 * PI;
-  else if (from == N_GRAD) d = d / 200 * PI;
+  if (from == N_DEG) d = d / 180 * M_PI;
+  else if (from == N_GRAD) d = d / 200 * M_PI;
 
   // Convert from radians.
-  if (to == N_DEG)  d = d / PI * 180;
-  else if (to == N_GRAD) d = d / PI * 200;
+  if (to == N_DEG)  d = d / M_PI * 180;
+  else if (to == N_GRAD) d = d / M_PI * 200;
 
   return (double) d;
 }

@@ -15,8 +15,7 @@ static void t(n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *
          str, n_print(n, s), n_print(res, s_res), err ? " ?" : "");
 }
 
-int main() {
-  // Forensics.
+static void test_forensics() {
   n_t N_9 = n_make(9000000000000LL, 0);
   n_trig_t D = N_DEG;
   n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(N_9, D, 0), D,
@@ -24,6 +23,10 @@ int main() {
   char str[N_PRINT_MAX_SIZE];
   printf("Forensics:\n  asin(acos(atan(tan(cos(sin(9)))))) = %s\n\n\n",
          n_print(res, str));
+}
+
+int main() {
+  test_forensics();
 
   n_t n;
   trig_fun_t trig_funs[] = { n_sin, n_cos, n_tan, n_asin, n_acos, n_atan };
