@@ -4,15 +4,14 @@
  * Header file for libn59, a library that implements arithmetic operators and
  * mathematical functions on TI-59 numbers.
  *
- * Note on precision: the ouput of our operations is either identical to TI-59's
- * or of comparable or better accuracy.
+ * Since libn59 is not based on TI-59's ROM, results from operators and
+ * functions are not necessarily identical to TI-59's, but they are of
+ * comparable or better accuracy.
  *
- * Note on return errors: Most functions have an 'err_out' parameter, which is
- * ignored if null. If nonnull, 'err_out' is set to the most severe error that
- * occurred while evaluating the function. In a TI-59, in case of error, the
- * display would typically blink.
+ * Note on return errors: Most functions have an 'err_out' parameter which, if
+ * nonnull, is set to the most severe error that occurred while evaluating the
+ * function.
  */
-
 
 #ifndef N59_H
 #define N59_H
@@ -40,8 +39,6 @@
  * - the exponent is an integer in -99..99.
  *
  * 0 is represented as { 0, 0 }.
- *
- * Note: Prefer n_make(mant, exp) to directly modifying mant and exp.
  */
 typedef struct n_s {
   long long mant;
@@ -50,7 +47,7 @@ typedef struct n_s {
 
 /** Display formats. */
 typedef enum n_format_e {
-  N_FLOAT,  // Float if possible, scientific for small and big numbers.
+  N_FLOAT,  // Float if possible, scientific for small and large numbers.
   N_SCI,    // Scientific notation.
   N_ENG     // Engineering notation.
 } n_format_t;
@@ -65,8 +62,8 @@ typedef enum n_trig_e {
 /** Errors by order of severity. */
 typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
-  N_ERR_UNDERFLOW,  // Too small, in absolute value, to be stored.
-  N_ERR_OVERFLOW,   // Too large, in absolute value, to be stored or displayed.
+  N_ERR_UNDERFLOW,  // Number too small, in absolute value, to be represented.
+  N_ERR_OVERFLOW,   // Number too large, in absolute value, to be represented.
   N_ERR_DOMAIN,     // Input not in the domain of the function.
 } n_err_t;
 
@@ -228,9 +225,8 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
  * Converts degrees/minutes/seconds to decimal degrees.
  *
  * Only the digits of n that are visible on TI-59's display are considered
- * for the conversion. For example, if format is FLOAT and fix is 2, 3.1549 will
- * be first trimmed down to 3.15 (3 hours and 15 minutes) and then converted to
- * 3.25.
+ * for the conversion. For example, if format is FLOAT and fix is 2, 3.1455 will
+ * be first rounded to 3.15 (3 hours and 15 minutes) and then converted to 3.25.
  *
  * Note: fix must be in 0..9.
  */
@@ -241,8 +237,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
  *
  * Only the digits of n that are visible on TI-59 display are considered
  * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
- * be first trimmed down to 3.25 and then converted to 3.15 (3 hours and 15
- * minutes)..
+ * be first rounded to 3.25 and then converted to 3.15 (3 hours and 15 minutes).
  *
  * Note: fix must be in 0..9.
  */
@@ -298,8 +293,8 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  *   of 1 or more digits.
  *
  * There may be spaces at the beginning and end of the string, and between the
- * float and the exponent. If the the exponent is nonnegative, a space is
- * required between the float and the exponent.
+ * float and the exponent. If the exponent is nonnegative, a space is required
+ *  between the float and the exponent.
  *
  * Sets error N_ERR_DOMAIN if s is incorrectly formatted.
  * Sets error if underflow or overflow.
