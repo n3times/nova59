@@ -2,11 +2,14 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
-int main(void) {
-  // This is a pretty exhaustive test over thousands of combinations of numbers
-  // and formats.
+static int fixes[] = { 0, 5, 8, 9 };
+static n_format_t formats[] = { N_FLOAT, N_SCI, N_ENG };
+static char *format_strs[] = { "FLOAT", "SCI", "ENG" };
 
+/* Exhaustive test over thousands of combinations of numbers and formats. */
+static void test_exhaustive() {
   long long mants[] = { 
                          1000000000000LL,
                          9999999999999LL,
@@ -28,11 +31,6 @@ int main(void) {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 98, 99
   };
 
-  int fixes[] = { 0, 5, 8, 9 };
-
-  n_format_t formats[] = { N_FLOAT, N_SCI, N_ENG };
-  char *format_strs[] = { "FLOAT", "SCI", "ENG" };
-
   for (int i = 0; i < N_ELEMS(mants); i++) {
     printf("==========================================================\n\n");
     printf("mantissa = %lld\n\n", mants[i]);
@@ -53,29 +51,42 @@ int main(void) {
       }
     }
   }
+}
 
-  // Make sure that n_n2s(n_s2n(s)) = s, for numbers on the display.
-  // For example "3.1415-12" => (3141500000000, -12) => "3.1415-12".
-
-  n_t ns[] = { TEST_NUMBERS, N_E, N_10 };
-  for (int i = 0; i < N_ELEMS(ns); i++) {
+/**
+ * Verifies n_n2s(n_s2n(s)) = s, for numbers display numbers n.
+ * For example '3.1415-12' => (3141500000000, -12) => '3.1415-12'.
+ */
+static void test_n2s_s2n() {
+  n_t numbers[] = { TEST_NUMBERS, N_E, N_10 };
+  for (int i = 0; i < N_ELEMS(numbers); i++) {
     printf("\n\n\n");
     for (int j = 0; j < N_ELEMS(formats); j++) {
       printf("\n%s (fix 0, 5, 8, 9)\n", format_strs[j]);
       for (int k = 0; k < N_ELEMS(fixes); k++) {
-        n_t n1 = ns[i];
-        char str_n1[N_N2S_MAX_SIZE];  // Loss of precision.
+        // n1 -> str_n1 -> n2 -> str_n2 -> n3.
+        n_t n1, n2, n3;
+        char str_n1[N_N2S_MAX_SIZE], str_n2[N_N2S_MAX_SIZE];
+
+        n1 = numbers[i];
         n_n2s(n1, fixes[k], formats[j], str_n1, NULL);
-        n_t n2 = n_s2n(str_n1, NULL);
-        char str_n2[N_N2S_MAX_SIZE];
+        n2 = n_s2n(str_n1, NULL);
         n_n2s(n2, fixes[k], formats[j], str_n2, NULL);
+        n3 = n_s2n(str_n2, NULL);
+
+        assert(n_equals(n2, n3));
+        assert(strcmp(str_n1, str_n2) == 0);
+
         char str1[N_PRINT_MAX_SIZE];
         char str2[N_PRINT_MAX_SIZE];
         printf("%s => %14s => %s => %14s\n",
                n_print(n1,str1), str_n1, n_print(n2, str2), str_n2);
-        n_t n3 = n_s2n(str_n2, NULL);
-        assert(n_equals(n2, n3));
       }
     }
   }
+}
+
+int main(void) {
+  test_exhaustive();
+  test_n2s_s2n();
 }
