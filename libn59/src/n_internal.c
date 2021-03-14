@@ -18,11 +18,11 @@ n_t normalize_number(long long mant, int exp, n_err_t *err) {
   // Make sure the mantissa has exactly 13 digits.
   while (ABS(mant) >= POW10_13) {
     mant /= 10;
-    exp += 1;
+    if (exp < 100) exp += 1;
   }
   while (ABS(mant) < POW10_12) {
     mant *= 10;
-    exp -= 1;
+    if (exp > -100) exp -= 1;
   }
 
   // Overflow.
