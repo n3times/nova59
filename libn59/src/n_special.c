@@ -11,12 +11,13 @@
  *
  ******************************************************************************/
 
-static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
-                                     n_err_t *err) {
+static n_t round_number(n_t n, int fix, n_format_t format, n_err_t *err) {
   n_err_t err1, err2;
   char str[N_N2S_MAX_SIZE];
+
   n_n2s(n, fix, format, str, &err1);
   n = n_s2n(str, &err2);
+
   if (err) *err = max_error(err1, err2);
   return n;
 }
@@ -40,7 +41,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
   }
 
   // Only consider the digits visible on the display.
-  n = discard_nonvisible_digits(n, fix, format, err);
+  n = round_number(n, fix, format, err);
 
   if (n.exp >= 9) return n;  // Optimization.
 
@@ -76,7 +77,7 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   }
 
   // Only consider the digits visible on the display.
-  n = discard_nonvisible_digits(n, fix, format, err);
+  n = round_number(n, fix, format, err);
 
   if (n.exp >= 9) return n;  // Optimization.
 
