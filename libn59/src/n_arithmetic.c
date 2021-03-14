@@ -42,7 +42,7 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
     }
   }
 
-  return n_make(mant, exp);
+  return (n_t) { mant, exp };
 }
 
 
