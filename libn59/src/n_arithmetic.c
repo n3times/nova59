@@ -1,6 +1,5 @@
 #include "n_internal.h"
 
-#include <assert.h>
 #include <math.h>
 
 

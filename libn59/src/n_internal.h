@@ -3,6 +3,8 @@
 
 #include "n59.h"
 
+#include <assert.h>
+
 #define NULL 0
 
 #define PI 3.14159265359

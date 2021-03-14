@@ -1,6 +1,5 @@
 #include "n_internal.h"
 
-#include <assert.h>
 #include <stdio.h>
 
 n_t n_make(long long mant, int exp) {

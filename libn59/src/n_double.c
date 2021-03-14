@@ -1,6 +1,5 @@
 #include "n_internal.h"
 
-#include <assert.h>
 #include <math.h>
 
 double n_n2d(n_t n) {
