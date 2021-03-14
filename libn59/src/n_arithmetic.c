@@ -122,8 +122,8 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
 #if 0
 // Alternative division with no rounding. Doesn't look like TI-59 does this.
 n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 

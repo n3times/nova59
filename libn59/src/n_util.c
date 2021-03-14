@@ -5,7 +5,7 @@
 
 n_t n_make(long long mant, int exp) {
   n_t n = { mant, exp };
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n;
 }

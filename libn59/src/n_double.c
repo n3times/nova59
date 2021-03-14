@@ -4,7 +4,7 @@
 #include <math.h>
 
 double n_n2d(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   double d = n.mant * pow(10, n.exp - 12);
 
