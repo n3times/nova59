@@ -112,7 +112,7 @@ int n_cmp(n_t n1, n_t n2);
  * n_n2s which returns only the digits visible on the display.
  *
  * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For
- * convenience, str_out is also returned directly by this function.
+ * convenience, 'str_out' is also returned directly by this function.
  *
  * Example:
  *   n_t n = n_square(N_PI, NULL);
@@ -177,10 +177,10 @@ n_t n_1_over_x(n_t n, n_err_t *err_out);
 /** Square root of n. */
 n_t n_sqrt(n_t n, n_err_t *err_out);
 
-/** Natural log. */
+/** Natural log of n. */
 n_t n_ln(n_t n, n_err_t *err_out);
 
-/** Log in base 10. */
+/** Log in base 10 of n. */
 n_t n_log(n_t n, n_err_t *err_out);
 
 /** e^n. */
@@ -293,10 +293,10 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
  *   of 1 or more digits.
  *
  * There may be spaces at the beginning and end of the string, and between the
- * float and the exponent. If the exponent is nonnegative, a space is required
- * between the float and the exponent.
+ * float and the exponent. If the exponent is nonnegative, at least one space is
+ * required between the float and the exponent.
  *
- * Sets error N_ERR_DOMAIN if s is incorrectly formatted.
+ * Sets error N_ERR_DOMAIN if 's' is incorrectly formatted.
  * Sets error if underflow or overflow.
  */
 n_t n_s2n(char *s, n_err_t *err_out);
