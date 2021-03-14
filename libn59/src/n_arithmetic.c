@@ -61,9 +61,6 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
 
 /** See n_plus. */
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
-  NORMALIZE(n1);
-  NORMALIZE(n2);
-
   return n_plus(n1, n_chs(n2), err);
 }
 

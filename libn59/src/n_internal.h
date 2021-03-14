@@ -16,13 +16,7 @@
 #define MIN(x, y)  ((x) < (y) ?  (x) : (y))
 #define MAX(x, y)  ((x) > (y) ?  (x) : (y))
 
-#define NORMALIZE(n) assert(n_is_number(n)); \
-                     n = normalize_number(n.mant, n.exp, NULL);
-
-#if !NDEBUG
-/** Returns true is n.mant and n.exp are in the appropriate range. */
-bool n_is_number(n_t n);
-#endif
+#define NORMALIZE(n) n = normalize_number(n.mant, n.exp, NULL);
 
 /**
  * Given an arbitrary mantissa and exponent, not necessary within the ranges of

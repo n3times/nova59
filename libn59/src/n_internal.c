@@ -2,15 +2,6 @@
 
 #include <math.h>
 
-#if !NDEBUG
-bool n_is_number(n_t n) {
-  return (n.mant == 0 && n.exp == 0)
-         ||
-         (ABS(n.mant) >= POW10_12
-             && ABS(n.mant) < POW10_13 && ABS(n.exp) <= 99);
-}
-#endif
-
 n_t normalize_number(long long mant, int exp, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (mant == 0) return N_0;

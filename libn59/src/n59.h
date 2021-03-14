@@ -34,13 +34,17 @@
 /**
  * TI-59 number.
  *
- * For nonzero numbers:
- * - the mantissa is a positive or negative integer, with exactly 13 digits.
- * - the exponent is an integer in -99..99.
+ * Value is mant / 10^12.
  *
- * 0 is represented as { 0, 0 }.
+ * Nonzero numbers should have:
+ * - a mantissa, positive or negative, with exactly 13 digits.
+ * - an exponent in -99..99.
  *
- * Note: use n_make to ensure the resulting number has the correct format.
+ * 0 should be represented as { 0, 0 }.
+ *
+ * Numbers in that format are said to be normalized. All library functions
+ * return normalized numbers. Inputs to library functions are first normalized
+ * if necessary.
  */
 typedef struct n_s {
   long long mant;
@@ -95,9 +99,9 @@ extern n_t N_INF;  // infinity, largest number.
  ******************************************************************************/
 
 /**
- * Convenience method to make TI-59 numbers out of doubles.
+ * Convenience function to make TI-59 numbers out of doubles.
  *
- * Equivalent to n_d2n(n, NULL). Note that errors are ignored.
+ * Equivalent to n_d2n(n, NULL). Note that over/underflow errors are ignored.
  */
 n_t n_make(double d);
 
@@ -114,7 +118,7 @@ int n_cmp(n_t n1, n_t n2);
  * Returns a representation of n as a string for debugging purposes.
  *
  * For example n_print(N_PI, str) returns ' 3141592653590 00'.
- * Note that this method returns all the 13 digits of the mantissa, unlike
+ * Note that this function returns all the 13 digits of the mantissa, unlike
  * n_n2s which returns only the digits visible on the display.
  *
  * String 'str_out' must be of size at least 'N_PRINT_MAX_SIZE'. For
@@ -289,7 +293,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err_out);
 /**
  * String to number.
  *
- * This method converts the display, seen as a string, into a number. For
+ * This function converts the display, seen as a string, into a number. For
  * example: '1234.5-01' -> 1234500000000 02
  *
  * More generally it can convert into a number any string composed of:

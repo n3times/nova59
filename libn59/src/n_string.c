@@ -43,6 +43,8 @@ static n_err_t is_digit(char c) {
 
 /** Number to string. */
 void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
+  NORMALIZE(n);
+
   assert(fix >= 0 && fix <= 9);
   if (fix < 0 || fix > 9) {
     if (err) *err = N_ERR_DOMAIN;

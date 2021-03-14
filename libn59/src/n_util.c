@@ -7,14 +7,20 @@ n_t n_make(double d) {
 }
 
 bool n_equals(n_t n1, n_t n2) {
+  NORMALIZE(n1);
+  NORMALIZE(n2);
+
   return (n1.mant == n2.mant) && (n1.exp == n2.exp);
 }
 
 bool n_is_zero(n_t n) {
-  return (n.mant == 0) && (n.exp == 0);
+  return n.mant == 0;
 }
 
 int n_cmp(n_t n1, n_t n2) {
+  NORMALIZE(n1);
+  NORMALIZE(n2);
+
   int n1_sign = (n1.mant > 0) - (n1.mant < 0);
   int n2_sign = (n2.mant > 0) - (n2.mant < 0);
 
@@ -46,6 +52,8 @@ int n_cmp(n_t n1, n_t n2) {
 }
 
 char *n_print(n_t n, char *str_out) {
+  NORMALIZE(n);
+
   sprintf(str_out, "% 014lld% 03d", n.mant, n.exp);
   return str_out;
 }
