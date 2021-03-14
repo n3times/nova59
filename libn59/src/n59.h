@@ -37,7 +37,7 @@
  * Value is mant / 10^12.
  *
  * Nonzero numbers should have:
- * - a mantissa, positive or negative, with exactly 13 digits.
+ * - a positive or negative mantissa with exactly 13 digits.
  * - an exponent in -99..99.
  *
  * 0 should be represented as { 0, 0 }.
@@ -89,7 +89,6 @@ extern n_t N_PI;   // pi.
 
 extern n_t N_EPS;  // epsilon, smallest positive number.
 extern n_t N_INF;  // infinity, largest number.
-
 
 
 /******************************************************************************
