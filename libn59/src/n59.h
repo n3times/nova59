@@ -39,6 +39,8 @@
  * - the exponent is an integer in -99..99.
  *
  * 0 is represented as { 0, 0 }.
+ *
+ * Note: use n_make to ensure the resulting number has the correct format.
  */
 typedef struct n_s {
   long long mant;
@@ -93,12 +95,11 @@ extern n_t N_INF;  // infinity, largest number.
  ******************************************************************************/
 
 /**
- * Returns a TI-59 number with the specified mantissa and exponent.
+ * Convenience method to make TI-59 numbers out of doubles.
  *
- * This function normalizes 'mant' and 'exp' to ensure that the return number
- * has the correct format (see definition of n_t).
+ * Equivalent to n_d2n(n, NULL). Note that errors are ignored.
  */
-n_t n_make(long long mant, int exp);
+n_t n_make(double d);
 
 /** Returns true if n1 and n2 are equal. */
 bool n_equals(n_t n1, n_t n2);

@@ -34,5 +34,5 @@ n_t n_d2n(double d, n_err_t *err) {
 
   if (d < 0) mant = -mant;
 
-  return n_make(mant, exp);
+  return (n_t) { mant, exp };
 }

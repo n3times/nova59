@@ -6,13 +6,13 @@
 n_t n_chs(n_t n) {
   NORMALIZE(n);
 
-  return n_make(-n.mant, n.exp);
+  return (n_t) { -n.mant, n.exp };
 }
 
 n_t n_abs(n_t n) {
   NORMALIZE(n);
 
-  return n_make(ABS(n.mant), n.exp);
+  return (n_t) { ABS(n.mant), n.exp };
 }
 
 n_t n_sign(n_t n) {

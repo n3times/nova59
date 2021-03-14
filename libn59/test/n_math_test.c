@@ -1,5 +1,6 @@
 #include "n_test.h"
 
+#include <math.h>
 #include <stdio.h>
 
 typedef n_t (*fun_t)(n_t, n_err_t *err);
@@ -45,19 +46,19 @@ int main() {
 
   // n_int.
   for (int i = -1; i < 14; i++) {
-    res = n_make(1000000000000LL, i);
+    res = n_make(pow(10, i));
     p(res, n_int(res), N_ERR_NONE, "int");
   }
   for (int i = -2; i < 14; i++) {
-    res = n_make(9999999999999LL, i);
+    res = n_make(9.999999999999 * pow(10, i));
     p(res, n_int(res), N_ERR_NONE, "int");
   }
   for (int i = -1; i < 14; i++) {
-    res = n_make(1234567890123LL, i);
+    res = n_make(1.234567890123 * pow(10, i));
     p(res, n_int(res), N_ERR_NONE, "int");
   }
   for (int i = -1; i < 14; i++) {
-    res = n_make(-1234567890123LL, i);
+    res = n_make(-1.234567890123 * pow(10, i));
     p(res, n_int(res), N_ERR_NONE, "int");
   }
 
@@ -65,19 +66,19 @@ int main() {
 
   // n_frac.
   for (int i = -1; i < 14; i++) {
-    res = n_make(1000000000000LL, i);
+    res = n_make(pow(10, i));
     p(res, n_frac(res), N_ERR_NONE, "frac");
   }
   for (int i = -2; i < 14; i++) {
-    res = n_make(9999999999999LL, i);
+    res = n_make(9.999999999999 * pow(10, i));
     p(res, n_frac(res), N_ERR_NONE, "frac");
   }
   for (int i = -1; i < 14; i++) {
-    res = n_make(1234567890123LL, i);
+    res = n_make(1.234567890123 * pow(10, i));
     p(res, n_frac(res), N_ERR_NONE, "frac");
   }
   for (int i = -1; i < 14; i++) {
-    res = n_make(-1234567890123LL, i);
+    res = n_make(-1.234567890123 * pow(10, i));
     p(res, n_frac(res), N_ERR_NONE, "frac");
   }
 }

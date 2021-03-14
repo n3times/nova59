@@ -1,6 +1,7 @@
 #include "n_test.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -40,7 +41,7 @@ static void test_exhaustive() {
         for (int l = 0; l < N_ELEMS(exps); l++) {
           if (mants[i] == 0 && exps[l]) continue;
 
-          n_t n = n_make(mants[i], exps[l]);
+          n_t n = n_make(mants[i] * pow(10, exps[l] - 12));
 
           char str[N_N2S_MAX_SIZE];
           n_err_t err;

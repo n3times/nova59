@@ -88,7 +88,7 @@ void n_n2s(n_t n, int fix, n_format_t format, char *str_out, n_err_t *err) {
     mant += 1;
     if (mant >= pow(10, mant_len)) {
       if (n.exp < 99) {
-        n_t n_1 = n_make(POW10_12 * (neg ? -1 : 1), n.exp + 1);
+        n_t n_1 = (n_t) { POW10_12 * (neg ? -1 : 1), n.exp + 1 };
         return n_n2s(n_1, fix, format, str_out, err);
       } else {
         exp = 100;
@@ -242,5 +242,5 @@ n_t n_s2n(char *s, n_err_t *err) {
     return n < 0 ? n_chs(ret) : ret;
   }
 
-  return n_make(n, exp);
+  return (n_t) { n, exp };
 }

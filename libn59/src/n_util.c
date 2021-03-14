@@ -2,11 +2,8 @@
 
 #include <stdio.h>
 
-n_t n_make(long long mant, int exp) {
-  n_t n = { mant, exp };
-  NORMALIZE(n);
-
-  return n;
+n_t n_make(double d) {
+  return n_d2n(d, NULL);
 }
 
 bool n_equals(n_t n1, n_t n2) {

@@ -16,9 +16,8 @@ static void t(n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *
 }
 
 static void test_forensics() {
-  n_t N_9 = n_make(9000000000000LL, 0);
   n_trig_t D = N_DEG;
-  n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(N_9, D, 0), D,
+  n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n_make(9), D, 0), D,
       0), D, 0), D, 0), D, 0), D, 0);
   char str[N_PRINT_MAX_SIZE];
   printf("Forensics:\n  asin(acos(atan(tan(cos(sin(9)))))) = %s\n\n\n",
@@ -58,10 +57,9 @@ int main() {
   printf("==============================================\n\n");
   for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
-      n_t two = n_make(2000000000000LL, 0);
-      n_t four = n_make(4000000000000LL, 0);
-      n = n_times(n_div(N_PI, two, NULL), n_d2n(i/2, NULL), NULL);
-      n = n_plus(n, n_times(n_div(N_PI, four, NULL), n_d2n(i%2, NULL), NULL), NULL);
+      n = n_times(n_div(N_PI, n_make(2), NULL), n_d2n(i/2, NULL), NULL);
+      n = n_plus(n, n_times(n_div(N_PI, n_make(4), NULL),
+                            n_d2n(i%2, NULL), NULL), NULL);
       t(n, N_RAD, trig_fun_strs[k], trig_funs[k]);
     }
     printf("\n");
@@ -87,22 +85,22 @@ int main() {
   printf("=================================\n\n");
   n_t ns2[] = {
                 // Around pi.
-                n_make(3141592000000LL, 0),
-                n_make(3141592600000LL, 0),
-                n_make(3141592653589LL, 0),
-                n_make(3141592653590LL, 0),
-                n_make(3141592653591LL, 0),
-                n_make(3141592700000LL, 0),
-                n_make(3141593000000LL, 0),
+                n_make(3.141592),
+                n_make(3.1415926),
+                n_make(3.141592653589),
+                n_make(3.141592653590),
+                n_make(3.141592653591),
+                n_make(3.1415927),
+                n_make(3.141593),
 
                 // Around pi/2.
-                n_make(1570796000000LL, 0),
-                n_make(1570796300000LL, 0),
-                n_make(1570796326794LL, 0),
-                n_make(1570796326795LL, 0),
-                n_make(1570796326796LL, 0),
-                n_make(1570796400000LL, 0),
-                n_make(1570797000000LL, 0),
+                n_make(1.570796),
+                n_make(1.5707963),
+                n_make(1.570796326794),
+                n_make(1.570796326795),
+                n_make(1.570796326796),
+                n_make(1.5707964),
+                n_make(1.570797),
               };
   for (int i = 0; i < N_ELEMS(trig_funs) / 2; i++) {
     for (int j = 0; j < N_ELEMS(ns2); j++) {

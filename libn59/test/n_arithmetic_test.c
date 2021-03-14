@@ -44,15 +44,15 @@ static void test_multiplication() {
 
   // Multiplication truncates result to 13 digits with no rounding. Same as
   // TI-59.
-  n1 = n_make(1111111111111LL, 0);
+  n1 = n_make(1.111111111111);
   n2 = n_d2n(99, NULL);
   res = n_times(n1, n2, NULL);
-  assert(n_equals(res, n_make(1099999999999LL, 2)));  // And not 101.
+  assert(n_equals(res, n_make(109.9999999999)));  // And not 101.
   p(n1, n2, res, N_ERR_NONE, "*");
 
   // Multiplication always gives 13 accurate digits, unlike TI-59.
-  // TI-59 gets (9999999999989, 1) while we get (9999999999998, 1).
-  n1 = n_make(9999999999999LL, 0);
+  // TI-59 gets 99.99999999989 while we get 99.99999999998.
+  n1 = n_make(9.999999999999);
   res = n_times(n1, n1, NULL);
   p(n1, n1, res, N_ERR_NONE, "*");
 
@@ -71,7 +71,7 @@ static void test_multiplication() {
   for (int i = 69; i >= 1; i--) {
     res = n_times(res, n_d2n(i, NULL), NULL);
   }
-  assert(n_equals(res, n_make(1711224524264LL, 98)));
+  assert(n_equals(res, n_make(1.711224524264e98)));
   p(n_d2n(69, NULL), N_1, res, N_ERR_NONE, "!");
 }
 
@@ -79,14 +79,14 @@ static void test_addition() {
   n_t n1, n2, res;
 
   // Number truncation before addition. Same as TI-59.
-  n1 = n_make(9999999999999LL, 13);
-  n2 = n_make(9999999999999LL, 0);
+  n1 = n_make(9.999999999999e13);
+  n2 = n_make(9.999999999999);
   res = n_plus(n1, n2, NULL);
   assert(n_equals(res, n1));  // Note that n2 is ignored
   p(n1, n2, res, N_ERR_NONE, "+");
 
   // Number truncation before substraction. Same as TI-59.
-  n1 = n_make(1000000000000LL, 13);
+  n1 = n_make(1e13);
   n2 = N_1;
   res = n_minus(n1, n2, NULL);
   assert(n_equals(res, n1));  // Note that n2 is ignored
