@@ -257,5 +257,5 @@ n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
     return N_INF;
   }
 
-  return n_pow(n1, n_1_over_x(n2, NULL), err);
+  return n_pow(n1, n_1_x(n2, NULL), err);
 }

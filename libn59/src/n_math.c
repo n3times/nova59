@@ -47,7 +47,7 @@ n_t n_square(n_t n, n_err_t *err) {
   return n_times(n, n, err);
 }
 
-n_t n_1_over_x(n_t n, n_err_t *err) {
+n_t n_1_x(n_t n, n_err_t *err) {
   NORMALIZE(n);
 
   return n_div(N_1, n, err);

@@ -20,7 +20,7 @@ int main() {
   n_t res;
   n_t ns[] = { TEST_NUMBERS, N_10, N_E };
 
-  fun_t funs[] = { n_square, n_sqrt, n_log, n_ln, n_1_over_x, n_exp, n_pow10 };
+  fun_t funs[] = { n_square, n_sqrt, n_log, n_ln, n_1_x, n_exp, n_pow10 };
   char *fun_strs[] = { "square", "sqrt", "log", "ln", "1/x" , "exp", "pow10" };
 
   // Test all the functions for all the test numbers.
