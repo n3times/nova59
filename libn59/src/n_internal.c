@@ -2,11 +2,15 @@
 
 #include <math.h>
 
-/**
- * Given an arbitrary mantissa and exponent, not necessary within the ranges of
- * those of a TI-59 number, returns a TI-59 number, that is either N_0 or a
- * number whose mantissa has exactly 13 digits and whose exponent is in -99..99.
- */
+#if !NDEBUG
+bool n_is_number(n_t n) {
+  return (n.mant == 0 && n.exp == 0)
+         ||
+         (ABS(n.mant) >= POW10_12
+             && ABS(n.mant) < POW10_13 && ABS(n.exp) <= 99);
+}
+#endif
+
 n_t normalize_number(long long mant, int exp, n_err_t *err) {
   if (err) *err = N_ERR_NONE;
   if (mant == 0) return N_0;
@@ -36,15 +40,6 @@ n_t normalize_number(long long mant, int exp, n_err_t *err) {
 
   return (n_t) { mant, exp };
 }
-
-#if !NDEBUG
-bool n_is_number(n_t n) {
-  return (n.mant == 0 && n.exp == 0)
-         ||
-         (ABS(n.mant) >= POW10_12
-             && ABS(n.mant) < POW10_13 && ABS(n.exp) <= 99);
-}
-#endif
 
 double convert_angle(double d, n_trig_t from, n_trig_t to) {
   if (from == to) return d;

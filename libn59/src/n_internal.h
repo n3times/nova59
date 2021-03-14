@@ -17,17 +17,17 @@
 #define NORMALIZE(n) assert(n_is_number(n)); \
                      n = normalize_number(n.mant, n.exp, NULL);
 
+#if !NDEBUG
+/** Returns true is n.mant and n.exp are in the appropriate range. */
+bool n_is_number(n_t n);
+#endif
+
 /**
  * Given an arbitrary mantissa and exponent, not necessary within the ranges of
  * those of a TI-59 number, returns a TI-59 number, that is either N_0 or a
  * number whose mantissa has exactly 13 digits and whose exponent is in -99..99.
  */
 n_t normalize_number(long long mant, int exp, n_err_t *err);
-
-#if !NDEBUG
-/** Returns true is n.mant and n.exp are in the appropriate range. */
-bool n_is_number(n_t n);
-#endif
 
 /** Converts angle from one measuring unit to another. */
 double convert_angle(double d, n_trig_t from, n_trig_t to);
