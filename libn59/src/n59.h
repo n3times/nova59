@@ -34,7 +34,7 @@
 /**
  * TI-59 number.
  *
- * Value is mant / 10^12.
+ * Value is mant * 10^(exp - 12).
  *
  * Nonzero numbers should have:
  * - a positive or negative mantissa with exactly 13 digits.
@@ -43,8 +43,8 @@
  * 0 should be represented as { 0, 0 }.
  *
  * Numbers in that format are said to be normalized. All library functions
- * return normalized numbers. Inputs to library functions are first normalized
- * if necessary.
+ * return normalized numbers. Input numbers to library functions are first
+ * normalized, if necessary.
  */
 typedef struct n_s {
   long long mant;
@@ -98,9 +98,12 @@ extern n_t N_INF;  // infinity, largest number.
  ******************************************************************************/
 
 /**
- * Convenience function to make TI-59 numbers out of doubles.
+ * Returns a number equivalent to d.
  *
- * Equivalent to n_d2n(n, NULL). Note that over/underflow errors are ignored.
+ * Only the 13 most significant digits of d are considered.
+ *
+ * This is a convenience function equivalent to n_d2n(n, NULL), where
+ * over/underflow errors are ignored.
  */
 n_t n_make(double d);
 
