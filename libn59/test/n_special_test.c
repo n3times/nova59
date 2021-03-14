@@ -38,6 +38,49 @@ static void test_dms_idms(n_t n) {
   p(n, res, MAX(e1, e2));
 }
 
+static void test_p_r(n_t rho, n_t theta, n_trig_t mode) {
+  n_t x, y;
+  n_err_t e;
+  n_p_r(rho, theta, mode, &x, &y, &e);
+  char s1[N_PRINT_MAX_SIZE];
+  char s2[N_PRINT_MAX_SIZE];
+  char s3[N_PRINT_MAX_SIZE];
+  char s4[N_PRINT_MAX_SIZE];
+  printf("%s  %s   =>  %s  %s%s\n",
+         n_print(rho, s1), n_print(theta, s2),
+         n_print(x, s3), n_print(y, s4),
+         e ? "?" : "");
+}
+
+static void test_r_p(n_t x, n_t y, n_trig_t mode) {
+  n_t rho, theta;
+  n_err_t e;
+  n_r_p(x, y, mode, &rho, &theta, &e);
+  char s1[N_PRINT_MAX_SIZE];
+  char s2[N_PRINT_MAX_SIZE];
+  char s3[N_PRINT_MAX_SIZE];
+  char s4[N_PRINT_MAX_SIZE];
+  printf("%s  %s   =>  %s  %s%s\n",
+         n_print(x, s1), n_print(y, s2),
+         n_print(rho, s3), n_print(theta, s4),
+         e ? "?" : "");
+}
+
+static void test_polar_rect() {
+  for (int theta = 0; theta <= 360; theta += 10) {
+    test_p_r(N_1, n_d2n(theta, NULL), N_DEG);
+  }
+}
+
+static void test_rect_polar() {
+  for (int theta = 0; theta <= 360; theta += 10) {
+    n_t x, y;
+    n_err_t e;
+    n_p_r(N_1, n_d2n(theta, NULL), N_DEG, &x, &y, &e);
+    test_r_p(x, y, N_DEG);
+  }
+}
+
 int  main() {
   n_t ns[] = { N_0, N_1, N_PI, N_EPS, N_INF, N_0_5, N_0_5_NEG, N_X, N_Y };
   printf("dms\n");
@@ -48,4 +91,10 @@ int  main() {
   for (int i = 0; i < N_ELEMS(ns); i++) { test_idms_dms(ns[i]); }
   printf("\ndms idms\n");
   for (int i = 0; i < N_ELEMS(ns); i++) { test_dms_idms(ns[i]); }
+
+  printf("\n[P -> R]  rho  theta  =>  x  y\n");
+  test_polar_rect();
+
+  printf("\n[R -> P]  x  y  =>  rho  theta\n");
+  test_rect_polar();
 }
