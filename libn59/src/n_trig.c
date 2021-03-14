@@ -99,7 +99,7 @@ static bool is_multiple_of_right_angle(n_t n, n_trig_t mode, long long *ratio) {
  ******************************************************************************/
 
 n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
   if (n.exp >= 13) return N_0;
@@ -124,7 +124,7 @@ n_t n_sin(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
   if (n.exp >= 13) return N_1;
@@ -146,7 +146,7 @@ n_t n_cos(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
   if (n.exp >= 13) return N_0;
@@ -164,7 +164,7 @@ n_t n_tan(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 
@@ -188,7 +188,7 @@ n_t n_asin(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 
@@ -212,7 +212,7 @@ n_t n_acos(n_t n, n_trig_t mode, n_err_t *err) {
 }
 
 n_t n_atan(n_t n, n_trig_t mode, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 

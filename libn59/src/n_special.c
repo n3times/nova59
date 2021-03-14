@@ -30,7 +30,7 @@ static n_t discard_nonvisible_digits(n_t n, int fix, n_format_t format,
 
 /** D.MS to decimal degrees. */
 n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
@@ -66,7 +66,7 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
 /** Decimal degrees to D.MS. */
 n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
   assert(fix >= 0 && fix <= 9);
@@ -101,8 +101,8 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
 
 void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
            n_t *n_x_out, n_t *n_y_out, n_err_t *err) {
-  assert(n_is_number(n_rho));
-  assert(n_is_number(n_theta));
+  NORMALIZE(n_rho);
+  NORMALIZE(n_theta);
 
   double d_rho = n_n2d(n_rho);
   double d_theta = n_n2d(n_theta);
@@ -117,8 +117,8 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
 
 void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,
            n_t *n_rho_out, n_t *n_theta_out, n_err_t *err) {
-  assert(n_is_number(n_x));
-  assert(n_is_number(n_y));
+  NORMALIZE(n_x);
+  NORMALIZE(n_y);
 
   double d_x = n_n2d(n_x);
   double d_y = n_n2d(n_y);

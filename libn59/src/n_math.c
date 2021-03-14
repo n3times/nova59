@@ -5,19 +5,19 @@
 #include <stdbool.h>
 
 n_t n_chs(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_make(-n.mant, n.exp);
 }
 
 n_t n_abs(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_make(ABS(n.mant), n.exp);
 }
 
 n_t n_sign(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (n.mant > 0) {
     return N_1;
@@ -28,7 +28,7 @@ n_t n_sign(n_t n) {
 }
 
 n_t n_int(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (n.exp >= 12) return n;
 
@@ -36,25 +36,25 @@ n_t n_int(n_t n) {
 }
 
 n_t n_frac(n_t n) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_minus(n, n_int(n), NULL);
 }
 
 n_t n_square(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_times(n, n, err);
 }
 
 n_t n_1_over_x(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_div(N_1, n, err);
 }
 
 n_t n_sqrt(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 
@@ -67,7 +67,7 @@ n_t n_sqrt(n_t n, n_err_t *err) {
 }
 
 n_t n_ln(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 
@@ -85,7 +85,7 @@ n_t n_ln(n_t n, n_err_t *err) {
 }
 
 n_t n_log(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   if (err) *err = N_ERR_NONE;
 
@@ -103,13 +103,13 @@ n_t n_log(n_t n, n_err_t *err) {
 }
 
 n_t n_exp(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_pow(N_E, n, err);
 }
 
 n_t n_pow10(n_t n, n_err_t *err) {
-  assert(n_is_number(n));
+  NORMALIZE(n);
 
   return n_pow(N_10, n, err);
 }

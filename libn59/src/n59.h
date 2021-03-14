@@ -92,7 +92,12 @@ extern n_t N_INF;  // infinity, largest number.
  *
  ******************************************************************************/
 
-/** Returns a TI-59 number with the specified mantissa and exponent. */
+/**
+ * Returns a TI-59 number with the specified mantissa and exponent.
+ *
+ * This function normalizes 'mant' and 'exp' to ensure that the return number
+ * has the correct format (see definition of n_t).
+ */
 n_t n_make(long long mant, int exp);
 
 /** Returns true if n1 and n2 are equal. */

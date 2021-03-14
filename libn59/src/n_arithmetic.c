@@ -6,48 +6,6 @@
 
 /******************************************************************************
  *
- *  HELPERS.
- *
- ******************************************************************************/
-
-/**
- * Given an arbitrary mantissa and exponent, not necessary within the ranges of
- * those of a TI-59 number, returns a TI-59 number, that is either N_0 or a
- * number whose mantissa has exactly 13 digits and whose exponent is in -99..99.
- */
-static n_t normalize_number(long long mant, int exp, n_err_t *err) {
-  if (err) *err = N_ERR_NONE;
-  if (mant == 0) return N_0;
-
-  // Make sure the mantissa has exactly 13 digits.
-  while (ABS(mant) >= POW10_13) {
-    mant /= 10;
-    exp += 1;
-  }
-  while (ABS(mant) < POW10_12) {
-    mant *= 10;
-    exp -= 1;
-  }
-
-  // Overflow.
-  if (ABS(exp) > 99) {
-    if (err) {
-      *err = exp < 0 ? N_ERR_UNDERFLOW : N_ERR_OVERFLOW;
-    }
-
-    if (exp < 0) {
-      return mant < 0 ? n_chs(N_EPS) : N_EPS;
-    } else {
-      return mant < 0 ? n_chs(N_INF) : N_INF;
-    }
-  }
-
-  return (n_t) { mant, exp };
-}
-
-
-/******************************************************************************
- *
  *  IMPLEMENTATION.
  *
  ******************************************************************************/
@@ -72,8 +30,8 @@ static n_t normalize_number(long long mant, int exp, n_err_t *err) {
  * even if 1000000000002 (13 digits) would be more accurate.
  */
 n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 
@@ -104,8 +62,8 @@ n_t n_plus(n_t n1, n_t n2, n_err_t *err) {
 
 /** See n_plus. */
 n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   return n_plus(n1, n_chs(n2), err);
 }
@@ -122,8 +80,8 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  * results slightly less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 
@@ -204,8 +162,8 @@ n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
 #endif
 
 n_t n_div(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 
@@ -228,8 +186,8 @@ n_t n_div(n_t n1, n_t n2, n_err_t *err) {
 }
 
 n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 
@@ -275,8 +233,8 @@ n_t n_pow(n_t n1, n_t n2, n_err_t *err) {
 }
 
 n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
-  assert(n_is_number(n1));
-  assert(n_is_number(n2));
+  NORMALIZE(n1);
+  NORMALIZE(n2);
 
   if (err) *err = N_ERR_NONE;
 
