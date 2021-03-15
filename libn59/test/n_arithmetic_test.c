@@ -24,7 +24,7 @@ static void test_all_operators() {
   n_err_t err;
   n_t res;
 
-  n_t numbers[] = { TEST_NUMBERS };
+  n_t numbers[] = { TEST_NUMBERS_2 };
   opr_t oprs[] = { n_plus, n_minus, n_times, n_div, n_pow, n_ipow };
   char *opr_strs[] = { "+", "-", "*", "/", "^", "v" };
 
