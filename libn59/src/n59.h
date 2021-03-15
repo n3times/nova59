@@ -87,8 +87,8 @@ extern n_t N_10;   // 10.
 extern n_t N_E;    // e.
 extern n_t N_PI;   // pi.
 
-extern n_t N_EPS;  // epsilon, smallest positive number.
-extern n_t N_INF;  // infinity, largest number.
+extern n_t N_EPS;  // epsilon, smallest positive number that can be represented.
+extern n_t N_INF;  // infinity, largest number that can be represented.
 
 
 /******************************************************************************
@@ -174,10 +174,10 @@ n_t n_abs(n_t n);
 /** 0, 1 or -1, depending on whether n == 0, n > 0 or n < 0. */
 n_t n_sign(n_t n);
 
-/** The integral part of n: n_int(-3.6) == -3, n_int(3.6) == 3. */
+/** The integral part of n: n_int(3.6) == 3, n_int(-3.6) == -3. */
 n_t n_int(n_t n);
 
-/** The fractional part of n: n_frac(-3.6) == -0.6, n_frac(3.6) == 0.6. */
+/** The fractional part of n: n_frac(3.6) == 0.6, n_frac(-3.6) == -0.6. */
 n_t n_frac(n_t n);
 
 /** n^2. */
@@ -236,9 +236,9 @@ n_t n_atan(n_t n, n_trig_t mode, n_err_t *err_out);
 /**
  * Converts degrees/minutes/seconds to decimal degrees.
  *
- * Only the digits of n that are visible on TI-59's display are considered
- * for the conversion. For example, if format is FLOAT and fix is 2, 3.1455 will
- * be first rounded to 3.15 (3 hours and 15 minutes) and then converted to 3.25.
+ * Only the digits of n that are visible on TI-59's display are considered in
+ * the conversion. For example, if format is FLOAT and fix is 2, 3.1455 is first
+ * rounded to 3.15 (3 hours and 15 minutes) and then converted to 3.25.
  *
  * Note: fix must be in 0..9.
  */
@@ -247,9 +247,9 @@ n_t n_dms(n_t n, int fix, n_format_t format, n_err_t *err_out);
 /**
  * Converts decimal degrees to degrees/minutes/seconds.
  *
- * Only the digits of n that are visible on TI-59 display are considered
- * for the conversion. For example, if format is FLOAT and fix is 2, 3.2549 will
- * be first rounded to 3.25 and then converted to 3.15 (3 hours and 15 minutes).
+ * Only the digits of n that are visible on TI-59's display are considered in
+ * the conversion. For example, if format is FLOAT and fix is 2, 3.2549 is first
+ * rounded to 3.25 and then converted to 3.15 (3 hours and 15 minutes).
  *
  * Note: fix must be in 0..9.
  */
