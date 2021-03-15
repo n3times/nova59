@@ -1,13 +1,14 @@
 #include "n_test.h"
 
-#include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 static void t(char *s) {
-  n_err_t err = false;
+  n_err_t err = N_ERR_NONE;
   n_t n = n_s2n(s, &err);
   char str[N_PRINT_MAX_SIZE];
+
   printf("%30s: %s%s\n", s, n_print(n, str), err ? " ?" : "");
 }
 

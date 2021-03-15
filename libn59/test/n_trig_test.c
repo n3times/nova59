@@ -6,20 +6,28 @@
 
 typedef n_t (*trig_fun_t)(n_t, n_trig_t mode, n_err_t *err);
 
-static void t(n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *)) {
+static void t(
+    n_t n, n_trig_t mode, char *str, n_t (op)(n_t, n_trig_t, n_err_t *)) {
   n_err_t err;
   n_t res = op(n, mode, &err);
   char s[N_PRINT_MAX_SIZE];
   char s_res[N_PRINT_MAX_SIZE];
+
   printf("%4s %s => %s%s\n",
          str, n_print(n, s), n_print(res, s_res), err ? " ?" : "");
 }
 
+/** Classic test for calculators. */
 static void test_forensics() {
   n_trig_t D = N_DEG;
-  n_t res = n_asin(n_acos(n_atan(n_tan(n_cos(n_sin(n_make(9), D, 0), D,
-      0), D, 0), D, 0), D, 0), D, 0);
+  n_t res = n_asin(
+            n_acos(
+            n_atan(
+            n_tan(
+            n_cos(
+            n_sin(n_make(9), D, 0), D, 0), D, 0), D, 0), D, 0), D, 0);
   char str[N_PRINT_MAX_SIZE];
+
   printf("Forensics:\n  asin(acos(atan(tan(cos(sin(9)))))) = %s\n\n\n",
          n_print(res, str));
 }
