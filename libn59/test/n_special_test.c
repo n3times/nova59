@@ -68,7 +68,7 @@ static void test_r_p(n_t x, n_t y, n_trig_t mode) {
 
 static void test_polar_rect() {
   for (int theta = 0; theta <= 360; theta += 10) {
-    test_p_r(N_1, n_d2n(theta, NULL), N_DEG);
+    test_p_r(N_1, n_make(theta), N_DEG);
   }
 }
 
@@ -76,7 +76,7 @@ static void test_rect_polar() {
   for (int theta = 0; theta <= 360; theta += 10) {
     n_t x, y;
     n_err_t e;
-    n_p_r(N_1, n_d2n(theta, NULL), N_DEG, &x, &y, &e);
+    n_p_r(N_1, n_make(theta), N_DEG, &x, &y, &e);
     test_r_p(x, y, N_DEG);
   }
 }

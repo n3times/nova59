@@ -45,7 +45,7 @@ static void test_multiplication() {
   // Multiplication truncates result to 13 digits with no rounding. Same as
   // TI-59.
   n1 = n_make(1.111111111111);
-  n2 = n_d2n(99, NULL);
+  n2 = n_make(99);
   res = n_times(n1, n2, NULL);
   assert(n_equals(res, n_make(109.9999999999)));  // And not 101.
   p(n1, n2, res, N_ERR_NONE, "*");
@@ -69,10 +69,10 @@ static void test_multiplication() {
   // 69! (See Pgm 16, from Master Library).
   res = N_1;
   for (int i = 69; i >= 1; i--) {
-    res = n_times(res, n_d2n(i, NULL), NULL);
+    res = n_times(res, n_make(i), NULL);
   }
   assert(n_equals(res, n_make(1.711224524264e98)));
-  p(n_d2n(69, NULL), N_1, res, N_ERR_NONE, "!");
+  p(n_make(69), N_1, res, N_ERR_NONE, "!");
 }
 
 static void test_addition() {

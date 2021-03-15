@@ -31,7 +31,7 @@ n_t n_int(n_t n) {
 
   if (n.exp >= 12) return n;
 
-  return n_d2n((long long)n_n2d(n), NULL);
+  return n_make((long long)n_n2d(n));
 }
 
 n_t n_frac(n_t n) {
@@ -62,7 +62,7 @@ n_t n_sqrt(n_t n, n_err_t *err) {
     n = n_chs(n);
   }
 
-  return n_d2n(sqrt(n_n2d(n)), NULL);
+  return n_make(sqrt(n_n2d(n)));
 }
 
 n_t n_ln(n_t n, n_err_t *err) {
@@ -80,7 +80,7 @@ n_t n_ln(n_t n, n_err_t *err) {
     n = n_chs(n);
   }
 
-  return n_d2n(log(n_n2d(n)), NULL);
+  return n_make(log(n_n2d(n)));
 }
 
 n_t n_log(n_t n, n_err_t *err) {
@@ -98,7 +98,7 @@ n_t n_log(n_t n, n_err_t *err) {
     n = n_chs(n);
   }
 
-  return n_d2n(log10(n_n2d(n)), NULL);
+  return n_make(log10(n_n2d(n)));
 }
 
 n_t n_exp(n_t n, n_err_t *err) {

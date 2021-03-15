@@ -35,7 +35,7 @@ int main() {
   printf("=======================================\n\n");
   for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
-      n = n_d2n(i * 45, NULL);
+      n = n_make(i * 45);
       t(n, N_DEG, trig_fun_strs[k], trig_funs[k]);
     }
     printf("\n");
@@ -46,7 +46,7 @@ int main() {
   printf("=========================================\n\n");
   for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
-      n = n_d2n(i * 50, NULL);
+      n = n_make(i * 50);
       t(n, N_GRAD, trig_fun_strs[k], trig_funs[k]);
     }
     printf("\n");
@@ -57,9 +57,9 @@ int main() {
   printf("==============================================\n\n");
   for (int k = 0; k < N_ELEMS(trig_funs) / 2; k++) {
     for (int i = -16; i < 16; i += 1) {
-      n = n_times(n_div(N_PI, n_make(2), NULL), n_d2n(i/2, NULL), NULL);
+      n = n_times(n_div(N_PI, n_make(2), NULL), n_make(i / 2), NULL);
       n = n_plus(n, n_times(n_div(N_PI, n_make(4), NULL),
-                            n_d2n(i%2, NULL), NULL), NULL);
+                            n_make(i % 2), NULL), NULL);
       t(n, N_RAD, trig_fun_strs[k], trig_funs[k]);
     }
     printf("\n");
@@ -114,15 +114,15 @@ int main() {
   for (int i = 0; i < N_ELEMS(trig_modes); i++) {
     printf("\n%s: input -1.0 -0.9 -0.8 ... 1.0\n\n", mode_strs[i]);
     for (int j = -10; j <= 10; j++) {
-      t(n_d2n(j/10., NULL), trig_modes[i], "asin", n_asin);
+      t(n_make(j / 10.), trig_modes[i], "asin", n_asin);
     }
     printf("\n");
     for (int j = -10; j <= 10; j++) {
-      t(n_d2n(j/10., NULL), trig_modes[i], "acos", n_acos);
+      t(n_make(j / 10.), trig_modes[i], "acos", n_acos);
     }
     printf("\n");
     for (int j = -10; j <= 10; j++) {
-      t(n_d2n(j/10., NULL), trig_modes[i], "atan", n_atan);
+      t(n_make(j / 10.), trig_modes[i], "atan", n_atan);
     }
     printf("\n");
   }
