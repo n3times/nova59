@@ -4,13 +4,14 @@
 #include <stdio.h>
 
 /* Arithmetic operator. */
-typedef n_t (*opr_t)(n_t, n_t, n_err_t *);
+typedef n_t (*opr_t)(n_t n1, n_t n2, n_err_t *);
 
 /* Prints operation. */
 static void p(n_t n1, n_t n2, n_t res, n_err_t err, char *opr) {
   char s1[N_PRINT_MAX_SIZE];
   char s2[N_PRINT_MAX_SIZE];
   char s_res[N_PRINT_MAX_SIZE];
+
   printf("%s %s %s   =   %s%s\n",
          n_print(n1, s1),
          opr,
@@ -37,6 +38,31 @@ static void test_all_operators() {
     }
     printf("\n\n\n");
   }
+}
+
+static void test_addition() {
+  n_t n1, n2, res;
+
+  // Number truncation before addition. Same as TI-59.
+  n1 = n_make(9.999999999999e13);
+  n2 = n_make(9.999999999999);
+  res = n_plus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "+");
+
+  // Number truncation before substraction. Same as TI-59.
+  n1 = n_make(1e13);
+  n2 = N_1;
+  res = n_minus(n1, n2, NULL);
+  assert(n_equals(res, n1));  // Note that n2 is ignored
+  p(n1, n2, res, N_ERR_NONE, "-");
+
+  // Addition has same accuracy as TI-59. For example, pi * 100 using addition.
+  res = N_0;
+  for (int i = 0; i < 100; i++) {
+    res = n_plus(res, N_PI, NULL);
+  }
+  p(N_PI, N_PI, res, N_ERR_NONE, "?");
 }
 
 static void test_multiplication() {
@@ -73,31 +99,6 @@ static void test_multiplication() {
   }
   assert(n_equals(res, n_make(1.711224524264e98)));
   p(n_make(69), N_1, res, N_ERR_NONE, "!");
-}
-
-static void test_addition() {
-  n_t n1, n2, res;
-
-  // Number truncation before addition. Same as TI-59.
-  n1 = n_make(9.999999999999e13);
-  n2 = n_make(9.999999999999);
-  res = n_plus(n1, n2, NULL);
-  assert(n_equals(res, n1));  // Note that n2 is ignored
-  p(n1, n2, res, N_ERR_NONE, "+");
-
-  // Number truncation before substraction. Same as TI-59.
-  n1 = n_make(1e13);
-  n2 = N_1;
-  res = n_minus(n1, n2, NULL);
-  assert(n_equals(res, n1));  // Note that n2 is ignored
-  p(n1, n2, res, N_ERR_NONE, "-");
-
-  // Addition has same accuracy as TI-59: pi*100 using addition.
-  res = N_0;
-  for (int i = 0; i < 100; i++) {
-    res = n_plus(res, N_PI, NULL);
-  }
-  p(N_PI, N_PI, res, N_ERR_NONE, "?");
 }
 
 int main() {
