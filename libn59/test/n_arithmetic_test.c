@@ -57,7 +57,8 @@ static void test_addition() {
   assert(n_equals(res, n1));  // Note that n2 is ignored
   p(n1, n2, res, N_ERR_NONE, "-");
 
-  // Addition has same accuracy as TI-59. For example, pi * 100 using addition.
+  // pi * 100.
+  // n_plus produces the exact result as TI-59.
   res = N_0;
   for (int i = 0; i < 100; i++) {
     res = n_plus(res, N_PI, NULL);
@@ -68,31 +69,32 @@ static void test_addition() {
 static void test_multiplication() {
   n_t n1, n2, res;
 
-  // Multiplication truncates result to 13 digits with no rounding. Same as
-  // TI-59.
+  // 1.111111111111 * 99 = 109.999999999989.
+  // n_times, like TI-59, gets 109.999999999, that is 13 accurate digits.
+  // Note that rounding (101.0000000000) would have been even more accurate.
   n1 = n_make(1.111111111111);
   n2 = n_make(99);
   res = n_times(n1, n2, NULL);
-  assert(n_equals(res, n_make(109.9999999999)));  // And not 101.
+  assert(n_equals(res, n_make(109.9999999999)));
   p(n1, n2, res, N_ERR_NONE, "*");
 
-  // Multiplication always gives 13 accurate digits, unlike TI-59.
-  // TI-59 gets 99.99999999989 while we get 99.99999999998.
+  // 9.999999999999 ^ 2 = 99.999999999980000000000001
+  // n_times gets 13 accurate digits: 99.99999999998.
+  // TI-59 gets a less accurate result: 99.99999999989.
   n1 = n_make(9.999999999999);
   res = n_times(n1, n1, NULL);
   p(n1, n1, res, N_ERR_NONE, "*");
 
-  // Same accuracy as TI-59 for mantissas with less than 13 significant digits:
-  // pi^100 using multiplication. Note that pi = (3141592653590, 0) has 12
-  // significant digits, its mantissa ending in 0.
+  // pi ^ 100.
+  // n_times produces the exact result as TI-59.
   res = N_1;
   for (int i = 0; i < 100; i++) {
     res = n_times(res, N_PI, NULL);
   }
   p(N_PI, N_PI, res, N_ERR_NONE, "?");
 
-  // Same accuracy as TI-59 for mantissas with less than 13 significant digits:
-  // 69! (See Pgm 16, from Master Library).
+  // 69!
+  // n_times produces the exact result as TI-59.
   res = N_1;
   for (int i = 69; i >= 1; i--) {
     res = n_times(res, n_make(i), NULL);
