@@ -115,48 +115,6 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   return res;
 }
 
-#if 0
-// Alternative division with no rounding. Doesn't look like TI-59 does this.
-n_t n_div2(n_t n1, n_t n2, n_err_t *err) {
-  NORMALIZE(n1);
-  NORMALIZE(n2);
-
-  if (err) *err = N_ERR_NONE;
-
-  // n1 or n2 is zero.
-  if (n_is_zero(n1) && n_is_zero(n2)) {
-    if (err) *err = N_ERR_DOMAIN;
-    return N_1;
-  } else if (n_is_zero(n1)) {
-    return N_0;
-  } else if (n_is_zero(n2)) {
-    return (n_cmp(n1, N_0) > 0) ? N_INF : n_chs(N_INF);
-  }
-
-  long long m1 = ABS(n1.mant);
-  long long m2 = ABS(n2.mant);
-  long long div = 0;
-  int exp = n1.exp - n2.exp;
-  if (m1 < m2) m1 *= 10;
-  int i = 0;
-  while (i < 14) {
-    if (m1 >= m2) {
-      m1 = m1 - m2;
-      div += 1;
-    } else {
-      i += 1;
-      m1 *= 10;
-      div *= 10;
-    }
-  }
-
-  n_t res = normalize_number(div, exp, err);
-  bool neg = (n1.mant > 0) != (n2.mant > 0);
-  res = neg ? n_chs(res) : res;
-  return res;
-}
-#endif
-
 n_t n_div(n_t n1, n_t n2, n_err_t *err) {
   NORMALIZE(n1);
   NORMALIZE(n2);
