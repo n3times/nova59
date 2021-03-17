@@ -1,11 +1,3 @@
-#include "n59.h"
-
-#include <curses.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /**
  * Command line RPN calculator based on libn59.
  *
@@ -14,7 +6,7 @@
  *             x2 x1 vx ln log exp pow
  *             sin cos tan asin acos atan
  *             dms idms pr rp
- * Formats: float sci eng f0-f9 deg rad grad
+ * Formats: flt sci eng f0-f9 deg rad grad
  * Stack:   clr
  * Numbers: 0-9 . ~
  *
@@ -24,11 +16,17 @@
  * Example: 2 ^ 3 - sin(4)
  *          2 newline 3 ^ 4 sin -
  *          stack: 2, 2 2, 2
- *
- *  Y = 
- *  X = 
- *  I = 
  */
+
+#include "n59.h"
+
+#include <curses.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define LINE_LEN 16
 
 static n_format_t format = N_FLOAT;
 static int fix = 9;
@@ -37,56 +35,45 @@ static n_trig_t trig = N_DEG;
 static n_t n_x = { 0, 0 };
 static n_t n_y = { 0, 0 };
 
-void handle_line(char *line);
-
-int main(void) {
-  char line[1000];
-  int line_len = 0; 
-  line[0] = 0;
-
+static void prepare_screen() {
   initscr();
   noecho();
 
-  mvprintw(0, 5, "RPN Calculator based on libn59");
+  mvprintw(0, 5, "CLI-59");
+  mvprintw(0, 30, "Fix");
   mvprintw(2, 5, "O =");
   mvprintw(3, 5, "Y =");
   mvprintw(4, 5, "X =");
-  mvprintw(6, 5, "I =");
-
-  while (true) {
-    char str[N_N2S_MAX_SIZE];
-    n_n2s(n_x, 9, N_FLOAT, str, NULL);
-    mvprintw(4, 10, "%30s", str);
-    n_n2s(n_y, 9, N_FLOAT, str, NULL);
-    mvprintw(3, 10, "%30s", str);
-
-    char c = getch();
-    if (c == 127) {
-      if (line_len > 0) {
-        line[--line_len] = 0;
-      }
-    } else if (c == '\n') {
-      handle_line(line);
-      line[0] = 0;
-      line_len = 0;
-    } else if (line_len < 30) {
-      line[line_len++] = c;
-      line[line_len] = 0;
-    }
-    mvprintw(6, 10, "%30s\r", line);
-  }
-
-  return 0;
+  mvprintw(6, 5, "D =");
+  mvprintw(8, 5, "I =");
 }
 
-void handle_line(char *line) {
+static void update_screen(char *line) {
+  mvprintw(0, 34, "%d", fix);
+  mvprintw(
+    0, 40, "%s", format == N_FLOAT ? "FLT" : format == N_SCI ? "SCI" : "ENG");
+  mvprintw(
+    0, 48, "%s", trig == N_RAD ? "RAD" : trig == N_DEG ? "DEG" : "GRAD");
+  char str[20];
+  n_n2s(n_y, 9, N_FLOAT, str, NULL);
+  mvprintw(3, 10, "%20s", str);
+  mvprintw(3, 40, "%20s", n_print(n_y, str));
+  n_n2s(n_x, 9, N_FLOAT, str, NULL);
+  mvprintw(4, 10, "%20s", str);
+  mvprintw(4, 40, "%20s", n_print(n_x, str));
+  n_n2s(n_x, fix, format, str, NULL);
+  mvprintw(6, 10, "%20s", str);
+  mvprintw(8, 10, "%[ %16s ]\r", line);
+}
+
+static void handle_line(char *line) {
   n_err_t err = N_ERR_NONE;
 
   if (strcmp(line, "deg")  == 0)  { trig = N_DEG; }
   if (strcmp(line, "rad")  == 0)  { trig = N_RAD; }
   if (strcmp(line, "grad") == 0)  { trig = N_GRAD; }
 
-  if (strcmp(line, "float") == 0) { format = N_FLOAT; }
+  if (strcmp(line, "flt") == 0)   { format = N_FLOAT; }
   if (strcmp(line, "eng") == 0)   { format = N_ENG; }
   if (strcmp(line, "sci") == 0)   { format = N_SCI; }
 
@@ -104,7 +91,7 @@ void handle_line(char *line) {
   if (strcmp(line, "x2") == 0)   { n_x = n_square(n_x, &err); }
   if (strcmp(line, "x1") == 0)   { n_x = n_1_x(n_x, &err); }
   if (strcmp(line, "vx") == 0)   { n_x = n_sqrt(n_x, &err); }
-  if (strcmp(line, "lnx") == 0)  { n_x = n_ln(n_x, &err); }
+  if (strcmp(line, "ln") == 0)  { n_x = n_ln(n_x, &err); }
   if (strcmp(line, "log") == 0)  { n_x = n_log(n_x, &err); }
   if (strcmp(line, "exp") == 0)  { n_x = n_exp(n_x, &err); }
   if (strcmp(line, "pow") == 0)  { n_x = n_pow10(n_x, &err); }
@@ -150,4 +137,32 @@ void handle_line(char *line) {
      n_y = n_x;
      n_x = n;
   }
+}
+
+int main(void) {
+  char line[1000];
+  int line_len = 0;
+  line[0] = 0;
+
+  prepare_screen();
+
+  while (true) {
+    update_screen(line);
+
+    char c = getch();
+    if (c == 127) {
+      if (line_len > 0) {
+        line[--line_len] = 0;
+      }
+    } else if (c == '\n') {
+      handle_line(line);
+      line[0] = 0;
+      line_len = 0;
+    } else if (line_len < LINE_LEN) {
+      line[line_len++] = c;
+      line[line_len] = 0;
+    }
+  }
+
+  return 0;
 }
