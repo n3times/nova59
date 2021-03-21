@@ -3,7 +3,7 @@
  *
  * Operations: + - / * ^ i^
  *             chs abs int frac
- *             x2 x1 vx ln log exp pow
+ *             xx ii v ln log iln ilog
  *             sin cos tan asin acos atan
  *             dms idms pr rp
  * Formats: flt sci eng f0-f9 deg rad grad
@@ -20,6 +20,7 @@
 
 #include "n59.h"
 
+#include <assert.h>
 #include <curses.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -90,96 +91,122 @@ static void eval_arith(n_t (*opr)(n_t, n_t, n_err_t *)) {
   n_x = opr(n_y, n_x, NULL);
   n_y = n_z;
   n_z = n_w;
-  n_w = N_0;
+  ///n_w = N_0;
 }
 
-static void handle_line(char *line) {
+/** Returns true if 'line' was handled. */
+static bool handle_fun(char *line) {
+  assert(line != NULL);
+
   n_err_t err = N_ERR_NONE;
 
-  if (strcmp(line, "")  == 0) { push(); }
+  if (strcmp(line, "de") == 0) { trig = N_DEG;  return true; }
+  if (strcmp(line, "ra") == 0) { trig = N_RAD;  return true; }
+  if (strcmp(line, "gr") == 0) { trig = N_GRAD; return true; }
 
-  if (strcmp(line, "deg")  == 0) { trig = N_DEG; }
-  if (strcmp(line, "rad")  == 0) { trig = N_RAD; }
-  if (strcmp(line, "grad") == 0) { trig = N_GRAD; }
+  if (strcmp(line, "fl") == 0) { format = N_FLOAT; return true; }
+  if (strcmp(line, "en") == 0) { format = N_ENG;   return true; }
+  if (strcmp(line, "sc") == 0) { format = N_SCI;   return true; }
 
-  if (strcmp(line, "flt") == 0) { format = N_FLOAT; }
-  if (strcmp(line, "eng") == 0) { format = N_ENG; }
-  if (strcmp(line, "sci") == 0) { format = N_SCI; }
+  if (line[0] == 'f' && line[1] >= '0' && line[1] <= '9' && line[2] == '\0') {
+    fix = line[1] - '0';
+    return true;
+  }
 
-  if (strcmp(line, "f0") == 0) { fix = 0; }
-  if (strcmp(line, "f1") == 0) { fix = 1; }
-  if (strcmp(line, "f2") == 0) { fix = 2; }
-  if (strcmp(line, "f3") == 0) { fix = 3; }
-  if (strcmp(line, "f4") == 0) { fix = 4; }
-  if (strcmp(line, "f5") == 0) { fix = 5; }
-  if (strcmp(line, "f6") == 0) { fix = 6; }
-  if (strcmp(line, "f7") == 0) { fix = 7; }
-  if (strcmp(line, "f8") == 0) { fix = 8; }
-  if (strcmp(line, "f9") == 0) { fix = 9; }
+  if (strcmp(line, "xx")  == 0) { n_x = n_square(n_x, &err); return true; }
+  if (strcmp(line, "ii")  == 0) { n_x = n_1_x(n_x, &err);    return true; }
+  if (strcmp(line, "v")   == 0) { n_x = n_sqrt(n_x, &err);   return true; }
+  if (strcmp(line, "ln")  == 0) { n_x = n_ln(n_x, &err);     return true; }
+  if (strcmp(line, "lo")  == 0) { n_x = n_log(n_x, &err);    return true; }
+  if (strcmp(line, "iln") == 0) { n_x = n_exp(n_x, &err);    return true; }
+  if (strcmp(line, "ilo") == 0) { n_x = n_pow10(n_x, &err);  return true; }
 
-  if (strcmp(line, "x2")   == 0) { n_x = n_square(n_x, &err); }
-  if (strcmp(line, "ix")   == 0) { n_x = n_1_x(n_x, &err); }
-  if (strcmp(line, "vx")   == 0) { n_x = n_sqrt(n_x, &err); }
-  if (strcmp(line, "ln")   == 0) { n_x = n_ln(n_x, &err); }
-  if (strcmp(line, "log")  == 0) { n_x = n_log(n_x, &err); }
-  if (strcmp(line, "iln")  == 0) { n_x = n_exp(n_x, &err); }
-  if (strcmp(line, "ilog") == 0) { n_x = n_pow10(n_x, &err); }
+  if (strcmp(line, "si") == 0) { n_x = n_sin(n_x, trig, &err);  return true; }
+  if (strcmp(line, "co") == 0) { n_x = n_cos(n_x, trig, &err);  return true; }
+  if (strcmp(line, "ta") == 0) { n_x = n_tan(n_x, trig, &err);  return true; }
+  if (strcmp(line, "as") == 0) { n_x = n_asin(n_x, trig, &err); return true; }
+  if (strcmp(line, "ac") == 0) { n_x = n_acos(n_x, trig, &err); return true; }
+  if (strcmp(line, "at") == 0) { n_x = n_atan(n_x, trig, &err); return true; }
 
-  if (strcmp(line, "sin") == 0)  { n_x = n_sin(n_x, trig, &err); }
-  if (strcmp(line, "cos") == 0)  { n_x = n_cos(n_x, trig, &err); }
-  if (strcmp(line, "tan") == 0)  { n_x = n_tan(n_x, trig, &err); }
-  if (strcmp(line, "asin") == 0) { n_x = n_asin(n_x, trig, &err); }
-  if (strcmp(line, "acos") == 0) { n_x = n_acos(n_x, trig, &err); }
-  if (strcmp(line, "atan") == 0) { n_x = n_atan(n_x, trig, &err); }
+  if (strcmp(line, "ch") == 0) { n_x = n_chs(n_x);  return true; }
+  if (strcmp(line, "in") == 0) { n_x = n_int(n_x);  return true; }
+  if (strcmp(line, "fr") == 0) { n_x = n_frac(n_x); return true; }
+  if (strcmp(line, "ab") == 0) { n_x = n_abs(n_x);  return true; }
 
-  if (strcmp(line, "chs") == 0)  { n_x = n_chs(n_x); }
-  if (strcmp(line, "int") == 0)  { n_x = n_int(n_x); }
-  if (strcmp(line, "frac") == 0) { n_x = n_frac(n_x); }
-  if (strcmp(line, "abs") == 0)  { n_x = n_abs(n_x); }
-
-  if (strcmp(line, "dms") == 0)  { n_x = n_dms(n_x, fix, format, &err); }
-  if (strcmp(line, "idms") == 0) { n_x = n_idms(n_x, fix, format, &err); }
-
+  if (strcmp(line, "dm") == 0)  {
+    n_x = n_dms(n_x, fix, format, &err);
+    return true;
+  }
+  if (strcmp(line, "idm") == 0) {
+    n_x = n_idms(n_x, fix, format, &err);
+    return true;
+  }
   if (strcmp(line, "pr") == 0) {
     n_t rho, theta;
     n_p_r(n_y, n_x, trig, &rho, &theta, &err);
     n_x = rho;
     n_y = theta;
+    return true;
   }
   if (strcmp(line, "rp") == 0) {
     n_t n1, n2;
     n_r_p(n_y, n_x, trig, &n1, &n2, &err);
     n_x = n2;
     n_y = n1;
+    return true;
   }
 
-  if (strcmp(line, "+") == 0)  { eval_arith(n_plus); }
-  if (strcmp(line, "-") == 0)  { eval_arith(n_minus); }
-  if (strcmp(line, "*") == 0)  { eval_arith(n_times); }
-  if (strcmp(line, "/") == 0)  { eval_arith(n_div); }
-  if (strcmp(line, "^") == 0)  { eval_arith(n_pow); }
-  if (strcmp(line, "i^") == 0) { eval_arith(n_ipow); }
+  if (strcmp(line, "+")  == 0) { eval_arith(n_plus);  return true; }
+  if (strcmp(line, "~")  == 0) { eval_arith(n_minus); return true; }
+  if (strcmp(line, "*")  == 0) { eval_arith(n_times); return true; }
+  if (strcmp(line, "/")  == 0) { eval_arith(n_div);   return true; }
+  if (strcmp(line, "^")  == 0) { eval_arith(n_pow);   return true; }
+  if (strcmp(line, "i^") == 0) { eval_arith(n_ipow);  return true; }
 
   if (strcmp(line, "pi") == 0) {
     push();
     n_x = N_PI;
+    return true;
   }
 
   if (strcmp(line, "xy") == 0) {
     n_t tmp = n_x;
     n_x = n_y;
     n_y = tmp;
+    return true;
   }
 
+  return false;
+}
+
+/** Returns true if 'line' was handled. */
+static bool handle_num(char *line) {
   n_err_t err2;
   n_t n = n_s2n(line, &err2);
+
   if (err2 != N_ERR_DOMAIN) {
-     n_y = n_x;
-     n_x = n;
+    n_w = n_z;
+    n_z = n_y;
+    n_y = n_x;
+    n_x = n;
+    return true;
   }
+
+  return false;
+}
+
+static bool is_numeric(char c) {
+  return (c == '.' || (c >= '0' && c <= '9') || c == '-' || c == ' ');
 }
 
 int main(void) {
+  typedef enum parse_state_e {
+    PARSE_START,
+    PARSE_NUM,
+    PARSE_FUN,
+  } parse_state_t;
+
+  parse_state_t state = PARSE_START;
   char line[1000];
   int line_len = 0;
   line[0] = 0;
@@ -190,17 +217,51 @@ int main(void) {
     update_screen(line);
 
     char c = getch();
+
     if (c == 127) {
-      if (line_len > 0) {
-        line[--line_len] = 0;
+      if (line_len > 0) { line[--line_len] = 0; }
+      if (line_len == 0) { state = PARSE_START; }
+      continue;
+    }
+    if (state == PARSE_START) {
+      if (c == ' ') continue;
+      if (is_numeric(c)) {
+        state = PARSE_NUM;
+      } else if (c != '\n') {
+        state = PARSE_FUN;
       }
-    } else if (c == '\n') {
-      handle_line(line);
+    }
+    if (c == '\n') {
+      if (state == PARSE_START) {
+        push();
+        continue;
+      }
+      if (state == PARSE_FUN) continue;
+
+      handle_num(line);
+
+      state = PARSE_START;
       line[0] = 0;
       line_len = 0;
-    } else if (line_len < LINE_LEN) {
+      continue;
+    }
+
+    if (line_len < LINE_LEN) {
+      if (state == PARSE_NUM && !is_numeric(c)) {
+        if (handle_num(line)) {
+          line_len = 0;
+          state = PARSE_FUN;
+        } else {
+          continue;
+        }
+      }
       line[line_len++] = c;
       line[line_len] = 0;
+      if (state == PARSE_FUN && handle_fun(line)) {
+        state = PARSE_START;
+        line[0] = 0;
+        line_len = 0;
+      }
     }
   }
 
