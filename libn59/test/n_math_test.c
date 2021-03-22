@@ -107,6 +107,14 @@ static void test_frac() {
   }
 }
 
+static void test_sqrt() {
+  n_t n_1_plus_eps  = n_make(1.000000000001);
+  n_t n_1_minus_eps = n_make(.9999999999999);
+
+  p(n_1_plus_eps,  n_sqrt(n_1_plus_eps, NULL),  N_ERR_NONE, "sqrt");
+  p(n_1_minus_eps, n_sqrt(n_1_minus_eps, NULL), N_ERR_NONE, "sqrt");
+}
+
 int main() {
   test_funs();
 
@@ -115,4 +123,7 @@ int main() {
   test_int();
 
   test_frac();
+
+  printf("\n");
+  test_sqrt();
 }
