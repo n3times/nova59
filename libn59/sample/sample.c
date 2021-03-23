@@ -40,53 +40,65 @@ static n_t Y = { 0, 0 };
 static n_t Z = { 0, 0 };
 static n_t T = { 0, 0 };
 
+static bool blink = false;
+
 static void prepare_screen() {
   initscr();
   noecho();
 
   // Modes.
-  mvprintw(0, 5, "CLI-59");
-  mvprintw(0, 30, "Fix");
-  mvprintw(2, 5, "O =");
+  mvprintw(0, 5, "=======================================================");
+  mvprintw(1, 5, "RPN-59");
+  mvprintw(1, 43, "Fix");
+  mvprintw(2, 5, "=======================================================");
 
   // Stack.
-  mvprintw(4, 5, "T =");
-  mvprintw(5, 5, "Z =");
-  mvprintw(6, 5, "Y =");
-  mvprintw(7, 5, "X =");
+  mvprintw(3, 5, "T =");
+  mvprintw(4, 5, "Z =");
+  mvprintw(5, 5, "Y =");
+  mvprintw(6, 5, "X =");
+  mvprintw(7, 5, "=======================================================");
 
   // Display and Input.
-  mvprintw(9, 5, "D =");
-  mvprintw(11, 5, "I =");
+  mvprintw(8,  5, "D =");
+  mvprintw(9,  5, "=======================================================");
+  mvprintw(10  5, "I =");
+  mvprintw(11, 5, "=======================================================");
 }
 
 static void update_screen(char *input) {
   // Modes.
-  mvprintw(0, 34, "%d", fix);
+  mvprintw(1, 47, "%d", fix);
   mvprintw(
-    0, 40, "%s", format == N_FLOAT ? "FLT" : format == N_SCI ? "SCI" : "ENG");
+    1, 51, "%s", format == N_FLOAT ? "FLT" : format == N_SCI ? "SCI" : "ENG");
   mvprintw(
-    0, 48, "%s", trig == N_RAD ? "RAD" : trig == N_DEG ? "DEG" : "GRD");
+    1, 57, "%s", trig == N_RAD ? "RAD" : trig == N_DEG ? "DEG" : "GRD");
 
   // Stack.
   char str[20];
   n_n2s(T, 9, N_FLOAT, str, NULL);
-  mvprintw(4, 10, "%20s", str);
-  mvprintw(4, 40, "%20s", n_print(T, str));
+  mvprintw(3, 10, "%20s", str);
+  mvprintw(3, 40, "%20s", n_print(T, str));
   n_n2s(Z, 9, N_FLOAT, str, NULL);
-  mvprintw(5, 10, "%20s", str);
-  mvprintw(5, 40, "%20s", n_print(Z, str));
+  mvprintw(4, 10, "%20s", str);
+  mvprintw(4, 40, "%20s", n_print(Z, str));
   n_n2s(Y, 9, N_FLOAT, str, NULL);
-  mvprintw(6, 10, "%20s", str);
-  mvprintw(6, 40, "%20s", n_print(Y, str));
+  mvprintw(5, 10, "%20s", str);
+  mvprintw(5, 40, "%20s", n_print(Y, str));
   n_n2s(X, 9, N_FLOAT, str, NULL);
-  mvprintw(7, 10, "%20s", str);
-  mvprintw(7, 40, "%20s", n_print(X, str));
+  mvprintw(6, 10, "%20s", str);
+  mvprintw(6, 40, "%20s", n_print(X, str));
 
   // Display and Input.
-  n_n2s(X, fix, format, str, NULL);
-  mvprintw(9, 10, "%20s", str);
-  mvprintw(11, 10, "%[ %16s ]\r", input);
+  n_err_t err;
+  n_n2s(X, fix, format, str, &err);
+  if (err) blink = true;
+  attron(A_BOLD);
+  if (blink) attron(A_BLINK);
+  mvprintw(8, 10, "%20s", str);
+  attroff(A_BOLD);
+  if (blink) attroff(A_BLINK);
+  mvprintw(10, 10, "%[ %16s ]\r", input);
 }
 
 static void push_X() {
@@ -96,9 +108,23 @@ static void push_X() {
 }
 
 static void eval_arithmetic_op(n_t (*opr)(n_t, n_t, n_err_t *)) {
-  X = opr(Y, X, NULL);
+  n_err_t err;
+  X = opr(Y, X, &err);
   Y = Z;
   Z = T;
+  if (err) blink = true;
+}
+
+static void eval_fun(n_t (*fun)(n_t, n_err_t *)) {
+  n_err_t err;
+  X = fun(X, &err);
+  if (err) blink = true;
+}
+
+static void eval_trig(n_t (*fun)(n_t, n_trig_t, n_err_t *)) {
+  n_err_t err;
+  X = fun(X, trig, &err);
+  if (err) blink = true;
 }
 
 /** Returns true if 'input' was handled. */
@@ -121,20 +147,20 @@ static bool handle_fun(char *input) {
     return true;
   }
 
-  if (strcmp(input, "xx")  == 0) { X = n_square(X, &err); return true; }
-  if (strcmp(input, "ii")  == 0) { X = n_1_x(X, &err);    return true; }
-  if (strcmp(input, "v")   == 0) { X = n_sqrt(X, &err);   return true; }
-  if (strcmp(input, "ln")  == 0) { X = n_ln(X, &err);     return true; }
-  if (strcmp(input, "lo")  == 0) { X = n_log(X, &err);    return true; }
-  if (strcmp(input, "iln") == 0) { X = n_exp(X, &err);    return true; }
-  if (strcmp(input, "ilo") == 0) { X = n_pow10(X, &err);  return true; }
+  if (strcmp(input, "xx") == 0) { eval_fun(n_square); return true; }
+  if (strcmp(input, "ii") == 0) { eval_fun(n_1_x);    return true; }
+  if (strcmp(input, "v")  == 0) { eval_fun(n_sqrt);   return true; }
+  if (strcmp(input, "ln") == 0) { eval_fun(n_ln);     return true; }
+  if (strcmp(input, "lo") == 0) { eval_fun(n_log);    return true; }
+  if (strcmp(input, "ex") == 0) { eval_fun(n_exp);    return true; }
+  if (strcmp(input, "po") == 0) { eval_fun(n_pow10);  return true; }
 
-  if (strcmp(input, "si") == 0) { X = n_sin(X, trig, &err);  return true; }
-  if (strcmp(input, "co") == 0) { X = n_cos(X, trig, &err);  return true; }
-  if (strcmp(input, "ta") == 0) { X = n_tan(X, trig, &err);  return true; }
-  if (strcmp(input, "as") == 0) { X = n_asin(X, trig, &err); return true; }
-  if (strcmp(input, "ac") == 0) { X = n_acos(X, trig, &err); return true; }
-  if (strcmp(input, "at") == 0) { X = n_atan(X, trig, &err); return true; }
+  if (strcmp(input, "si") == 0) { eval_trig(n_sin);  return true; }
+  if (strcmp(input, "co") == 0) { eval_trig(n_cos);  return true; }
+  if (strcmp(input, "ta") == 0) { eval_trig(n_tan);  return true; }
+  if (strcmp(input, "as") == 0) { eval_trig(n_asin); return true; }
+  if (strcmp(input, "ac") == 0) { eval_trig(n_acos); return true; }
+  if (strcmp(input, "at") == 0) { eval_trig(n_atan); return true; }
 
   if (strcmp(input, "ch") == 0) { X = n_chs(X);  return true; }
   if (strcmp(input, "in") == 0) { X = n_int(X);  return true; }
@@ -143,15 +169,18 @@ static bool handle_fun(char *input) {
 
   if (strcmp(input, "dm") == 0)  {
     X = n_dms(X, fix, format, &err);
+    if (err) blink = true;
     return true;
   }
-  if (strcmp(input, "idm") == 0) {
+  if (strcmp(input, "id") == 0) {
     X = n_idms(X, fix, format, &err);
+    if (err) blink = true;
     return true;
   }
   if (strcmp(input, "pr") == 0) {
     n_t rho, theta;
     n_p_r(Y, X, trig, &rho, &theta, &err);
+    if (err) blink = true;
     X = rho;
     Y = theta;
     return true;
@@ -159,6 +188,7 @@ static bool handle_fun(char *input) {
   if (strcmp(input, "rp") == 0) {
     n_t n1, n2;
     n_r_p(Y, X, trig, &n1, &n2, &err);
+    if (err) blink = true;
     X = n2;
     Y = n1;
     return true;
@@ -204,7 +234,11 @@ static bool handle_num(char *input) {
 }
 
 static bool is_numeric(char c) {
-  return (c == '.' || (c >= '0' && c <= '9') || c == '-' || c == ' ');
+  return strchr("0123456789.- ", c);
+}
+
+static bool is_char(char c) {
+  return is_numeric(c) || (c >= 'a' && c <= 'z') || strchr("/^*~+\n\x7f", c); 
 }
 
 int main(void) {
@@ -224,6 +258,13 @@ int main(void) {
     update_screen(input);
 
     char c = getch();
+
+    if (!is_char(c)) continue;
+
+    if (c == 'k') {
+      blink = false;
+      continue;
+    }
 
     if (c == DEL) {
       int input_len = strlen(input);
