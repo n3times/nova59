@@ -97,4 +97,11 @@ int  main() {
 
   printf("\n[R -> P]  x  y  =>  rho  theta\n");
   test_rect_polar();
+
+  double ds[] = { 0.1, 1.1, 10.1, 100.1, 1000.1 };
+  printf("\ndms\n");
+  for (int i = 0; i < N_ELEMS(ds); i++) {
+    n_t n = n_make(ds[i]);
+    p(n, n_idms(n, 9, N_FLOAT, NULL), N_ERR_NONE);
+  }
 }

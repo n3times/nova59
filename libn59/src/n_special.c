@@ -87,6 +87,14 @@ n_t n_idms(n_t n, int fix, n_format_t format, n_err_t *err) {
   double total_s = (d - h) * 3600;
   int m = (int) (total_s / 60);
   double s = total_s - m * 60;
+  if (s == 60) {
+    m += 1;
+    s = 0;
+  }
+  if (m == 60) {
+    h += 1;
+    m = 0;
+  }
 
   // Combine hours, minutes and seconds into result.
   double res = h + m / 100. + s / 10000;
@@ -105,15 +113,12 @@ void n_p_r(n_t n_rho, n_t n_theta, n_trig_t mode,
   NORMALIZE(n_rho);
   NORMALIZE(n_theta);
 
-  double d_rho = n_n2d(n_rho);
-  double d_theta = n_n2d(n_theta);
+  n_err_t err1, err2, err3, err4;
 
-  d_theta = convert_angle(d_theta, mode, N_RAD);
+  *n_x_out = n_times(n_rho, n_sin(n_theta, mode, &err1), &err2);
+  *n_y_out = n_times(n_rho, n_cos(n_theta, mode, &err3), &err4);
 
-  n_err_t err1, err2;
-  *n_x_out = n_d2n(d_rho * sin(d_theta), &err1);
-  *n_y_out = n_d2n(d_rho * cos(d_theta), &err2);
-  if (err) *err = max_error(err1, err2);
+  if (err) *err = max_error(max_error(err1, err2), max_error(err3, err4));
 }
 
 void n_r_p(n_t n_x, n_t n_y, n_trig_t mode,

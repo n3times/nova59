@@ -62,7 +62,7 @@ static void prepare_screen() {
   // Display and Input.
   mvprintw(8,  5, "D =");
   mvprintw(9,  5, "=======================================================");
-  mvprintw(10  5, "I =");
+  mvprintw(10, 5, "I =");
   mvprintw(11, 5, "=======================================================");
 }
 
