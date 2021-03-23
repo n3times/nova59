@@ -50,19 +50,17 @@ static void prepare_screen() {
   mvprintw(0, 5, "=======================================================");
   mvprintw(1, 5, "RPN-59");
   mvprintw(1, 43, "Fix");
-  mvprintw(2, 5, "=======================================================");
+  mvprintw(2, 5, "-------------------------------------------------------");
 
   // Stack.
   mvprintw(3, 5, "T =");
   mvprintw(4, 5, "Z =");
   mvprintw(5, 5, "Y =");
   mvprintw(6, 5, "X =");
-  mvprintw(7, 5, "=======================================================");
+  mvprintw(7, 5, "-------------------------------------------------------");
 
   // Display and Input.
-  mvprintw(8,  5, "D =");
-  mvprintw(9,  5, "=======================================================");
-  mvprintw(10, 5, "I =");
+  mvprintw(9, 5, "-------------------------------------------------------");
   mvprintw(11, 5, "=======================================================");
 }
 
@@ -93,12 +91,12 @@ static void update_screen(char *input) {
   n_err_t err;
   n_n2s(X, fix, format, str, &err);
   if (err) blink = true;
-  attron(A_BOLD);
+  attron(A_STANDOUT);
   if (blink) attron(A_BLINK);
-  mvprintw(8, 10, "%20s", str);
-  attroff(A_BOLD);
+  mvprintw(8, 16, "%14s ", str);
+  attroff(A_STANDOUT);
   if (blink) attroff(A_BLINK);
-  mvprintw(10, 10, "%[ %16s ]\r", input);
+  mvprintw(10, 13, "%16s%s\r", input, strlen(input) == 16 ? " " : "_");
 }
 
 static void push_X() {
