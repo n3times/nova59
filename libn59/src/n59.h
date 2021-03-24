@@ -70,7 +70,7 @@ typedef enum n_err_e {
   N_ERR_NONE = 0,   // No error.
   N_ERR_UNDERFLOW,  // Number too small, in absolute value, to be represented.
   N_ERR_OVERFLOW,   // Number too large, in absolute value, to be represented.
-  N_ERR_DOMAIN,     // Input not in the domain of the function.
+  N_ERR_DOMAIN      // Input not in the domain of the function.
 } n_err_t;
 
 

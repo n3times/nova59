@@ -4,8 +4,7 @@
 #include "n59.h"
 
 #include <assert.h>
-
-#define NULL 0
+#include <stddef.h>
 
 #define PI 3.14159265359
 
@@ -19,9 +18,9 @@
 #define NORMALIZE(n) n = normalize_number(n.mant, n.exp, NULL);
 
 /**
- * Given an arbitrary mantissa and exponent, not necessary within the ranges of
- * those of a TI-59 number, returns a TI-59 number, that is either N_0 or a
- * number whose mantissa has exactly 13 digits and whose exponent is in -99..99.
+ * Given an arbitrary mantissa and exponent, returns a normalized TI-59 number,
+ * that is either N_0 or a number whose mantissa has exactly 13 digits and whose
+ * exponent is in -99..99.
  */
 n_t normalize_number(long long mant, int exp, n_err_t *err);
 

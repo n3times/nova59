@@ -70,10 +70,10 @@ n_t n_minus(n_t n1, n_t n2, n_err_t *err) {
  * The 13 digits of the result are guaranteed to be accurate (with no rounding
  * up).
  *
- * TI-59 appears to follow the same strategy most of the time. If all the digits
- * of both numbers are significant, TI-59 appears to truncate the last digit of
- * at least one of the numbers, before multiplication. In this case, TI-59 gets
- * results slightly less accurate than this method.
+ * TI-59 appears to follow the same strategy most of the time. But if all the
+ * digits of both numbers are significant, TI-59 appears to truncate the last
+ * digit of at least one of the numbers, before multiplication. In this case,
+ * TI-59 gets results slightly less accurate than this method.
  */
 n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   NORMALIZE(n1);
@@ -87,7 +87,7 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   long long m2 = ABS(n2.mant);
 
   // Perform double precision multiplication. The first 13 or 14 digits will be
-  // stored in l and the last 12 in r.
+  // stored in 'l' and the last 12 in 'r'.
   long long f = 1000000LL;
   long long l1 = m1 / f;
   long long r1 = m1 % f;
@@ -100,7 +100,7 @@ n_t n_times(n_t n1, n_t n2, n_err_t *err) {
   l = l + m / f + r / f / f;
   r = r % (f * f);
 
-  // Normalize. We could consider r and possibly round up but TI-59 does not
+  // Normalize. We could consider 'r' and possibly round up but TI-59 does not
   // seem to do that.
   int exp = n1.exp + n2.exp;
   if (l >= 10000000000000LL) {  // 14 digits.
