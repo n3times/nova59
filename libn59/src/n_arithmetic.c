@@ -211,5 +211,11 @@ n_t n_ipow(n_t n1, n_t n2, n_err_t *err) {
     return N_INF;
   }
 
-  return n_pow(n1, n_1_x(n2, NULL), err);
+  if (d1 == 1) return N_1;
+
+  n_err_t err1, err2;
+  n_t res = n_pow(n1, n_1_x(n2, &err1), &err2);
+  if (err) *err = max_error(err1, err2);
+
+  return res;
 }

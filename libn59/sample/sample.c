@@ -53,10 +53,10 @@ static void prepare_screen() {
   mvprintw(2, 5, "-------------------------------------------------------");
 
   // Stack.
-  mvprintw(3, 5, "T =");
-  mvprintw(4, 5, "Z =");
-  mvprintw(5, 5, "Y =");
-  mvprintw(6, 5, "X =");
+  mvprintw(3, 5, "T");
+  mvprintw(4, 5, "Z");
+  mvprintw(5, 5, "Y");
+  mvprintw(6, 5, "X");
   mvprintw(7, 5, "-------------------------------------------------------");
 
   // Display and Input.
@@ -297,8 +297,6 @@ int main(void) {
       continue;
     }
 
-    if (strlen(input) >= LINE_LEN) { continue; }
-
     if (state == PARSE_NUM && !is_numeric(c)) {
       if (handle_num(input)) {
         input[0] = 0;
@@ -307,6 +305,8 @@ int main(void) {
         continue;
       }
     }
+
+    if (strlen(input) >= LINE_LEN) { continue; }
 
     int input_len = strlen(input);
     input[input_len] = c;
