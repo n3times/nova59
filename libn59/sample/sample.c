@@ -1,21 +1,19 @@
 /**
- * Command line RPN calculator based on libn59.
+ * RPN-59: Command Line RPN calculator based on libn59.
  *
  * Operations - first 2 characters of:
- *             + - / * ^ i^
- *             chs abs int frac
- *             xx ii v ln log iln ilog
- *             sin cos tan asin acos atan
- *             dms idms pr rp
- * Formats: flt sci eng f0-f9 deg rad grd
+ *     + - / * ^ i^
+ *     chs abs int frac
+ *     xx ii v ln log exp pow
+ *     sin cos tan asin acos atan
+ *     dms idms pr rp
+ * Formats: float sci eng f0-f9 deg rad grad
  * Stack:   xy
  * Numbers: 0-9 . ~
  *
- * UI shows input, number stack, modes.
  * Input can be edited with del key.
  *
- * Example: 2 ^ 3 - sin(4)
- *          2 newline 3 ^ 4 sin -
+ * Example: to compute '2 ^ 3 - sin(4)', type '2 nl 3 ^ 4 sin -'.
  */
 
 #include "n59.h"
@@ -29,74 +27,55 @@
 #define LINE_LEN 16
 #define DEL 127
 
-/** Modes. */
-static n_format_t format = N_FLOAT;
-static int fix = 9;
-static n_trig_t trig = N_DEG;
-
-/** Stack. */
+/** State. */
 static n_t X = { 0, 0 };
 static n_t Y = { 0, 0 };
 static n_t Z = { 0, 0 };
 static n_t T = { 0, 0 };
-
+static int fix = 9;
+static n_format_t format = N_FLOAT;
+static n_trig_t trig = N_DEG;
 static bool blink = false;
+static char input[100];
+
+static char *p_n(n_t n, char *str) {
+  n_n2s(n, 9, N_FLOAT, str, NULL);
+  return str;
+}
 
 static void prepare_screen() {
   initscr();
   noecho();
-
-  // Modes.
-  mvprintw(0, 5, "=======================================================");
-  mvprintw(1, 5, "RPN-59");
-  mvprintw(1, 43, "Fix");
-  mvprintw(2, 5, "-------------------------------------------------------");
-
-  // Stack.
-  mvprintw(3, 5, "T");
-  mvprintw(4, 5, "Z");
-  mvprintw(5, 5, "Y");
-  mvprintw(6, 5, "X");
-  mvprintw(7, 5, "-------------------------------------------------------");
-
-  // Display and Input.
-  mvprintw(9, 5, "-------------------------------------------------------");
-  mvprintw(11, 5, "=======================================================");
 }
 
-static void update_screen(char *input) {
-  // Modes.
-  mvprintw(1, 47, "%d", fix);
-  mvprintw(
-    1, 51, "%s", format == N_FLOAT ? "FLT" : format == N_SCI ? "SCI" : "ENG");
-  mvprintw(
-    1, 57, "%s", trig == N_RAD ? "RAD" : trig == N_DEG ? "DEG" : "GRD");
-
-  // Stack.
-  char str[20];
-  n_n2s(T, 9, N_FLOAT, str, NULL);
-  mvprintw(3, 10, "%20s", str);
-  mvprintw(3, 40, "%20s", n_print(T, str));
-  n_n2s(Z, 9, N_FLOAT, str, NULL);
-  mvprintw(4, 10, "%20s", str);
-  mvprintw(4, 40, "%20s", n_print(Z, str));
-  n_n2s(Y, 9, N_FLOAT, str, NULL);
-  mvprintw(5, 10, "%20s", str);
-  mvprintw(5, 40, "%20s", n_print(Y, str));
-  n_n2s(X, 9, N_FLOAT, str, NULL);
-  mvprintw(6, 10, "%20s", str);
-  mvprintw(6, 40, "%20s", n_print(X, str));
-
-  // Display and Input.
+static void update_screen() {
+  char str1[20];
+  char str2[20];
   n_err_t err;
-  n_n2s(X, fix, format, str, &err);
-  if (err) blink = true;
-  attron(A_STANDOUT);
-  if (blink) attron(A_BLINK);
-  mvprintw(8, 16, "%14s ", str);
-  attroff(A_STANDOUT);
-  if (blink) attroff(A_BLINK);
+
+  mvprintw(0,  5, "=======================================================");
+  mvprintw(1,  5, "RPN-59");
+  mvprintw(1, 43, "Fix %d   %s   %s",
+                   fix,
+                   format == N_FLOAT ? "FLT" : format == N_SCI ? "SCI" : "ENG",
+                   trig == N_RAD ? "RAD" : trig == N_DEG ? "DEG" : "GRD");
+  mvprintw(2,  5, "-------------------------------------------------------");
+  mvprintw(3,  5, "T    %20s   %20s", p_n(T, str1), n_print(T, str2));
+  mvprintw(4,  5, "Z    %20s   %20s", p_n(Z, str1), n_print(Z, str2));
+  mvprintw(5,  5, "Y    %20s   %20s", p_n(Y, str1), n_print(Y, str2));
+  mvprintw(6,  5, "X    %20s   %20s", p_n(X, str1), n_print(X, str2));
+  mvprintw(7,  5, "-------------------------------------------------------");
+
+  // Display.
+  n_n2s(X, fix, format, str1, &err);
+  int attr = A_STANDOUT | (err ? A_BLINK : 0);
+  attron(attr);
+  mvprintw(8, 16, "%14s ", str1);
+  attroff(attr);
+
+  mvprintw(9,  5, "-------------------------------------------------------");
   mvprintw(10, 13, "%16s%s\r", input, strlen(input) == 16 ? " " : "_");
+  mvprintw(11, 5, "=======================================================");
 }
 
 static void push_X() {
@@ -236,7 +215,7 @@ static bool is_numeric(char c) {
 }
 
 static bool is_char(char c) {
-  return is_numeric(c) || (c >= 'a' && c <= 'z') || strchr("/^*~+\n\x7f", c); 
+  return is_numeric(c) || (c >= 'a' && c <= 'z') || strchr("/^*~+\n\x7f", c);
 }
 
 int main(void) {
@@ -247,13 +226,12 @@ int main(void) {
   } parse_state_t;
 
   parse_state_t state = PARSE_START;
-  char input[100];
   input[0] = 0;
 
   prepare_screen();
 
   while (true) {
-    update_screen(input);
+    update_screen();
 
     char c = getch();
 
@@ -306,7 +284,7 @@ int main(void) {
       }
     }
 
-    if (strlen(input) >= LINE_LEN) { continue; }
+    if (strlen(input) >= LINE_LEN) continue;
 
     int input_len = strlen(input);
     input[input_len] = c;
