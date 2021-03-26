@@ -1,37 +1,43 @@
 /**
- * RPN-59: Command Line RPN calculator based on libn59.
+ * RPN-59.
  *
- * Operations - first 2 characters of:
- *     + - / * ^ i^
- *     chs abs int frac
- *     xx ii v ln log exp pow
- *     sin cos tan asin acos atan
- *     dms idms pr rp
- * Formats: float sci eng f0-f9 deg rad grad
- * Stack:   xy
- * Numbers: 0-9 . ~
+ * Command line RPN calculator based on libn59.
  *
- * Input can be edited with del key.
+ * Commands are 1 or 2 letters, typically the beginning of the name of the
+ * function or operator.
  *
- * Example: to compute '2 ^ 3 - sin(4)', type '2 nl 3 ^ 4 sin -'.
+ * Math: + ~ (minus) / * ^ i^ (root extraction)
+ *       ch's ab's in't fr'ac
+ *       xx (x^2) ii (1/x) vv (square root)
+ *       ln lo'g ex'p po'w
+ *       si'n co's ta'n as'in ac'os at'an
+ *       dm's id'ms pr (polar->rect) rp
+ * Formats: fl'oat sc'i en'g f0-f9 de'g ra'd gr'ad
+ * Stack: xy
+ *
+ * Numbers are entered using characters in "0123456789.- ".
+ *
+ * Example: to compute '2 ^ 3 - sin(4)', type '2 newline 3 ^ 4 si -'.
  */
 
 #include "n59.h"
 
 #include <assert.h>
+#include <ctype.h>
 #include <curses.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #define LINE_LEN 16
+
 #define DEL 127
 
 /** State. */
-static n_t X = { 0, 0 };
-static n_t Y = { 0, 0 };
-static n_t Z = { 0, 0 };
-static n_t T = { 0, 0 };
+static n_t X;
+static n_t Y;
+static n_t Z;
+static n_t T;
 static int fix = 9;
 static n_format_t format = N_FLOAT;
 static n_trig_t trig = N_DEG;
@@ -68,7 +74,8 @@ static void update_screen() {
 
   // Display.
   n_n2s(X, fix, format, str1, &err);
-  int attr = A_STANDOUT | (err ? A_BLINK : 0);
+  if (err) blink = true;
+  int attr = A_STANDOUT | (blink ? A_BLINK : 0);
   attron(attr);
   mvprintw(8, 16, "%14s ", str1);
   attroff(attr);
@@ -104,7 +111,11 @@ static void eval_trig(n_t (*fun)(n_t, n_trig_t, n_err_t *)) {
   if (err) blink = true;
 }
 
-/** Returns true if 'input' was handled. */
+/**
+ * Computes function if 'input' is the name of a function.
+ *
+ * Returns true if 'input' is the name of a function.
+ */
 static bool handle_fun(char *input) {
   assert(input != NULL);
 
@@ -126,7 +137,7 @@ static bool handle_fun(char *input) {
 
   if (strcmp(input, "xx") == 0) { eval_fun(n_square); return true; }
   if (strcmp(input, "ii") == 0) { eval_fun(n_1_x);    return true; }
-  if (strcmp(input, "v")  == 0) { eval_fun(n_sqrt);   return true; }
+  if (strcmp(input, "vv") == 0) { eval_fun(n_sqrt);   return true; }
   if (strcmp(input, "ln") == 0) { eval_fun(n_ln);     return true; }
   if (strcmp(input, "lo") == 0) { eval_fun(n_log);    return true; }
   if (strcmp(input, "ex") == 0) { eval_fun(n_exp);    return true; }
@@ -194,20 +205,23 @@ static bool handle_fun(char *input) {
   return false;
 }
 
-/** Returns true if 'input' was handled. */
-static bool handle_num(char *input) {
+/**
+ * Pushes input into the stack if it's a number.
+ *
+ * Returns true if 'input' is a number, false otherwise.
+ */
+static bool handle_number(char *input) {
   n_err_t err;
   n_t n = n_s2n(input, &err);
 
-  if (err != N_ERR_DOMAIN) {
-    T = Z;
-    Z = Y;
-    Y = X;
+  bool is_a_num = err != N_ERR_DOMAIN;
+
+  if (is_a_num) {
+    push_X();
     X = n;
-    return true;
   }
 
-  return false;
+  return is_a_num;
 }
 
 static bool is_numeric(char c) {
@@ -235,12 +249,10 @@ int main(void) {
 
     char c = getch();
 
-    if (!is_char(c)) continue;
+    blink = false;
+    c = tolower(c);
 
-    if (c == 'k') {
-      blink = false;
-      continue;
-    }
+    if (!is_char(c)) continue;
 
     if (c == DEL) {
       int input_len = strlen(input);
@@ -266,7 +278,7 @@ int main(void) {
         case PARSE_FUN:
           break;
         case PARSE_NUM:
-          if (handle_num(input)) {
+          if (handle_number(input)) {
             state = PARSE_START;
             input[0] = 0;
           }
@@ -276,7 +288,7 @@ int main(void) {
     }
 
     if (state == PARSE_NUM && !is_numeric(c)) {
-      if (handle_num(input)) {
+      if (handle_number(input)) {
         input[0] = 0;
         state = PARSE_FUN;
       } else {
