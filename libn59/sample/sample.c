@@ -46,6 +46,13 @@ static bool blink = false;
 static char input[INPUT_MAX_LEN];
 static char last_command[COMMAND_MAX_LEN];
 
+
+/******************************************************************************
+ *
+ *  SCREEN HANDLING.
+ *
+ ******************************************************************************/
+
 static char *p_n(n_t n, char *str) {
   n_n2s(n, 9, N_FLOAT, str, NULL);
   return str;
@@ -87,12 +94,42 @@ static void update_screen() {
                    last_command);
 }
 
+
+/******************************************************************************
+ *
+ *  HELPERS.
+ *
+ ******************************************************************************/
+
 static void stack_push(n_t n) {
   T = Z;
   Z = Y;
   Y = X;
   X = n;
 }
+
+static bool is_numeric_char(char c) {
+  return strchr("0123456789.- ", c);
+}
+
+static bool is_command_char(char c) {
+  return (c >= 'a' && c <= 'z') || strchr("+~*/^", c);
+}
+
+static bool is_edit_char(char c) {
+  return c == '\n' || c == DEL;
+}
+
+static bool is_input_char(char c) {
+  return is_numeric_char(c) || is_command_char(c) || is_edit_char(c);
+}
+
+
+/******************************************************************************
+ *
+ *  COMMANDS.
+ *
+ ******************************************************************************/
 
 static void eval_arithmetic_op(n_t (*opr)(n_t, n_t, n_err_t *)) {
   n_err_t err;
@@ -207,38 +244,16 @@ static bool handle_command(char *name) {
   return false;
 }
 
-/**
- * Pushes given number into the stack.
+
+/******************************************************************************
  *
- * Returns false if 'n_str' does not represent a number.
- */
-static bool handle_number(char *n_str) {
-  n_err_t err;
-  n_t n = n_s2n(n_str, &err);
-
-  bool is_a_num = err != N_ERR_DOMAIN;
-
-  if (is_a_num) {
-    stack_push(n);
-  }
-
-  return is_a_num;
-}
-
-static bool is_numeric_char(char c) {
-  return strchr("0123456789.- ", c);
-}
-
-static bool is_command_char(char c) {
-  return (c >= 'a' && c <= 'z') || strchr("+~*/^", c);
-}
-
-static bool is_input_char(char c) {
-  return is_numeric_char(c) || is_command_char(c) || c == '\n' || c == DEL;
-}
+ *  MAIN.
+ *
+ ******************************************************************************/
 
 int main(void) {
   bool is_number_edit = false;
+
   input[0] = 0;
   last_command[0] = 0;
 
@@ -274,7 +289,11 @@ int main(void) {
 
     // Handle number.
     if (is_number_edit && !is_numeric_char(c)) {
-      if (handle_number(input)) {
+      n_err_t err;
+      n_t n = n_s2n(input, &err);
+
+      if (err != N_ERR_DOMAIN) {
+        stack_push(n);
         is_number_edit = false;
         input[0] = 0;
       }
