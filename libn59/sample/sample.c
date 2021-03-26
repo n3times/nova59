@@ -112,60 +112,60 @@ static void eval_trig(n_t (*fun)(n_t, n_trig_t, n_err_t *)) {
 }
 
 /**
- * Computes function if 'input' is the name of a function.
+ * Executes command of given name.
  *
- * Returns true if 'input' is the name of a function.
+ * Returns false if 'cmd_name' is not the name of a command.
  */
-static bool handle_fun(char *input) {
-  assert(input != NULL);
+static bool handle_command(char *cmd_name) {
+  assert(cmd_name != NULL);
 
   n_err_t err = N_ERR_NONE;
 
-  if (strcmp(input, "de") == 0) { trig = N_DEG;  return true; }
-  if (strcmp(input, "ra") == 0) { trig = N_RAD;  return true; }
-  if (strcmp(input, "gr") == 0) { trig = N_GRAD; return true; }
+  if (strcmp(cmd_name, "de") == 0) { trig = N_DEG;  return true; }
+  if (strcmp(cmd_name, "ra") == 0) { trig = N_RAD;  return true; }
+  if (strcmp(cmd_name, "gr") == 0) { trig = N_GRAD; return true; }
 
-  if (strcmp(input, "fl") == 0) { format = N_FLOAT; return true; }
-  if (strcmp(input, "en") == 0) { format = N_ENG;   return true; }
-  if (strcmp(input, "sc") == 0) { format = N_SCI;   return true; }
+  if (strcmp(cmd_name, "fl") == 0) { format = N_FLOAT; return true; }
+  if (strcmp(cmd_name, "en") == 0) { format = N_ENG;   return true; }
+  if (strcmp(cmd_name, "sc") == 0) { format = N_SCI;   return true; }
 
-  if (input[0] == 'f' && input[1] >= '0' && input[1] <= '9' &&
-      input[2] == '\0') {
-    fix = input[1] - '0';
+  if (cmd_name[0] == 'f' && cmd_name[1] >= '0' && cmd_name[1] <= '9' &&
+      cmd_name[2] == '\0') {
+    fix = cmd_name[1] - '0';
     return true;
   }
 
-  if (strcmp(input, "xx") == 0) { eval_fun(n_square); return true; }
-  if (strcmp(input, "ii") == 0) { eval_fun(n_1_x);    return true; }
-  if (strcmp(input, "vv") == 0) { eval_fun(n_sqrt);   return true; }
-  if (strcmp(input, "ln") == 0) { eval_fun(n_ln);     return true; }
-  if (strcmp(input, "lo") == 0) { eval_fun(n_log);    return true; }
-  if (strcmp(input, "ex") == 0) { eval_fun(n_exp);    return true; }
-  if (strcmp(input, "po") == 0) { eval_fun(n_pow10);  return true; }
+  if (strcmp(cmd_name, "xx") == 0) { eval_fun(n_square); return true; }
+  if (strcmp(cmd_name, "ii") == 0) { eval_fun(n_1_x);    return true; }
+  if (strcmp(cmd_name, "vv") == 0) { eval_fun(n_sqrt);   return true; }
+  if (strcmp(cmd_name, "ln") == 0) { eval_fun(n_ln);     return true; }
+  if (strcmp(cmd_name, "lo") == 0) { eval_fun(n_log);    return true; }
+  if (strcmp(cmd_name, "ex") == 0) { eval_fun(n_exp);    return true; }
+  if (strcmp(cmd_name, "po") == 0) { eval_fun(n_pow10);  return true; }
 
-  if (strcmp(input, "si") == 0) { eval_trig(n_sin);  return true; }
-  if (strcmp(input, "co") == 0) { eval_trig(n_cos);  return true; }
-  if (strcmp(input, "ta") == 0) { eval_trig(n_tan);  return true; }
-  if (strcmp(input, "as") == 0) { eval_trig(n_asin); return true; }
-  if (strcmp(input, "ac") == 0) { eval_trig(n_acos); return true; }
-  if (strcmp(input, "at") == 0) { eval_trig(n_atan); return true; }
+  if (strcmp(cmd_name, "si") == 0) { eval_trig(n_sin);  return true; }
+  if (strcmp(cmd_name, "co") == 0) { eval_trig(n_cos);  return true; }
+  if (strcmp(cmd_name, "ta") == 0) { eval_trig(n_tan);  return true; }
+  if (strcmp(cmd_name, "as") == 0) { eval_trig(n_asin); return true; }
+  if (strcmp(cmd_name, "ac") == 0) { eval_trig(n_acos); return true; }
+  if (strcmp(cmd_name, "at") == 0) { eval_trig(n_atan); return true; }
 
-  if (strcmp(input, "ch") == 0) { X = n_chs(X);  return true; }
-  if (strcmp(input, "in") == 0) { X = n_int(X);  return true; }
-  if (strcmp(input, "fr") == 0) { X = n_frac(X); return true; }
-  if (strcmp(input, "ab") == 0) { X = n_abs(X);  return true; }
+  if (strcmp(cmd_name, "ch") == 0) { X = n_chs(X);  return true; }
+  if (strcmp(cmd_name, "in") == 0) { X = n_int(X);  return true; }
+  if (strcmp(cmd_name, "fr") == 0) { X = n_frac(X); return true; }
+  if (strcmp(cmd_name, "ab") == 0) { X = n_abs(X);  return true; }
 
-  if (strcmp(input, "dm") == 0)  {
+  if (strcmp(cmd_name, "dm") == 0)  {
     X = n_dms(X, fix, format, &err);
     if (err) blink = true;
     return true;
   }
-  if (strcmp(input, "id") == 0) {
+  if (strcmp(cmd_name, "id") == 0) {
     X = n_idms(X, fix, format, &err);
     if (err) blink = true;
     return true;
   }
-  if (strcmp(input, "pr") == 0) {
+  if (strcmp(cmd_name, "pr") == 0) {
     n_t rho, theta;
     n_p_r(Y, X, trig, &rho, &theta, &err);
     if (err) blink = true;
@@ -173,7 +173,7 @@ static bool handle_fun(char *input) {
     Y = theta;
     return true;
   }
-  if (strcmp(input, "rp") == 0) {
+  if (strcmp(cmd_name, "rp") == 0) {
     n_t n1, n2;
     n_r_p(Y, X, trig, &n1, &n2, &err);
     if (err) blink = true;
@@ -182,20 +182,20 @@ static bool handle_fun(char *input) {
     return true;
   }
 
-  if (strcmp(input, "+")  == 0) { eval_arithmetic_op(n_plus);  return true; }
-  if (strcmp(input, "~")  == 0) { eval_arithmetic_op(n_minus); return true; }
-  if (strcmp(input, "*")  == 0) { eval_arithmetic_op(n_times); return true; }
-  if (strcmp(input, "/")  == 0) { eval_arithmetic_op(n_div);   return true; }
-  if (strcmp(input, "^")  == 0) { eval_arithmetic_op(n_pow);   return true; }
-  if (strcmp(input, "i^") == 0) { eval_arithmetic_op(n_ipow);  return true; }
+  if (strcmp(cmd_name, "+")  == 0) { eval_arithmetic_op(n_plus);  return true; }
+  if (strcmp(cmd_name, "~")  == 0) { eval_arithmetic_op(n_minus); return true; }
+  if (strcmp(cmd_name, "*")  == 0) { eval_arithmetic_op(n_times); return true; }
+  if (strcmp(cmd_name, "/")  == 0) { eval_arithmetic_op(n_div);   return true; }
+  if (strcmp(cmd_name, "^")  == 0) { eval_arithmetic_op(n_pow);   return true; }
+  if (strcmp(cmd_name, "i^") == 0) { eval_arithmetic_op(n_ipow);  return true; }
 
-  if (strcmp(input, "pi") == 0) {
+  if (strcmp(cmd_name, "pi") == 0) {
     push_X();
     X = N_PI;
     return true;
   }
 
-  if (strcmp(input, "xy") == 0) {
+  if (strcmp(cmd_name, "xy") == 0) {
     n_t tmp = X;
     X = Y;
     Y = tmp;
@@ -206,13 +206,13 @@ static bool handle_fun(char *input) {
 }
 
 /**
- * Pushes input into the stack if it's a number.
+ * Pushes given number into the stack.
  *
- * Returns true if 'input' is a number, false otherwise.
+ * Returns false if 'number_str' does not represent a number.
  */
-static bool handle_number(char *input) {
+static bool handle_number(char *number_str) {
   n_err_t err;
-  n_t n = n_s2n(input, &err);
+  n_t n = n_s2n(number_str, &err);
 
   bool is_a_num = err != N_ERR_DOMAIN;
 
@@ -256,8 +256,8 @@ int main(void) {
 
     if (c == DEL) {
       int input_len = strlen(input);
-      if (input_len > 0) { input[--input_len] = 0; }
-      if (input_len== 0) { state = PARSE_START; }
+      if (input_len > 0) input[--input_len] = 0;
+      if (input_len== 0) state = PARSE_START;
       continue;
     }
 
@@ -287,6 +287,7 @@ int main(void) {
       continue;
     }
 
+    // Handle number.
     if (state == PARSE_NUM && !is_numeric(c)) {
       if (handle_number(input)) {
         input[0] = 0;
@@ -296,12 +297,14 @@ int main(void) {
       }
     }
 
+    // Append character if possible.
     if (strlen(input) >= LINE_LEN) continue;
-
     int input_len = strlen(input);
     input[input_len] = c;
     input[input_len + 1] = 0;
-    if (state == PARSE_FUN && handle_fun(input)) {
+
+    // Handle command.
+    if (state == PARSE_FUN && handle_command(input)) {
       state = PARSE_START;
       input[0] = 0;
     }
