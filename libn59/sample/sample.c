@@ -225,22 +225,20 @@ static bool handle_number(char *n_str) {
   return is_a_num;
 }
 
-static bool is_numeric(char c) {
+static bool is_numeric_char(char c) {
   return strchr("0123456789.- ", c);
 }
 
+static bool is_command_char(char c) {
+  return (c >= 'a' && c <= 'z') || strchr("+~*/^", c);
+}
+
 static bool is_input_char(char c) {
-  return is_numeric(c) || (c >= 'a' && c <= 'z') || strchr("+~*/^\n\x7f", c);
+  return is_numeric_char(c) || is_command_char(c) || c == '\n' || c == DEL;
 }
 
 int main(void) {
-  typedef enum parse_state_e {
-    PARSE_START,
-    PARSE_NUM,
-    PARSE_FUN,
-  } parse_state_t;
-
-  parse_state_t state = PARSE_START;
+  bool is_number_edit = false;
   input[0] = 0;
   last_command[0] = 0;
 
@@ -259,41 +257,31 @@ int main(void) {
     if (c == DEL) {
       int input_len = strlen(input);
       if (input_len > 0) input[--input_len] = 0;
-      if (input_len== 0) state = PARSE_START;
+      if (input_len == 0) is_number_edit = false;
       continue;
     }
 
-    if (state == PARSE_START) {
+    if (input[0] == '\0') {
       if (c == ' ') continue;
-      if (is_numeric(c)) {
-        state = PARSE_NUM;
-      } else if (c != '\n') {
-        state = PARSE_FUN;
+      if (c == '\n') {
+        stack_push(X);
+        continue;
       }
-    }
-
-    if (c == '\n') {
-      if (state == PARSE_START) stack_push(X);
-      if (state == PARSE_NUM) {
-        if (handle_number(input)) {
-          state = PARSE_START;
-          input[0] = 0;
-        }
+      if (is_numeric_char(c)) {
+        is_number_edit = true;
       }
-      continue;
     }
 
     // Handle number.
-    if (state == PARSE_NUM && !is_numeric(c)) {
+    if (is_number_edit && !is_numeric_char(c)) {
       if (handle_number(input)) {
+        is_number_edit = false;
         input[0] = 0;
-        state = PARSE_FUN;
-      } else {
-        continue;
       }
     }
 
     // Append character if possible.
+    if (c == '\n') continue;
     int input_len = strlen(input);
     if (input_len >= INPUT_MAX_LEN) continue;
     input[input_len] = c;
@@ -301,7 +289,7 @@ int main(void) {
 
     // Handle command.
     if (handle_command(input)) {
-      state = PARSE_START;
+      is_number_edit = false;
       strcpy(last_command, input);
       input[0] = 0;
     }
