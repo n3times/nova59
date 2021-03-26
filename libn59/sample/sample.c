@@ -49,14 +49,64 @@ static char last_command[COMMAND_MAX_LEN];
 
 /******************************************************************************
  *
- *  SCREEN HANDLING.
+ *  HELPERS.
  *
  ******************************************************************************/
+
+static void stack_push(n_t n) {
+  T = Z;
+  Z = Y;
+  Y = X;
+  X = n;
+}
+
+static bool is_numeric_char(char c) {
+  return strchr("0123456789.- ", c);
+}
+
+static bool is_command_char(char c) {
+  return (c >= 'a' && c <= 'z') || strchr("+~*/^", c);
+}
+
+static bool is_edit_char(char c) {
+  return c == '\n' || c == DEL;
+}
+
+static bool is_input_char(char c) {
+  return is_numeric_char(c) || is_command_char(c) || is_edit_char(c);
+}
+
+static void eval_arithmetic_op(n_t (*opr)(n_t, n_t, n_err_t *)) {
+  n_err_t err;
+  X = opr(Y, X, &err);
+  Y = Z;
+  Z = T;
+  if (err) blink = true;
+}
+
+static void eval_fun(n_t (*fun)(n_t, n_err_t *)) {
+  n_err_t err;
+  X = fun(X, &err);
+  if (err) blink = true;
+}
+
+static void eval_trig(n_t (*fun)(n_t, n_trig_t, n_err_t *)) {
+  n_err_t err;
+  X = fun(X, trig, &err);
+  if (err) blink = true;
+}
 
 static char *p_n(n_t n, char *str) {
   n_n2s(n, 9, N_FLOAT, str, NULL);
   return str;
 }
+
+
+/******************************************************************************
+ *
+ *  SCREEN HANDLING.
+ *
+ ******************************************************************************/
 
 static void prepare_screen() {
   initscr();
@@ -97,59 +147,9 @@ static void update_screen() {
 
 /******************************************************************************
  *
- *  HELPERS.
- *
- ******************************************************************************/
-
-static void stack_push(n_t n) {
-  T = Z;
-  Z = Y;
-  Y = X;
-  X = n;
-}
-
-static bool is_numeric_char(char c) {
-  return strchr("0123456789.- ", c);
-}
-
-static bool is_command_char(char c) {
-  return (c >= 'a' && c <= 'z') || strchr("+~*/^", c);
-}
-
-static bool is_edit_char(char c) {
-  return c == '\n' || c == DEL;
-}
-
-static bool is_input_char(char c) {
-  return is_numeric_char(c) || is_command_char(c) || is_edit_char(c);
-}
-
-
-/******************************************************************************
- *
  *  COMMANDS.
  *
  ******************************************************************************/
-
-static void eval_arithmetic_op(n_t (*opr)(n_t, n_t, n_err_t *)) {
-  n_err_t err;
-  X = opr(Y, X, &err);
-  Y = Z;
-  Z = T;
-  if (err) blink = true;
-}
-
-static void eval_fun(n_t (*fun)(n_t, n_err_t *)) {
-  n_err_t err;
-  X = fun(X, &err);
-  if (err) blink = true;
-}
-
-static void eval_trig(n_t (*fun)(n_t, n_trig_t, n_err_t *)) {
-  n_err_t err;
-  X = fun(X, trig, &err);
-  if (err) blink = true;
-}
 
 /**
  * Executes command of given name.
