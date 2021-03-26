@@ -8,4 +8,6 @@ Operations supported:
 
 Build library: make
 Build library in debug mode: make debug
+
 Run tests: ./runTests
+Run app: ./runApp
