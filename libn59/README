@@ -1,5 +1,8 @@
 C library that supports common operations on TI-59 numbers.
 
+This library can be used to help implement a TI-59 emulator or, more generally,
+a scientific calculator.
+
 Operations supported:
 - arithmetic operators
 - math functions

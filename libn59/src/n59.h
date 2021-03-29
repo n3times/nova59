@@ -18,6 +18,13 @@
 
 #include <stdbool.h>
 
+#define LIBN59_MAJOR_VERSION 1
+#define LIBN59_MINOR_VERSION 0
+#define LIBN59_REVISION 0
+
+#define LIBN59_CHECK_VERSION(major, minor) \
+    ((major == LIBN59_MAJOR_VERSION) && (minor <= LIBN59_MINOR_VERSION))
+
 /** The size of the string that needs to be allocated when calling n_n2s. */
 #define N_N2S_MAX_SIZE 14
 
