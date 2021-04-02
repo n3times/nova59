@@ -31,6 +31,12 @@ typedef struct s_program_s {
   int step_count;
 } s_program_t;
 
+typedef enum s_opd_type_e {
+  OPD_TYPE_D,    // 1-digit operand. 'Fix' for example.
+  OPD_TYPE_DD,   // 2-digit operand. 'STO' for example.
+  OPD_TYPE_DDD,  // 3-digit operand. 'GTO' for example.
+} s_opd_type_t;
+
 typedef bool s_err_t;
 
 
@@ -41,49 +47,42 @@ typedef bool s_err_t;
  ******************************************************************************/
 
 /**
- * Returns an integer that can be used as param for an operation that takes a
- * 1-digit param such as 'Fix'.
+ * Returns the actual operand of an indirect operator.
  *
- * This can be used to resolve indirect operations such as 'Fix Ind' that use
- * the value of regs[i] as parameter.
+ * For example s_param_get_ind_operand(OPD_TYPE_DDD, regs, 59, &err) returns the
+ * actual address of 'GTO Ind 59' or 'SBR Ind 59'.
  *
- * If regs[i] >= 0, returns the last digit of the integral part of regs[i]. If
- * regs[i] < 0, returns 0.
+ * A negative regs[i] is interpreted as '0' and the fractional part of regs[i]
+ * is discarded.
+ *
+ * If opd_type is OPD_TYPE_D, returns regs[i] % 10.
+ *
+ * Sets err if 'i' is out of bounds or regs[i] is too large for the param type.
  */
-int s_param_get_ind_d(n_t *regs, int i, s_err_t *err);
+int s_param_get_ind_operand(
+    s_opd_type_t opd_type, n_t *regs, int i, s_err_t *err);
 
 /**
- * Returns an integer that can be used as param for an operation that takes a
- * 2-digit param such as 'STO'.
+ * Returns the address immediately after a given label, within a given program.
+ * This can be used to determine the actual operand of an address operator such
+ * as GTO.
  *
- * This can be used to resolve indirect operations such as 'STO Ind' that use
- * the value of regs[i] as parameter.
+ * For example s_param_get_label_address(11, program, &err) returns '59' for the
+ * following program:
  *
- * Only the integral part of regs[i] is considered. If regs[i] < 0, returns 0.
- * If regs[i] >= 100, sets error.
+ *   056  ..  ...
+ *   057  76  Lbl
+ *   058  11  A
+ *   059  ..  ...
+ *
+ * and therefore 'GTO A' is equivalent to 'GTO 059'.
+ *
+ * If the same label appears multiple times in the program, only the first
+ * one is considered.
+ *
+ * Sets err if there is no such label.
  */
-int s_param_get_ind_dd(n_t *regs, int i, s_err_t *err);
-
-/**
- * Returns an integer that can be used as param for an operation that takes a
- * 3-digit param such as 'GTO'.
- *
- * This can be used to resolve indirect operations such as 'GTO Ind' that use
- * the value of regs[i] as parameter.
- *
- * Only the integral part of regs[i] is considered. If regs[i] < 0, returns 0.
- * If regs[i] >= 1000, sets error.
- */
-int s_param_get_ind_ddd(n_t *regs, int i, s_err_t *err);
-
-/**
- * Returns the location just after a given label, within a given program.
- *
- * Sets error if there is no such label.
- *
- * Note that return value may be 1000 if label is at the very end of program.
- */
-int s_param_get_label_address(int label, s_program_t *program, s_err_t *err);
+int s_param_get_label_address(char label, s_program_t *program, s_err_t *err);
 
 
 /******************************************************************************
