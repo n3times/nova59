@@ -68,7 +68,7 @@ Code  |	Name	Mnemo	O@Open	ArgRUN	iArgRUN	EVAL	Comments
 83    |	Go*	go*	vvc	DD	-	=
 84    |	Op*	op*	vvc	DD	-	=
 85    |	+	+	vvc	0	-	=
-86    |	Stf	stf	vvc	DD+	DD+	=
+86    |	Stf	stf	vvc	D+	D+	=
 87    |	Iff	iff	vvc	D+ Addr	D+ Addr =
 88    |	DMS	dms	vvc	0	0	=
 89    |	pi	pi	vvc	0	-	=
