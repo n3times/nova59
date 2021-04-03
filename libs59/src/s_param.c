@@ -35,16 +35,9 @@ static int OPD_TYPE[] =
  *
  ******************************************************************************/
 
-int s_param_get_ind_operand(
-    s_opd_type_t opd_type, n_t *regs, int i, s_err_t *err) {
+int s_param_get_ind_operand(s_opd_type_t opd_type, n_t n, s_err_t *err) {
   if (err) *err = false;
 
-  if (i < 0 || i >= 100) {
-    if (err) *err = true;
-    return -1;
-  }
-
-  n_t n = regs[i];
   if (n_cmp(n, N_0) < 0) return 0;
 
   if (opd_type == OPD_TYPE_D) {

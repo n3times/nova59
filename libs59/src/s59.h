@@ -123,15 +123,13 @@ void s_reg_xt(n_t *X, n_t *T);
 
 /**
  * For flag operators, 'flags' should have 10 elements.
- *
- * 'err' is set if d is a not in 0..9.
  */
 
 /** flags[d] = true. */
-void s_flag_raise(int d, bool *flags, s_err_t *err);
+void s_flag_raise(int d, bool *flags);
 
 /** flags[d] = false. */
-void s_flag_clear(int d, bool *flags, s_err_t *err);
+void s_flag_clear(int d, bool *flags);
 
 
 /******************************************************************************
@@ -140,9 +138,14 @@ void s_flag_clear(int d, bool *flags, s_err_t *err);
  *
  ******************************************************************************/
 
+/**
+ *
+ */
 void s_flow_gto(int ddd, int *pc, s_err_t *err);
 
 void s_flow_sbr(int ddd, int *pc, s_err_t *err);
+
+void s_flow_rtn(int *pc, s_err_t *err);
 
 /**
  * Returns true if X = T.
@@ -159,12 +162,32 @@ bool s_flow_ge(int ddd, int *X, int *T, int *pc, s_err_t *err);
  */
 bool s_flow_lt(int ddd, int *X, int *T, int *pc, s_err_t *err);
 
+/**
+ * Returns true if flags[d] is true.
+ */
 bool s_flow_iff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
 
+/**
+ * Returns true if flags[d] is false.
+ */
 bool s_flow_iiff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
 
+/**
+ * Decrements d[z] and returns true if d[z] != 0.
+ *
+ * If d[z] > 1, d[z] = d[z] - 1.
+ * If d[z] < -1, d[z] = d[z] + 1.
+ * If |d[z]| <= 1, d[z] = 0.
+ */
 bool s_flow_dsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
 
+/**
+ * Decrements d[z] and returns true if d[z] = 0.
+ *
+ * If d[z] > 1, d[z] = d[z] - 1.
+ * If d[z] < -1, d[z] = d[z] + 1.
+ * If |d[z]| <= 1, d[z] = 0.
+ */
 bool s_flow_idsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
 
 /** Sets all steps to 0. */
@@ -188,7 +211,6 @@ void s_display_chs(s_display_t *display);
 void s_display_ee(s_display_t *display);
 
 void s_display_iee(s_display_t *display);
-
 
 
 /******************************************************************************
@@ -229,19 +251,19 @@ void s_math_log(n_t *X, s_err_t *err);
 void s_math_exp(n_t *X, s_err_t *err);
 void s_math_pow10(n_t *X, s_err_t *err);
 
-void s_math_sin(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_cos(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_tan(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_sin(n_t *X, n_trig_t trig, s_err_t *err);
+void s_math_cos(n_t *X, n_trig_t trig, s_err_t *err);
+void s_math_tan(n_t *X, n_trig_t trig, s_err_t *err);
 
-void s_math_asin(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_acos(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_atan(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_asin(n_t *X, n_trig_t trig, s_err_t *err);
+void s_math_acos(n_t *X, n_trig_t trig, s_err_t *err);
+void s_math_atan(n_t *X, n_trig_t trig, s_err_t *err);
 
 void s_math_dms(n_t *X, int fix, n_format_t format, s_err_t *err);
 void s_math_idms(n_t *X, int fix, n_format_t format, s_err_t *err);
 
-void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
-void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
+void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, s_err_t *err);
+void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, s_err_t *err);
 
 /** X = N_PI. */
 void s_math_pi(n_t *X);
@@ -287,18 +309,16 @@ void s_mode_ieng(bool *eng);
 /**
  * Returns the actual operand of an indirect operator.
  *
- * For example s_param_get_ind_operand(OPD_TYPE_DDD, regs, 59, &err) returns the
+ * For example s_param_get_ind_operand(OPD_TYPE_DDD, regs[59], &err) returns the
  * actual address of 'GTO Ind 59' or 'SBR Ind 59'.
  *
- * A negative regs[i] is interpreted as '0' and the fractional part of regs[i]
- * is discarded.
+ * A negative n is interpreted as '0' and the fractional part of n is discarded.
  *
- * If opd_type is OPD_TYPE_D, returns regs[i] % 10.
+ * If opd_type is OPD_TYPE_D, returns n % 10.
  *
- * Sets err if 'i' is out of bounds or regs[i] is too large for the param type.
+ * Sets err if n is too large for the param type.
  */
-int s_param_get_ind_operand(
-    s_opd_type_t opd_type, n_t *regs, int i, s_err_t *err);
+int s_param_get_ind_operand(s_opd_type_t opd_type, n_t n, s_err_t *err);
 
 /**
  * Returns the address immediately after a given label, within a given program.
