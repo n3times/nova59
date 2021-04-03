@@ -31,13 +31,251 @@ typedef struct s_program_s {
   int step_count;
 } s_program_t;
 
+typedef struct s_module_s {
+  s_program_t program[100];
+  int program_count;
+} s_module_t;
+
+typedef enum s_mode_e {
+  MODE_EVAL,
+  MODE_LRN,
+  MODE_RUN,
+  MODE_SST
+} s_mode_t;
+
 typedef enum s_opd_type_e {
-  OPD_TYPE_D,    // 1-digit operand. 'Fix' for example.
-  OPD_TYPE_DD,   // 2-digit operand. 'STO' for example.
-  OPD_TYPE_DDD,  // 3-digit operand. 'GTO' for example.
+  OPD_TYPE_UNK,  // Unknown, not yet determined.
+  OPD_TYPE_IND,  // Indirect. 'GTO Ind 59', for example.
+  OPD_TYPE_LBL,  // Label. 'GTO A', for example.
+  OPD_TYPE_D,    // 1-digit operand. 'Fix 5' for example.
+  OPD_TYPE_DD,   // 2-digit operand. 'STO 59' for example.
+  OPD_TYPE_DDD,  // 3-digit operand. 'GTO 059' for example.
 } s_opd_type_t;
 
+typedef enum s_opn_status_e {
+  OPN_PENDING,
+  OPN_COMPLETE,
+  OPN_CANCELED
+} s_opn_status_t;
+
+typedef struct s_opd_s {
+  s_opd_type_t type;  // Indicates how to interpret the operand value.
+  char value[4];      // Up to 3 digits: opcode for label, address or register..
+  bool sbr;           // Operand is SBR <addr> w/ <addr> given by type and value
+} s_opd_t;
+
+typedef struct s_opn_s {
+  s_opn_status_t status;
+  bool opr_inv;
+  char opr_key;
+  s_opd_t opds[2];
+} s_opn_t;
+
 typedef bool s_err_t;
+
+
+/******************************************************************************
+ *
+ *  REGISTERS.
+ *
+ ******************************************************************************/
+
+/**
+ * For register operators, 'regs' should have 100 elements.
+ *
+ * 'err' is set if dd is a not in 0..99 or if there is a overflow, underflow or
+ * division by 0.
+ */
+
+/** Recall: X = regs[i]. */
+void s_reg_rcl(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Store: regs[i] = X. */
+void s_reg_sto(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Sum: regs[i] += X. */
+void s_reg_sum(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Inv sum: regs[i] -= X. */
+void s_reg_isum(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Product: regs[i] *= X. */
+void s_reg_prd(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Inv product: regs[i] /= X. */
+void s_reg_iprd(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Exchange: regs[i] <-> X. */
+void s_reg_exc(int dd, n_t *regs, n_t *X, s_err_t *err);
+
+/** Sets all registers to 0. */
+void s_reg_cms(n_t *regs);
+
+/** Exchange of X and T: X <-> T. */
+void s_reg_xt(n_t *X, n_t *T);
+
+
+/******************************************************************************
+ *
+ *  FLAGS.
+ *
+ ******************************************************************************/
+
+/**
+ * For flag operators, 'flags' should have 10 elements.
+ *
+ * 'err' is set if d is a not in 0..9.
+ */
+
+/** flags[d] = true. */
+void s_flag_raise(int d, bool *flags, s_err_t *err);
+
+/** flags[d] = false. */
+void s_flag_clear(int d, bool *flags, s_err_t *err);
+
+
+/******************************************************************************
+ *
+ *  FLOW.
+ *
+ ******************************************************************************/
+
+void s_flow_gto(int ddd, int *pc, s_err_t *err);
+
+void s_flow_sbr(int ddd, int *pc, s_err_t *err);
+
+/**
+ * Returns true if X = T.
+ */
+bool s_flow_equal(int ddd, int *X, int *T, int *pc, s_err_t *err);
+
+/**
+ * Returns true if X >= T.
+ */
+bool s_flow_ge(int ddd, int *X, int *T, int *pc, s_err_t *err);
+
+/**
+ * Returns true if X < T.
+ */
+bool s_flow_lt(int ddd, int *X, int *T, int *pc, s_err_t *err);
+
+bool s_flow_iff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
+
+bool s_flow_iiff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
+
+bool s_flow_dsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
+
+bool s_flow_idsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
+
+/** Sets all steps to 0. */
+void s_flow_cp(int *steps);
+
+
+/******************************************************************************
+ *
+ *  DISPLAY.
+ *
+ ******************************************************************************/
+
+void s_display_init(s_display_t *display);
+
+void s_display_digit(s_display_t *display, int digit);
+
+void s_display_dot(s_display_t *display);
+
+void s_display_chs(s_display_t *display);
+
+void s_display_ee(s_display_t *display);
+
+void s_display_iee(s_display_t *display);
+
+
+
+/******************************************************************************
+ *
+ *  AOS.
+ *
+ ******************************************************************************/
+
+void s_aos_left(s_aos_t *aos);
+void s_aos_right(s_aos_t *aos);
+void s_aos_equal(s_aos_t *aos);
+void s_aos_plus(s_aos_t *aos);
+void s_aos_minus(s_aos_t *aos);
+void s_aos_times(s_aos_t *aos);
+void s_aos_div(s_aos_t *aos);
+void s_aos_pow(s_aos_t *aos);
+void s_aos_ipow(s_aos_t *aos);
+
+
+/******************************************************************************
+ *
+ *  MATH.
+ *
+ ******************************************************************************/
+
+void s_math_chs(n_t *X);
+void s_math_abs(n_t *X);
+void s_math_sign(n_t *X);
+void s_math_int(n_t *X);
+void s_math_frac(n_t *X);
+
+void s_math_square(n_t *X, s_err_t *err);
+void s_math_sqrt(n_t *X, s_err_t *err);
+void s_math_1_x(n_t *X, s_err_t *err);
+
+void s_math_ln(n_t *X, s_err_t *err);
+void s_math_log(n_t *X, s_err_t *err);
+void s_math_exp(n_t *X, s_err_t *err);
+void s_math_pow10(n_t *X, s_err_t *err);
+
+void s_math_sin(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_cos(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_tan(n_t *X, n_err_t trig, s_err_t *err);
+
+void s_math_asin(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_acos(n_t *X, n_err_t trig, s_err_t *err);
+void s_math_atan(n_t *X, n_err_t trig, s_err_t *err);
+
+void s_math_dms(n_t *X, int fix, n_format_t format, s_err_t *err);
+void s_math_idms(n_t *X, int fix, n_format_t format, s_err_t *err);
+
+void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
+void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
+
+/** X = N_PI. */
+void s_math_pi(n_t *X);
+
+
+/******************************************************************************
+ *
+ *  MODES.
+ *
+ ******************************************************************************/
+
+/** trig = N_DEG. */
+void s_mode_deg(n_trig_t *trig);
+
+/** trig = N_RAD. */
+void s_mode_rad(n_trig_t *trig);
+
+/** trig = N_GRAD. */
+void s_mode_grad(n_trig_t *trig);
+
+/** fix = val. */
+void s_mode_fix(int *fix, int val);
+
+/** ee = true. */
+void s_mode_ee(bool *ee);
+
+/** ee = false. */
+void s_mode_iee(bool *ee);
+
+/** eng = true. */
+void s_mode_eng(bool *eng);
+
+/** eng = false. */
+void s_mode_ieng(bool *eng);
 
 
 /******************************************************************************
@@ -87,143 +325,15 @@ int s_param_get_label_address(char label, s_program_t *program, s_err_t *err);
 
 /******************************************************************************
  *
- *  DISPLAY.
+ *  PARSING.
  *
  ******************************************************************************/
 
-void s_display_init(s_display_t *display);
+void s_parse_init_opn(s_opn_t *opn);
 
-void s_display_digit(s_display_t *display, int digit);
-
-void s_display_dot(s_display_t *display);
-
-void s_display_chs(s_display_t *display);
-
-void s_display_ee(s_display_t *display);
-
-void s_display_iee(s_display_t *display);
-
-
-/******************************************************************************
- *
- *  AOS.
- *
- ******************************************************************************/
-
-void s_aos_left(s_aos_t *aos);
-void s_aos_right(s_aos_t *aos);
-void s_aos_equal(s_aos_t *aos);
-void s_aos_plus(s_aos_t *aos);
-void s_aos_minus(s_aos_t *aos);
-void s_aos_times(s_aos_t *aos);
-void s_aos_div(s_aos_t *aos);
-void s_aos_pow(s_aos_t *aos);
-void s_aos_ipow(s_aos_t *aos);
-
-
-/******************************************************************************
- *
- *  REGISTERS.
- *
- ******************************************************************************/
-
-void s_reg_rcl(int dd, n_t *regs, n_t *X, s_err_t *err);
-void s_reg_sto(int dd, n_t *regs, n_t *X, s_err_t *err);
-
-void s_reg_sum(int dd, n_t *regs, n_t *X, s_err_t *err);
-void s_reg_isum(int dd, n_t *regs, n_t *X, s_err_t *err);
-
-void s_reg_prd(int dd, n_t *regs, n_t *X, s_err_t *err);
-void s_reg_iprd(int dd, n_t *regs, n_t *X, s_err_t *err);
-
-void s_reg_exc(int dd, n_t *regs, n_t *X, s_err_t *err);
-
-void s_reg_cms(n_t *regs);
-void s_reg_xt(n_t *X, n_t *T);
-
-
-/******************************************************************************
- *
- *  MATH.
- *
- ******************************************************************************/
-
-void s_math_chs(n_t *X);
-void s_math_abs(n_t *X);
-void s_math_sign(n_t *X);
-void s_math_int(n_t *X);
-void s_math_frac(n_t *X);
-
-void s_math_square(n_t *X, s_err_t *err);
-void s_math_sqrt(n_t *X, s_err_t *err);
-void s_math_1_x(n_t *X, s_err_t *err);
-
-void s_math_ln(n_t *X, s_err_t *err);
-void s_math_log(n_t *X, s_err_t *err);
-void s_math_exp(n_t *X, s_err_t *err);
-void s_math_pow10(n_t *X, s_err_t *err);
-
-void s_math_sin(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_cos(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_tan(n_t *X, n_err_t trig, s_err_t *err);
-
-void s_math_asin(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_acos(n_t *X, n_err_t trig, s_err_t *err);
-void s_math_atan(n_t *X, n_err_t trig, s_err_t *err);
-
-void s_math_dms(n_t *X, int fix, n_format_t format, s_err_t *err);
-void s_math_idms(n_t *X, int fix, n_format_t format, s_err_t *err);
-
-void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
-void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, n_err_t *err);
-
-void s_math_pi(n_t *X);
-
-
-/******************************************************************************
- *
- *  MODES.
- *
- ******************************************************************************/
-
-void s_mode_deg(n_trig_t *trig);
-void s_mode_rad(n_trig_t *trig);
-void s_mode_grad(n_trig_t *trig);
-
-void s_mode_fix(int *fix, int val);
-
-void s_mode_ee(bool *ee);
-void s_mode_iee(bool *ee);
-
-void s_mode_eng(bool *eng);
-void s_mode_ieng(bool *eng);
-
-
-/******************************************************************************
- *
- *  FLAGS.
- *
- ******************************************************************************/
-
-void s_flag_raise(int d, bool *flags, s_err_t *err);
-void s_flag_clear(int d, bool *flags, s_err_t *err);
-
-
-/******************************************************************************
- *
- *  FLOW.
- *
- ******************************************************************************/
-
-void s_flow_gto(int ddd, int *pc, s_err_t *err);
-void s_flow_sbr(int ddd, int *pc, s_err_t *err);
-void s_flow_equal(int ddd, int *X, int *T, int *pc, s_err_t *err);
-void s_flow_ge(int ddd, int *X, int *T, int *pc, s_err_t *err);
-void s_flow_lt(int ddd, int *X, int *T, int *pc, s_err_t *err);
-void s_flow_iff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
-void s_flow_iiff(int d, int ddd, bool *flags, int *pc, s_err_t *err);
-void s_flow_dsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
-void s_flow_idsz(int d, int ddd, n_t *regs, int *pc, s_err_t *err);
-void s_flow_cp(int *steps);
+/**
+ * Given a pending operation, updates its state.
+ */
+void s_parse_opn(s_opn_t *opn, s_mode_t mode, int key);
 
 #endif  // S59_H

@@ -7,15 +7,14 @@
 #define LBL  76
 #define SBR  71
 
-/**
- * Map between a step code, see as operator, and the type of the operands.
- * 1 - No operand.
- * 2 - D or DD operand.
- * 3 - Address operand.
- * 4 - D or Ind DD operand.
- * 5 - D or Ind DD operand followed by address operand.
- */
-static int OP_TYPE[] =
+#define OPD_NONE          1
+#define OPD_D_DD          2
+#define OPD_ADDRESS       3
+#define OPD_D_IND         4
+#define OPD_D_IND_ADDRESS 5
+
+/** Map between a step code, see as operator, and the type of the operands. */
+static int OPD_TYPE[] =
 {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -77,24 +76,19 @@ int s_param_get_label_address(char label, s_program_t *program, s_err_t *err) {
       continue;
     }
 
-    int type = OP_TYPE[(int) step];
+    int opd_type = OPD_TYPE[(int) step];
 
-    if (type == 1) {
-      // No operands.
+    if (opd_type == OPD_NONE) {
       i += 1;
-    } else if (type == 2) {
-      // D or DD operand.
+    } else if (opd_type == OPD_D_DD) {
       i += 2;
-    } else if (type == 3) {
-      // Address operand.
+    } else if (opd_type == OPD_ADDRESS) {
       bool lbl = next_step != IND && next_step / 10 != 0;
       i += lbl ? 2 : 3;
-    } else if (type == 4) {
-      // D or Ind DD operand.
+    } else if (opd_type == OPD_D_IND) {
       bool ind = next_step == IND;
       i += ind ? 3 : 2;
-    } else if (type == 5) {
-      // D or Ind DD operand followed by address operand.
+    } else if (opd_type == OPD_D_IND_ADDRESS) {
       bool ind = next_step == IND;
       i += ind ? 3 : 2;
 
