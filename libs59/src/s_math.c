@@ -2,6 +2,13 @@
 
 #include <assert.h>
 
+
+/******************************************************************************
+ *
+ *  HELPERS.
+ *
+ ******************************************************************************/
+
 static void s_math_op(n_t (*op)(n_t), n_t *X) {
   assert(X);
   if (!X) return;
@@ -9,7 +16,7 @@ static void s_math_op(n_t (*op)(n_t), n_t *X) {
   *X = op(*X);
 }
 
-static void s_math_op2(n_t (*op)(n_t, n_err_t *), n_t *X, s_err_t *err) {
+static void s_math_op_err(n_t (*op)(n_t, n_err_t *), n_t *X, s_err_t *err) {
   assert(X);
   if (!X) return;
 
@@ -54,7 +61,7 @@ static void s_math_op_p_r(
 
   n_err_t n_err;
 
-  op(*X, *T, trig, X, T, &n_err);
+  op(*T, *X, trig, T, X, &n_err);
 
   if (err) *err = n_err ? true : false;
 }
@@ -65,6 +72,8 @@ static void s_math_op_p_r(
  *  IMPLEMENTATION.
  *
  ******************************************************************************/
+
+/** Simple functions. */
 
 void s_math_chs(n_t *X) {
   s_math_op(n_chs, X);
@@ -86,32 +95,41 @@ void s_math_frac(n_t *X) {
   s_math_op(n_frac, X);
 }
 
+void s_math_pi(n_t *X) {
+  assert(X);
+  if (!X) return;
+
+  *X = N_PI;
+}
+
 void s_math_square(n_t *X, s_err_t *err) {
-  s_math_op2(n_square, X, err);
+  s_math_op_err(n_square, X, err);
 }
 
 void s_math_sqrt(n_t *X, s_err_t *err) {
-  s_math_op2(n_sqrt, X, err);
+  s_math_op_err(n_sqrt, X, err);
 }
 
 void s_math_1_x(n_t *X, s_err_t *err) {
-  s_math_op2(n_1_x, X, err);
+  s_math_op_err(n_1_x, X, err);
 }
 
+/** Transcendental functions. */
+
 void s_math_ln(n_t *X, s_err_t *err) {
-  s_math_op2(n_ln, X, err);
+  s_math_op_err(n_ln, X, err);
 }
 
 void s_math_log(n_t *X, s_err_t *err) {
-  s_math_op2(n_log, X, err);
+  s_math_op_err(n_log, X, err);
 }
 
 void s_math_exp(n_t *X, s_err_t *err) {
-  s_math_op2(n_exp, X, err);
+  s_math_op_err(n_exp, X, err);
 }
 
 void s_math_pow10(n_t *X, s_err_t *err) {
-  s_math_op2(n_pow10, X, err);
+  s_math_op_err(n_pow10, X, err);
 }
 
 /** Trigonometric functions. */
@@ -156,12 +174,4 @@ void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, s_err_t *err) {
 
 void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, s_err_t *err) {
   s_math_op_p_r(n_r_p, X, T, trig, err);
-}
-
-/** Miscellaneous. */
-
-void s_math_pi(n_t *X) {
-  assert(X);
-  if (!X) return;
-  *X = N_PI;
 }
