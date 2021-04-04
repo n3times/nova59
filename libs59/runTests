@@ -1,0 +1,34 @@
+test () {
+  c=${i#test/}
+  c=${c%.c}
+  gcc -Wall -Isrc/. -I../libn59/src -L. -ls59 test/$c.c
+  ./a.out > tmp
+  wc=`diff golden/$c.golden tmp | wc -l`
+  if [ $wc = 0 ]
+  then
+    echo "$c: PASS"
+  else
+    echo "$c: *** FAIL ***"
+  fi
+}
+
+test_all () {
+  for i in test/*.c ;
+  do
+    test $i
+    echo ""
+  done
+}
+
+if [ "$1" == "" ]
+then
+  test_all
+else
+  if [[ "$1" == *"test" ]]
+  then
+    i=$1
+  else
+    i=n_$1_test
+  fi
+  test $i
+fi
