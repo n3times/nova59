@@ -7,7 +7,9 @@ static void test(char *input) {
   s_display_init(&display);
 
   for (char *c = input; *c != '\0'; c++) {
-    if (*c == '-') {
+    if (*c == 'k') {
+      s_display_init(&display);
+    } else if (*c == '-') {
       s_display_chs(&display);
     } else if (*c == '.') {
       s_display_dot(&display);
@@ -63,6 +65,18 @@ int main() {
 
   printf("\n");
   test("12e34.56e78");
+
+  printf("\n");
+  test("12345678e");
+  test("123456789e");
+  test(".1234567e");
+  test(".12345678e");
+  test(".123456789e");
+
+  printf("\n");
+  test("1k");
+  test("ek");
+  test("1e-1k");
 
   return 0;
 }

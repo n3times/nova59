@@ -1,3 +1,5 @@
+#include "s59.h"
+
 #include <assert.h>
 
 #define CHECK(X) {\

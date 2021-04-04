@@ -1,8 +1,6 @@
-#include "s59.h"
+#include "s_internal.h"
 
 #include <string.h>
-
-#include "s_internal.h"
 
 
 /******************************************************************************
@@ -58,7 +56,7 @@ void s_display_digit(s_display_t *display, int digit) {
 
   // Add digit to mantissa.
 
-  char *start = d[0] == '-' ? d + 1 : d;
+  char *start = *d == '-' ? d + 1 : d;
   char *end = get_end_mant(d);
 
   // Case "0" or "-0".
@@ -75,7 +73,7 @@ void s_display_digit(s_display_t *display, int digit) {
     dig_count += 1;
   }
 
-  // See if there is any room for digit.
+  // See if there is room for digit.
   bool exp = *end != '\0';
   if (dig_count == (exp ? 8 : 10)) {
     if (*start == '0' && start[1] == '.') {
@@ -110,7 +108,7 @@ void s_display_chs(s_display_t *display) {
     char *sign = d + strlen(d) - 3;
     *sign = *sign == '-' ? ' ' : '-';
   } else {
-    bool neg = d[0] == '-';
+    bool neg = *d == '-';
     if (neg) {
       memmove(d, d + 1, strlen(d + 1) + 1);
     } else {
@@ -128,8 +126,25 @@ void s_display_ee(s_display_t *display) {
   display->edit_exp = true;
 
   // Add exponent if missing.
+
   char *end_mant = get_end_mant(d);
-  if (*end_mant == '\0') {
+  if (*end_mant != '\0') return;
+
+  int dig_count = 0;
+  for (char *c = d; *c != '\0'; c++) {
+    if (*c >= '0' && *c <= '9') dig_count += 1;
+  }
+
+  if (dig_count == 9) {
+    int i = 0;
+    if (d[0] == '-') i = 1;
+    if (d[i] == '0' && d[i + 1] == '.') {
+      memmove(d + i, d + i + 1, strlen(d+ i + 1) + 1);
+      dig_count = 8;
+    }
+  }
+
+  if (dig_count <= 8) {
     insert_at_end_mant(d, ' ');
     insert_at_end_mant(d, '0');
     insert_at_end_mant(d, '0');
