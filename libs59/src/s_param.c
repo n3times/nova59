@@ -1,5 +1,7 @@
 #include "s59.h"
 
+#include <assert.h>
+
 #define FIX  58
 #define IND  40
 #define INV  22
@@ -55,6 +57,9 @@ int s_param_get_ind_operand(s_opd_type_t opd_type, n_t n, s_err_t *err) {
 }
 
 int s_param_get_label_address(char label, s_program_t *program, s_err_t *err) {
+  assert(program);
+  if (!program) return -1;
+
   char *steps = program->steps;
 
   for (int i = 0; i < program->step_count - 1; ) {

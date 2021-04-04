@@ -1,13 +1,11 @@
 #include "s59.h"
 
+#include "s_internal.h"
+
 #include <assert.h>
 
 static void s_flag_set(int d, bool *flags, bool val) {
-  assert(flags);
-  if (!flags) return;
-
-  if (d < 0) d = 0;
-  d = d % 10;
+  CHECK_FLAG(flags, d)
 
   flags[d] = val;
 }

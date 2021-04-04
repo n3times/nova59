@@ -1,5 +1,7 @@
 #include "s59.h"
 
+#include "s_internal.h"
+
 #include <assert.h>
 
 
@@ -10,15 +12,13 @@
  ******************************************************************************/
 
 static void s_math_op(n_t (*op)(n_t), n_t *X) {
-  assert(X);
-  if (!X) return;
+  CHECK(X);
 
   *X = op(*X);
 }
 
 static void s_math_op_err(n_t (*op)(n_t, n_err_t *), n_t *X, s_err_t *err) {
-  assert(X);
-  if (!X) return;
+  CHECK(X);
 
   n_err_t n_err;
 
@@ -29,8 +29,7 @@ static void s_math_op_err(n_t (*op)(n_t, n_err_t *), n_t *X, s_err_t *err) {
 
 static void s_math_op_trig(n_t (*op)(n_t, n_trig_t trig, n_err_t *),
                            n_t *X, n_trig_t trig, s_err_t *err) {
-  assert(X);
-  if (!X) return;
+  CHECK(X);
 
   n_err_t n_err;
 
@@ -41,8 +40,8 @@ static void s_math_op_trig(n_t (*op)(n_t, n_trig_t trig, n_err_t *),
 
 static void s_math_op_dms(n_t (*op)(n_t, int, n_format_t, n_err_t *), 
                           n_t *X, int fix, n_format_t format, s_err_t *err) {
-  assert(X);
-  if (!X) return;
+
+  CHECK(X);
 
   n_err_t n_err;
 
@@ -54,10 +53,8 @@ static void s_math_op_dms(n_t (*op)(n_t, int, n_format_t, n_err_t *),
 static void s_math_op_p_r(
     void (*op)(n_t, n_t, n_trig_t, n_t *, n_t *, n_err_t *), 
     n_t *X, n_t * T, n_trig_t trig, s_err_t *err) {
-  assert(X);
-  assert(T);
-  if (!X) return;
-  if (!T) return;
+  CHECK(X);
+  CHECK(T);
 
   n_err_t n_err;
 

@@ -202,7 +202,7 @@ void s_flow_cp(int *steps);
 
 void s_display_init(s_display_t *display);
 
-void s_display_digit(s_display_t *display, int digit);
+void s_display_digit(s_display_t *display, int d);
 
 void s_display_dot(s_display_t *display);
 
@@ -265,16 +265,16 @@ void s_math_idms(n_t *X, int fix, n_format_t format, s_err_t *err);
 /**
  * Converts polar coordinates into rectangular coordinates.
  *
- * Input: X has theta and T has rho.
- * Output: X has y and T has x.
+ * Input: (X, T) = (theta, rho).
+ * Output: (X, T) = (y, x).
  */
 void s_math_p_r(n_t *X, n_t *T, n_trig_t trig, s_err_t *err);
 
 /**
  * Converts rectangular coordinates into polar coordinates.
  *
- * Input: X has y and T has x.
- * Output: X has theta and T has rho.
+ * Input: (X, T) = (y, x).
+ * Output: (X, T) = (theta, rho).
  */
 void s_math_r_p(n_t *X, n_t *T, n_trig_t trig, s_err_t *err);
 

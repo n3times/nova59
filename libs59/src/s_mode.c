@@ -1,62 +1,52 @@
 #include "s59.h"
 
-#include <assert.h>
+#include "s_internal.h"
 
 void s_mode_deg(n_trig_t *trig) {
-  assert(trig);
-  if (!trig) return;
+  CHECK(trig);
 
   *trig = N_DEG;
 }
 
 void s_mode_rad(n_trig_t *trig) {
-  assert(trig);
-  if (!trig) return;
+  CHECK(trig);
 
   *trig = N_RAD;
 }
 
 void s_mode_grad(n_trig_t *trig) {
-  assert(trig);
-  if (!trig) return;
+  CHECK(trig);
 
   *trig = N_GRAD;
 }
 
-void s_mode_fix(int *fix, int val) {
-  assert(fix);
-  if (!fix) return;
+void s_mode_fix(int *fix, int d) {
+  CHECK(fix);
+  CHECK_D(d);
 
-  if (val < 0) val = 0;
-  val = val % 10;
-
-  *fix = val;
+  *fix = d;
 }
 
 void s_mode_ee(bool *ee) {
-  assert(ee);
-  if (!ee) return;
+  CHECK(ee);
 
   *ee = true;
 }
 
 void s_mode_iee(bool *ee) {
-  assert(ee);
-  if (!ee) return;
+  CHECK(ee);
 
   *ee = false;
 }
 
 void s_mode_eng(bool *eng) {
-  assert(eng);
-  if (!eng) return;
+  CHECK(eng);
 
   *eng = true;
 }
 
 void s_mode_ieng(bool *eng) {
-  assert(eng);
-  if (!eng) return;
+  CHECK(eng);
 
   *eng = false;
 }
