@@ -112,9 +112,9 @@ void s_display_chs(s_display_t *display) {
   } else {
     bool neg = d[0] == '-';
     if (neg) {
-      memmove(d, d + 1, strlen(d+1));
+      memmove(d, d + 1, strlen(d + 1) + 1);
     } else {
-      memmove(d + 1, d, strlen(d));
+      memmove(d + 1, d, strlen(d) + 1);
       d[0] = '-';
     }
   }
@@ -140,5 +140,11 @@ void s_display_iee(s_display_t *display) {
   CHECK(display);
   if (display->edit_exp) {
     display->edit_exp = false;
+  }
+
+  char *d = display->d;
+  int len = strlen(d);
+  if (len >= 3 && d[len - 3] == ' ' && d[len - 2] == '0' && d[len - 1] == '0') {
+    d[len - 3] = '\0';
   }
 }
