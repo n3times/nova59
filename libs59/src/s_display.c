@@ -1,6 +1,9 @@
 #include "s_internal.h"
 
+#include <assert.h>
 #include <string.h>
+
+#define CHECK_DISPLAY(d) { CHECK(d); assert(check_display(d)); }
 
 
 /******************************************************************************
@@ -9,6 +12,50 @@
  *
  ******************************************************************************/
 
+#if !NDEBUG
+static bool is_digit(char c) {
+  return c >= '0' && c <= '9';
+}
+
+static bool check_display(s_display_t * display) {
+  char *d = display->d;
+
+  // Should not start with "0d" or "-0d".
+  if (*d == '-') d += 1;
+  if (*d == '0' && is_digit(*(d + 1))) return false;
+
+  // One dot and up to 8 or 10 digits.
+  int digit_count = 0;
+  bool has_dot = false;
+  while (*d == '.' || is_digit(*d)) {
+    if (*d == '.') {
+      if (has_dot) return false;
+      has_dot = true;
+    } else {
+      digit_count += 1;
+    }
+    d += 1;
+  }
+
+  // Has no exp.
+  bool is_exp = *d != '\0';
+  if (!is_exp) {
+    if (digit_count > 10) return false;
+    if (display->edit_exp) return false;
+    return true;
+  }
+
+  // Has exp.
+  if (digit_count > 8) return false;
+  if (strlen(d) != 3) return false;
+  if (*d != ' ' && *d != '-') return false;
+  if (!is_digit(*(d + 1))) return false;
+  if (!is_digit(*(d + 2))) return false;
+  return true;
+}
+#endif
+
+/** Returns the location of the first character after the mantissa. */
 static char *get_end_mant(char *start_mant) {
   int len = strlen(start_mant);
   if (len <= 3) return start_mant + len;
@@ -39,11 +86,13 @@ void s_display_init(s_display_t *display) {
   display->d[0] = '0';
   display->d[1] = '\0';
   display->edit_exp = false;
+
+  CHECK_DISPLAY(display);
 }
 
 void s_display_digit(s_display_t *display, int digit) {
-  CHECK(display);
   CHECK_D(digit);
+  CHECK_DISPLAY(display);
   char *d = display->d;
 
   // Add digit to exponent.
@@ -89,7 +138,7 @@ void s_display_digit(s_display_t *display, int digit) {
 }
 
 void s_display_dot(s_display_t *display) {
-  CHECK(display);
+  CHECK_DISPLAY(display);
   char *d = display->d;
 
   if (display->edit_exp) {
@@ -101,7 +150,7 @@ void s_display_dot(s_display_t *display) {
 }
 
 void s_display_chs(s_display_t *display) {
-  CHECK(display);
+  CHECK_DISPLAY(display);
   char *d = display->d;
 
   if (display->edit_exp) {
@@ -119,16 +168,18 @@ void s_display_chs(s_display_t *display) {
 }
 
 void s_display_ee(s_display_t *display) {
-  CHECK(display);
+  CHECK_DISPLAY(display);
   char *d = display->d;
 
   if (display->edit_exp) return;
-  display->edit_exp = true;
 
   // Add exponent if missing.
 
   char *end_mant = get_end_mant(d);
-  if (*end_mant != '\0') return;
+  if (*end_mant != '\0') {
+    display->edit_exp = true;
+    return;
+  }
 
   int dig_count = 0;
   for (char *c = d; *c != '\0'; c++) {
@@ -148,11 +199,12 @@ void s_display_ee(s_display_t *display) {
     insert_at_end_mant(d, ' ');
     insert_at_end_mant(d, '0');
     insert_at_end_mant(d, '0');
+    display->edit_exp = true;
   }
 }
 
 void s_display_iee(s_display_t *display) {
-  CHECK(display);
+  CHECK_DISPLAY(display);
   if (display->edit_exp) {
     display->edit_exp = false;
   }
