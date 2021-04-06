@@ -1,10 +1,13 @@
 all:
 	gcc -Wall -I../libn59/src -c -DNDEBUG src/*.c
-	ar rcs libs59.a libn59.a *.o
+	ar rcs ../libs/libs59.a *.o
+	mkdir -p ../libs
 
 debug:
 	gcc -Wall -I../libn59/src -c src/*.c
-	ar rcs libs59.a *.o
+	mkdir -p ../libs
+	ar rcs ../libs/libs59.a *.o
 
 clean:
-	rm *.o *.a tmp a.out
+	rm *.o
+	rm -f tmp a.out

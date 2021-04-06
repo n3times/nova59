@@ -1,2 +1,2 @@
-gcc -Isrc -lncurses -L. -ln59 -Wall sample/sample.c
+gcc -Isrc -lncurses -L../libs -ln59 -Wall sample/sample.c
 ./a.out
