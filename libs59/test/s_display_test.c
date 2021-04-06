@@ -3,26 +3,26 @@
 #include <stdio.h>
 
 static void test(char *input) {
-  s_display_t display;
-  s_display_init(&display);
+  s_display_X_t display_X;
+  s_display_X_init(&display_X);
 
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_init(&display);
+      s_display_X_init(&display_X);
     } else if (*c == '-') {
-      s_display_chs(&display);
+      s_display_X_chs(&display_X);
     } else if (*c == '.') {
-      s_display_dot(&display);
+      s_display_X_dot(&display_X);
     } else if (*c == 'e') {
-      s_display_ee(&display);
+      s_display_X_ee(&display_X);
     } else if (*c == 'i') {
-      s_display_iee(&display);
+      s_display_X_iee(&display_X);
     } else if (*c >= '0' && *c <= '9') {
-      s_display_digit(&display, *c - '0');
+      s_display_X_digit(&display_X, *c - '0');
     }
   }
 
-  printf("%s\n", display.d);
+  printf("%s\n", display_X.display);
 }
 
 int main() {

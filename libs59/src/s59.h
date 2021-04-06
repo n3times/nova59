@@ -16,10 +16,11 @@
  *
  ******************************************************************************/
 
-typedef struct s_display_s {
-  char d[14];
-  bool edit_exp;
-} s_display_t;
+typedef struct s_display_X_s {
+  char display[14];
+  bool editing;
+  bool editing_exp;
+} s_display_X_t;
 
 typedef struct s_aos_s {
   n_t hir[8];
@@ -196,21 +197,21 @@ void s_flow_cp(int *steps);
 
 /******************************************************************************
  *
- *  DISPLAY.
+ *  DISPLAY X.
  *
  ******************************************************************************/
 
-void s_display_init(s_display_t *display);
+void s_display_X_init(s_display_X_t *display_X);
 
-void s_display_digit(s_display_t *display, int d);
+void s_display_X_digit(s_display_X_t *display_X, int d);
 
-void s_display_dot(s_display_t *display);
+void s_display_X_dot(s_display_X_t *display_X);
 
-void s_display_chs(s_display_t *display);
+void s_display_X_chs(s_display_X_t *display_X);
 
-void s_display_ee(s_display_t *display);
+void s_display_X_ee(s_display_X_t *display_X);
 
-void s_display_iee(s_display_t *display);
+void s_display_X_iee(s_display_X_t *display_X);
 
 
 /******************************************************************************
