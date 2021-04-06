@@ -225,6 +225,8 @@ void s_display_x_ee(s_display_x_t *display_x) {
     insert_at_end_mant(d, '0');
     insert_at_end_mant(d, '0');
     display_x->edit = DISPLAY_X_EDIT_EXP;
+  } else {
+    display_x->edit = DISPLAY_X_EDIT_MANT;
   }
 }
 

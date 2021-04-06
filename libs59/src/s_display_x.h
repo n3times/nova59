@@ -1,8 +1,7 @@
 /**
  * s_display_x.h
  *
- * Describes how register X appears on the display. Also used for editing
- * register X.
+ * Used to input and output numbers into/from register X.
  */
 
 #ifndef S_DISPLAY_X_H
@@ -37,15 +36,15 @@ typedef struct s_display_x_s {
  ******************************************************************************/
 
 /**
- * Sets display to '0', and puts it in edit mode.
+ * Sets display to '0' putting it in edit mode.
  *
  * This is called when 'CLR' is pressed on TI-59.
  */
 void s_display_x_init(s_display_x_t *display_x);
 
 /**
- * Set display to represent 'X', taking into account 'fix' and 'format'. The
- * display is put in no edit mode..
+ * Sets display with register X, using 'fix' and 'format' for formatting. The
+ * display is put in no edit mode.
  *
  * This function should be called whenever X is modified, for example after
  * evaluating a math function.
@@ -81,10 +80,7 @@ void s_display_x_chs(s_display_x_t *display_x);
  * - adds exponent ' 00' if it is missing and there is enough space.
  * - if ' 00' is added or exponent is already present, sets 'edit' to
  *   DISPLAY_X_EDIT_EXP.
- * - if there is no room for exponent, does nothing.
- *
- * Note that this function has the ability to put in edit mode a number that has
- * an exponent.
+ * - if not, sets 'edit' to DISPLAY_X_EDIT_MANT.
  *
  * This is called when 'EE' is pressed on TI-59. A separate function (s_mode_ee)
  * should be called to set the EE mode.

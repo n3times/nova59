@@ -1,4 +1,4 @@
-#include "s59.h"
+#include "s_display_x.h"
 
 #include <stdio.h>
 
@@ -115,6 +115,14 @@ int main() {
   s_display_x_set_with_x(&display_x, n_make(1e45), 2, N_FLOAT, NULL);
   s_display_x_ee(&display_x);
   s_display_x_digit(&display_x, 9);
+  printf("%s\n", display_x.display);
+
+  printf("\n");
+  s_display_x_set_with_x(&display_x, n_make(12345.54321), 4, N_FLOAT, NULL);
+  printf("%s\n", display_x.display);
+  s_display_x_ee(&display_x);
+  printf("%s\n", display_x.display);
+  s_display_x_digit(&display_x, 5);
   printf("%s\n", display_x.display);
 
   return 0;
