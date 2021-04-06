@@ -16,11 +16,16 @@
  *
  ******************************************************************************/
 
-typedef struct s_display_X_s {
-  char display[14];
-  bool editing;
-  bool editing_exp;
-} s_display_X_t;
+typedef enum s_display_x_mode_e {
+  DISPLAY_X_NO_EDIT,
+  DISPLAY_X_EDIT,
+  DISPLAY_X_EDIT_EXP
+} s_display_x_mode_t;
+
+typedef struct s_display_x_s {
+  char display[N_N2S_MAX_SIZE];
+  s_display_x_mode_t mode;
+} s_display_x_t;
 
 typedef struct s_aos_s {
   n_t hir[8];
@@ -201,17 +206,35 @@ void s_flow_cp(int *steps);
  *
  ******************************************************************************/
 
-void s_display_X_init(s_display_X_t *display_X);
+/**
+ * Initializes display_x with '0', in editing mode.
+ */
+void s_display_x_init(s_display_x_t *display_x);
 
-void s_display_X_digit(s_display_X_t *display_X, int d);
+void s_display_x_set_with_x(s_display_x_t *display_x, n_t X, int fix,
+                            n_format_t format, s_err_t *err_out);
 
-void s_display_X_dot(s_display_X_t *display_X);
+/**
+ * Non-edit mode: initializes display with 'd', in editing mode.
+ * Edit mode: adds d to display.
+ */
+void s_display_x_digit(s_display_x_t *display_x, int d);
 
-void s_display_X_chs(s_display_X_t *display_X);
+/**
+ * Non-edit mode: initializes display with '0.', in editing mode.
+ * Edit mode: adds '.' to display.
+ */
+void s_display_x_dot(s_display_x_t *display_x);
 
-void s_display_X_ee(s_display_X_t *display_X);
+void s_display_x_chs(s_display_x_t *display_x);
 
-void s_display_X_iee(s_display_X_t *display_X);
+/**
+ * Non-edit mode: if no exp, adds exp ' 00' if possible. If exp
+ * Edit mode: adds exponent if missing. If not missing, sets exp_editing.
+ */
+void s_display_x_ee(s_display_x_t *display_x);
+
+void s_display_x_iee(s_display_x_t *display_x);
 
 
 /******************************************************************************

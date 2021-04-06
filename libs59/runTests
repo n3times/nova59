@@ -1,7 +1,7 @@
 test () {
   c=${i#test/}
   c=${c%.c}
-  gcc -Wall -Isrc/. -I../libn59/src -L. -ls59 test/$c.c
+  gcc -Wall -Isrc/. -I../libn59/src -L. -ls59 -ln59 test/$c.c
   ./a.out > tmp
   wc=`diff golden/$c.golden tmp | wc -l`
   if [ $wc = 0 ]

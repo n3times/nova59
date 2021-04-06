@@ -3,26 +3,26 @@
 #include <stdio.h>
 
 static void test(char *input) {
-  s_display_X_t display_X;
-  s_display_X_init(&display_X);
+  s_display_x_t display_x;
+  s_display_x_init(&display_x);
 
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_X_init(&display_X);
+      s_display_x_init(&display_x);
     } else if (*c == '-') {
-      s_display_X_chs(&display_X);
+      s_display_x_chs(&display_x);
     } else if (*c == '.') {
-      s_display_X_dot(&display_X);
+      s_display_x_dot(&display_x);
     } else if (*c == 'e') {
-      s_display_X_ee(&display_X);
+      s_display_x_ee(&display_x);
     } else if (*c == 'i') {
-      s_display_X_iee(&display_X);
+      s_display_x_iee(&display_x);
     } else if (*c >= '0' && *c <= '9') {
-      s_display_X_digit(&display_X, *c - '0');
+      s_display_x_digit(&display_x, *c - '0');
     }
   }
 
-  printf("%s\n", display_X.display);
+  printf("%s\n", display_x.display);
 }
 
 int main() {
@@ -109,6 +109,13 @@ int main() {
   printf("\n");
   test("-.99999999e-99");
   test(".99999999e99-.-");
+
+  printf("\n");
+  s_display_x_t display_x;
+  s_display_x_set_with_x(&display_x, n_make(1e45), 2, N_FLOAT, NULL);
+  s_display_x_ee(&display_x);
+  s_display_x_digit(&display_x, 9);
+  printf("%s\n", display_x.display);
 
   return 0;
 }
