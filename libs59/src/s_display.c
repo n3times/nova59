@@ -41,7 +41,7 @@ static bool check_display_x(s_display_x_t * display_x) {
   bool is_exp = *d != '\0';
   if (!is_exp) {
     if (digit_count > 10) return false;
-    if (display_x->mode == DISPLAY_X_EDIT_EXP) return false;
+    if (display_x->edit == DISPLAY_X_EDIT_EXP) return false;
     return true;
   }
 
@@ -85,7 +85,7 @@ void s_display_x_init(s_display_x_t *display_x) {
 
   display_x->display[0] = '0';
   display_x->display[1] = '\0';
-  display_x->mode = DISPLAY_X_EDIT;
+  display_x->edit = DISPLAY_X_EDIT_MANT;
 
   CHECK_DISPLAY_EDIT(display_x);
 }
@@ -97,7 +97,7 @@ void s_display_x_set_with_x(s_display_x_t *display_x, n_t X, int fix,
   if (err_out) {
     *err_out = n_err ? true : false;
   }
-  display_x->mode = DISPLAY_X_NO_EDIT;
+  display_x->edit = DISPLAY_X_EDIT_NONE;
 }
 
 void s_display_x_digit(s_display_x_t *display_x, int digit) {
@@ -105,15 +105,15 @@ void s_display_x_digit(s_display_x_t *display_x, int digit) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_NO_EDIT) {
+  if (display_x->edit == DISPLAY_X_EDIT_NONE) {
     display_x->display[0] = '0' + digit;
     display_x->display[1] = '\0';
-    display_x->mode = DISPLAY_X_EDIT;
+    display_x->edit = DISPLAY_X_EDIT_MANT;
     return;
   }
 
   // Add digit to exponent.
-  if (display_x->mode == DISPLAY_X_EDIT_EXP) {
+  if (display_x->edit == DISPLAY_X_EDIT_EXP) {
     int len = strlen(d);
     d[len - 2] = d[len - 1];
     d[len - 1] = '0' + digit;
@@ -158,15 +158,15 @@ void s_display_x_dot(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_NO_EDIT) {
+  if (display_x->edit == DISPLAY_X_EDIT_NONE) {
     display_x->display[0] = '0';
     display_x->display[1] = '.';
     display_x->display[2] = '\0';
-    display_x->mode = DISPLAY_X_EDIT;
+    display_x->edit = DISPLAY_X_EDIT_MANT;
     return;
   }
 
-  display_x->mode = DISPLAY_X_EDIT;
+  display_x->edit = DISPLAY_X_EDIT_MANT;
   char *dot = strchr(d, '.');
   if (dot) return;
   insert_at_end_mant(d, '.');
@@ -176,9 +176,9 @@ void s_display_x_chs(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_NO_EDIT) return;
+  if (display_x->edit == DISPLAY_X_EDIT_NONE) return;
 
-  if (display_x->mode == DISPLAY_X_EDIT_EXP) {
+  if (display_x->edit == DISPLAY_X_EDIT_EXP) {
     char *sign = d + strlen(d) - 3;
     *sign = *sign == '-' ? ' ' : '-';
   } else {
@@ -196,13 +196,13 @@ void s_display_x_ee(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_EDIT_EXP) return;
+  if (display_x->edit == DISPLAY_X_EDIT_EXP) return;
 
   // Add exponent if missing.
 
   char *end_mant = get_end_mant(d);
   if (*end_mant != '\0') {
-    display_x->mode = DISPLAY_X_EDIT_EXP;
+    display_x->edit = DISPLAY_X_EDIT_EXP;
     return;
   }
 
@@ -224,16 +224,16 @@ void s_display_x_ee(s_display_x_t *display_x) {
     insert_at_end_mant(d, ' ');
     insert_at_end_mant(d, '0');
     insert_at_end_mant(d, '0');
-    display_x->mode = DISPLAY_X_EDIT_EXP;
+    display_x->edit = DISPLAY_X_EDIT_EXP;
   }
 }
 
 void s_display_x_iee(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
 
-  if (display_x->mode == DISPLAY_X_NO_EDIT) return;
+  if (display_x->edit == DISPLAY_X_EDIT_NONE) return;
 
-  display_x->mode = DISPLAY_X_EDIT;
+  display_x->edit = DISPLAY_X_EDIT_MANT;
 
   char *d = display_x->display;
   int len = strlen(d);

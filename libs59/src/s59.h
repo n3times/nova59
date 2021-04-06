@@ -16,15 +16,15 @@
  *
  ******************************************************************************/
 
-typedef enum s_display_x_mode_e {
-  DISPLAY_X_NO_EDIT,
-  DISPLAY_X_EDIT,
+typedef enum s_display_x_edit_e {
+  DISPLAY_X_EDIT_NONE,
+  DISPLAY_X_EDIT_MANT,
   DISPLAY_X_EDIT_EXP
-} s_display_x_mode_t;
+} s_display_x_edit_t;
 
 typedef struct s_display_x_s {
   char display[N_N2S_MAX_SIZE];
-  s_display_x_mode_t mode;
+  s_display_x_edit_t edit;
 } s_display_x_t;
 
 typedef struct s_aos_s {
@@ -207,33 +207,63 @@ void s_flow_cp(int *steps);
  ******************************************************************************/
 
 /**
- * Initializes display_x with '0', in editing mode.
+ * Sets display to '0', ready for editing.
+ *
+ * This is called when 'CLR' is pressed on TI-59.
  */
 void s_display_x_init(s_display_x_t *display_x);
 
+/**
+ * Sets display to X, with fix and format. No editing.
+ *
+ * This function should be called whenever X is modified, for example after
+ * a math function.
+ */
 void s_display_x_set_with_x(s_display_x_t *display_x, n_t X, int fix,
                             n_format_t format, s_err_t *err_out);
 
 /**
- * Non-edit mode: initializes display with 'd', in editing mode.
- * Edit mode: adds d to display.
+ * In edit, adds 'd' to display if possible.
+ * In non edit, sets display to 'd', ready for editing.
  */
 void s_display_x_digit(s_display_x_t *display_x, int d);
 
 /**
- * Non-edit mode: initializes display with '0.', in editing mode.
- * Edit mode: adds '.' to display.
+ * In edit, adds '.' to display, if not already present, and sets 'edit' to
+ * DISPLAY_X_EDIT_MANT.
+ * In non edit, sets display to '0.', ready for editing.
  */
 void s_display_x_dot(s_display_x_t *display_x);
 
+/**
+ * In edit, changes the sign of the mantissa or exponent.
+ * In non edit, does nothing. Instead s_math_chs should be called, followed by
+ * s_display_x_set_with_x.
+ */
 void s_display_x_chs(s_display_x_t *display_x);
 
 /**
- * Non-edit mode: if no exp, adds exp ' 00' if possible. If exp
- * Edit mode: adds exponent if missing. If not missing, sets exp_editing.
+ * Whether in edit or non edit:
+ * - adds exponent ' 00' if missing/possible.
+ * - if ' 00' is added or exponent is already present, sets 'edit' to
+ *   DISPLAY_X_EDIT_EXP.
+ * - if there is no room for exponent, does nothing.
+ *
+ * Note that this function has the ability to put in edit mode a number that has
+ * an exponent.
+ *
+ * This is called when 'INV EE' is pressed on TI-59, also causing the EE mode to
+ * be set.
  */
 void s_display_x_ee(s_display_x_t *display_x);
 
+/**
+ * In edit, sets 'edit' to DISPLAY_X_EDIT_MANT.
+ * In non edit, does nothing.
+ *
+ * This is called when 'EE' is pressed on TI-59, also causing the EE mode to be
+ * unset.
+ */
 void s_display_x_iee(s_display_x_t *display_x);
 
 
