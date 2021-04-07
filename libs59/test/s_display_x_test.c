@@ -4,21 +4,21 @@
 
 static void test(char *input) {
   s_display_x_t display_x;
-  s_display_x_init(&display_x);
+  s_display_x_edit_start(&display_x);
 
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_x_init(&display_x);
+      s_display_x_clear(&display_x);
     } else if (*c == '-') {
-      s_display_x_chs(&display_x);
+      s_display_x_edit_chs(&display_x);
     } else if (*c == '.') {
-      s_display_x_dot(&display_x);
+      s_display_x_edit_dot(&display_x);
     } else if (*c == 'e') {
-      s_display_x_ee(&display_x);
+      s_display_x_edit_ee(&display_x);
     } else if (*c == 'i') {
-      s_display_x_iee(&display_x);
+      s_display_x_edit_iee(&display_x);
     } else if (*c >= '0' && *c <= '9') {
-      s_display_x_digit(&display_x, *c - '0');
+      s_display_x_edit_digit(&display_x, *c - '0');
     }
   }
 
@@ -112,17 +112,17 @@ int main() {
 
   printf("\n");
   s_display_x_t display_x;
-  s_display_x_set_with_x(&display_x, n_make(1e45), 2, N_FLOAT, NULL);
-  s_display_x_ee(&display_x);
-  s_display_x_digit(&display_x, 9);
+  s_display_x_update_display(&display_x, n_make(1e45), 2, N_FLOAT, NULL);
+  s_display_x_edit_ee(&display_x);
+  s_display_x_edit_digit(&display_x, 9);
   printf("%s\n", display_x.display);
 
   printf("\n");
-  s_display_x_set_with_x(&display_x, n_make(12345.54321), 4, N_FLOAT, NULL);
+  s_display_x_update_display(&display_x, n_make(12345.54321), 4, N_FLOAT, NULL);
   printf("%s\n", display_x.display);
-  s_display_x_ee(&display_x);
+  s_display_x_edit_ee(&display_x);
   printf("%s\n", display_x.display);
-  s_display_x_digit(&display_x, 5);
+  s_display_x_edit_digit(&display_x, 5);
   printf("%s\n", display_x.display);
 
   return 0;

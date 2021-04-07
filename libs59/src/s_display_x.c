@@ -76,11 +76,11 @@ static void insert_at_end_mant(char *start_mant, char c) {
 
 /******************************************************************************
  *
- *  IMPLEMENTATION.
+ *  EDITING.
  *
  ******************************************************************************/
 
-void s_display_x_init(s_display_x_t *display_x) {
+void s_display_x_edit_start_(s_display_x_t *display_x) {
   CHECK(display_x);
 
   display_x->display[0] = '0';
@@ -90,17 +90,7 @@ void s_display_x_init(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
 }
 
-void s_display_x_set_with_x(s_display_x_t *display_x, n_t X, int fix,
-                            n_format_t format, s_err_t *err_out) {
-  n_err_t n_err;
-  n_n2s(X, fix, format, display_x->display, &n_err);
-  if (err_out) {
-    *err_out = n_err ? true : false;
-  }
-  display_x->edit = DISPLAY_X_EDIT_NONE;
-}
-
-void s_display_x_digit(s_display_x_t *display_x, int digit) {
+void s_display_x_edit_digit(s_display_x_t *display_x, int digit) {
   CHECK_D(digit);
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
@@ -154,7 +144,7 @@ void s_display_x_digit(s_display_x_t *display_x, int digit) {
   insert_at_end_mant(d, '0' + digit);
 }
 
-void s_display_x_dot(s_display_x_t *display_x) {
+void s_display_x_edit_dot(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
@@ -172,7 +162,7 @@ void s_display_x_dot(s_display_x_t *display_x) {
   insert_at_end_mant(d, '.');
 }
 
-void s_display_x_chs(s_display_x_t *display_x) {
+void s_display_x_edit_chs(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
@@ -192,7 +182,7 @@ void s_display_x_chs(s_display_x_t *display_x) {
   }
 }
 
-void s_display_x_ee(s_display_x_t *display_x) {
+void s_display_x_edit_ee(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
@@ -230,7 +220,7 @@ void s_display_x_ee(s_display_x_t *display_x) {
   }
 }
 
-void s_display_x_iee(s_display_x_t *display_x) {
+void s_display_x_edit_iee(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
 
   if (display_x->edit == DISPLAY_X_EDIT_NONE) return;
@@ -242,4 +232,30 @@ void s_display_x_iee(s_display_x_t *display_x) {
   if (len >= 3 && d[len - 3] == ' ' && d[len - 2] == '0' && d[len - 1] == '0') {
     d[len - 3] = '\0';
   }
+}
+
+/******************************************************************************
+ *
+ *  SYNCHRONIZATION DISPLAY X <=> REGISTER X.
+ *
+ ******************************************************************************/
+
+void s_display_x_update_display(s_display_x_t *display_x, n_t X, int fix,
+                              n_format_t format, s_err_t *err_out) {
+  n_err_t n_err;
+  n_n2s(X, fix, format, display_x->display, &n_err);
+  if (err_out) {
+    *err_out = n_err ? true : false;
+  }
+  display_x->edit = DISPLAY_X_EDIT_NONE;
+}
+
+void s_display_x_update_x(
+    s_display_x_t *display_x, n_t *X, s_err_t *err_out) {
+  n_err_t n_err;
+  *X = n_s2n(display_x->display, &n_err);
+  if (err_out) {
+    *err_out = n_err ? true : false;
+  }
+  display_x->edit = DISPLAY_X_EDIT_NONE;
 }
