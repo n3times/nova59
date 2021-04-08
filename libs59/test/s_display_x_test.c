@@ -8,7 +8,7 @@ static void test(char *input) {
 
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_x_clear(&display_x);
+      s_display_x_edit_start(&display_x);
     } else if (*c == '-') {
       s_display_x_edit_chs(&display_x);
     } else if (*c == '.') {
@@ -110,20 +110,37 @@ int main() {
   test("-.99999999e-99");
   test(".99999999e99-.-");
 
+  // Edit number.
   printf("\n");
   s_display_x_t display_x;
-  s_display_x_update_display(&display_x, n_make(1e45), 2, N_FLOAT, NULL);
+  n_t X = n_make(1e45);
+  s_display_x_update_display(&display_x, &X, 9, N_FLOAT, NULL);
+  printf("%s\n", display_x.display);
   s_display_x_edit_ee(&display_x);
   s_display_x_edit_digit(&display_x, 9);
+  s_display_x_edit_dot(&display_x);
+  s_display_x_edit_digit(&display_x, 7);
   printf("%s\n", display_x.display);
 
+  // Replace last visible digit of number.
   printf("\n");
-  s_display_x_update_display(&display_x, n_make(12345.54321), 4, N_FLOAT, NULL);
+  X = n_make(12345.54321);
+  s_display_x_update_display(&display_x, &X, 4, N_FLOAT, NULL);
   printf("%s\n", display_x.display);
   s_display_x_edit_ee(&display_x);
   printf("%s\n", display_x.display);
   s_display_x_edit_digit(&display_x, 5);
   printf("%s\n", display_x.display);
+
+  // Only keep visible digits of pi.
+  printf("\n");
+  for (int i = 0; i <= 9; i++) {
+    X = N_PI;
+    s_display_x_update_display(&display_x, &X, i, N_FLOAT, NULL);
+    s_display_x_update_x(&display_x, &X, NULL);
+    char str[N_PRINT_MAX_SIZE];
+    printf("%s : %s\n", n_print(X, str), display_x.display);
+  }
 
   return 0;
 }
