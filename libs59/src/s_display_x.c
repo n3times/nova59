@@ -166,8 +166,6 @@ void s_display_x_edit_chs(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->edit == DISPLAY_X_EDIT_NONE) return;
-
   if (display_x->edit == DISPLAY_X_EDIT_EXP) {
     char *sign = d + strlen(d) - 3;
     *sign = *sign == '-' ? ' ' : '-';
@@ -242,6 +240,8 @@ void s_display_x_edit_iee(s_display_x_t *display_x) {
 
 void s_display_x_update_display(s_display_x_t *display_x, n_t *X, int fix,
                                 n_format_t format, s_err_t *err_out) {
+  assert(display_x->edit == DISPLAY_X_EDIT_NONE);
+
   n_err_t n_err;
   n_n2s(*X, fix, format, display_x->display, &n_err);
   if (err_out) {
@@ -251,6 +251,8 @@ void s_display_x_update_display(s_display_x_t *display_x, n_t *X, int fix,
 }
 
 void s_display_x_update_x(s_display_x_t *display_x, n_t *X, s_err_t *err_out) {
+  assert(display_x->edit != DISPLAY_X_EDIT_NONE);
+
   n_err_t n_err;
   *X = n_s2n(display_x->display, &n_err);
   if (err_out) {

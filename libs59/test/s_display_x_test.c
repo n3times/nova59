@@ -113,6 +113,7 @@ int main() {
   // Edit number.
   printf("\n");
   s_display_x_t display_x;
+  s_display_x_edit_start(&display_x);
   n_t X = n_make(1e45);
   s_display_x_update_display(&display_x, &X, 9, N_FLOAT, NULL);
   printf("%s\n", display_x.display);
@@ -124,6 +125,7 @@ int main() {
 
   // Replace last visible digit of number.
   printf("\n");
+  s_display_x_edit_start(&display_x);
   X = n_make(12345.54321);
   s_display_x_update_display(&display_x, &X, 4, N_FLOAT, NULL);
   printf("%s\n", display_x.display);
@@ -135,12 +137,21 @@ int main() {
   // Only keep visible digits of pi.
   printf("\n");
   for (int i = 0; i <= 9; i++) {
+    s_display_x_edit_start(&display_x);
     X = N_PI;
     s_display_x_update_display(&display_x, &X, i, N_FLOAT, NULL);
+    s_display_x_edit_ee(&display_x);
+    s_display_x_edit_iee(&display_x);
     s_display_x_update_x(&display_x, &X, NULL);
     char str[N_PRINT_MAX_SIZE];
     printf("%s : %s\n", n_print(X, str), display_x.display);
   }
+
+  printf("\n");
+  X = n_make(-0.01);
+  s_display_x_update_display(&display_x, &X, 1, N_FLOAT, NULL);
+  s_display_x_edit_chs(&display_x);
+  printf("%s\n", display_x.display);
 
   return 0;
 }

@@ -36,9 +36,10 @@ typedef struct s_display_x_s {
  ******************************************************************************/
 
 /**
- * Resets display to '0' and puts it in edit mode.
+ * Sets/resets display to '0' and puts it in edit mode.
  *
- * This should be called when 'CLR' is pressed on TI-59.
+ * This should be called when 'CLR' is pressed on TI-59 and when TI-59 is turned
+ * on.
  */
 void s_display_x_edit_start(s_display_x_t *display_x);
 
@@ -58,10 +59,9 @@ void s_display_x_edit_digit(s_display_x_t *display_x, int d);
 void s_display_x_edit_dot(s_display_x_t *display_x);
 
 /**
- * In edit mode, changes the sign of the mantissa or exponent.
+ * Changes the sign of the mantissa or exponent.
  *
- * In non edit mode, does nothing. Instead 's_math_chs' should be called,
- * followed by 's_display_update_display'.
+ * In non edit mode, 's_math_chs' should be called too.
  */
 void s_display_x_edit_chs(s_display_x_t *display_x);
 
@@ -111,10 +111,8 @@ void s_display_x_update_display(s_display_x_t *display_x, n_t *X, int fix,
  * Updates X using the value on the display. For example if display is '3.15',
  * then X is updated with X.mant = 3150000000000 and X.exp = 0.
  *
- * Display should be in non edit mode before calling this method and will remain
- * in non edit mode after.
- *
- * This function should be called after the display has been edited.
+ * Before this call, display should be in edit mode. After this call, the
+ * display is put in non edit mode.
  */
 void s_display_x_update_x(s_display_x_t *display_x, n_t *X, s_err_t *err_out);
 
