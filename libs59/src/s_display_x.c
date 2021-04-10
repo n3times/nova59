@@ -85,6 +85,7 @@ void s_display_x_edit_clear(s_display_x_t *display_x) {
 
   display_x->display[0] = '0';
   display_x->display[1] = '\0';
+  display_x->blink = false;
   display_x->mode = DISPLAY_X_MODE_EDIT_MANT;
 
   CHECK_DISPLAY_EDIT(display_x);
@@ -238,23 +239,18 @@ void s_display_x_edit_iee(s_display_x_t *display_x) {
  *
  ******************************************************************************/
 
-void s_display_x_update_from_reg(s_display_x_t *display_x, n_t X, int fix,
-                                 n_format_t format, s_err_t *err_out) {
-  n_err_t n_err;
-  n_n2s(X, fix, format, display_x->display, &n_err);
-  if (err_out) {
-    *err_out = n_err ? true : false;
-  }
+void s_display_x_update_from_reg(s_display_x_t *display_x,
+                                 n_t X, int fix, n_format_t format) {
+  n_err_t err;
+  n_n2s(X, fix, format, display_x->display, &err);
+  if (err) display_x->blink = true;
   display_x->mode = DISPLAY_X_MODE_REG;
 }
 
-void s_display_x_update_reg(
-    s_display_x_t *display_x, n_t *X, s_err_t *err_out) {
+void s_display_x_update_reg(s_display_x_t *display_x, n_t *X) {
   assert(display_x->mode != DISPLAY_X_MODE_REG);
 
-  n_err_t n_err;
-  *X = n_s2n(display_x->display, &n_err);
-  if (err_out) {
-    *err_out = n_err ? true : false;
-  }
+  n_err_t err;
+  *X = n_s2n(display_x->display, &err);
+  if (err) display_x->blink = true;
 }

@@ -27,6 +27,7 @@ typedef enum s_display_x_mode_e {
 // The display showing register X or a number being edited.
 typedef struct s_display_x_s {
   char display[N_N2S_MAX_SIZE];  // display shows X or number being edited.
+  bool blink;                    // whether the display is blinking.
   s_display_x_mode_t mode;       // how to interpret the display.
 } s_display_x_t;
 
@@ -43,14 +44,20 @@ typedef struct s_display_x_s {
  * This function should be called:
  * - when TI-59 is turned on.
  * - when 'CLR' is pressed.
- * - when 'CE' is pressed and display is in edit mode.
- *
- * Do not call 's_display_x_update_from_reg' as we want to show '0' and not
- * '0.'.
  *
  * Mode: * -> DISPLAY_X_MODE_EDIT_MANT.
  */
 void s_display_x_edit_clear(s_display_x_t *display_x);
+
+/**
+ * Sets blink to false.
+ * In addition, if mode is edit, resets display to '0'.
+ *
+ * This function should be called, when 'CE' is pressed.
+ *
+ * Mode: * -> DISPLAY_X_MODE_EDIT_MANT.
+ */
+void s_display_x_edit_clear_entry(s_display_x_t *display_x);
 
 /**
  * In edit mode, adds digit 'd' to display if possible.
@@ -114,7 +121,8 @@ void s_display_x_edit_iee(s_display_x_t *display_x);
  ******************************************************************************/
 
 /**
- * Updates display and overflow flag using the values of X, fix and format.
+ * Updates display using the values of X, fix, format and sets the blink flag
+ * to true if overflow.
  *
  * This function should be called when X, fix or format are modified, or when
  * the display may start blinking because of overflow, after a key stroke.
@@ -135,11 +143,12 @@ void s_display_x_edit_iee(s_display_x_t *display_x);
  *
  * Mode: * -> register.
  */
-void s_display_x_update_from_reg(s_display_x_t *display_x, n_t X, int fix,
-                                 n_format_t format, s_err_t *err_out);
+void s_display_x_update_from_reg(s_display_x_t *display_x,
+                                 n_t X, int fix, n_format_t format);
 
 /**
- * Updates register X using the value on the display.
+ * Updates register X using the value on the display and sets the blink flag to
+ * true if overflow/underflow.
  *
  * This function should be called when, and only when, the display is in edit
  * mode and the user is done editing it.
@@ -154,6 +163,6 @@ void s_display_x_update_from_reg(s_display_x_t *display_x, n_t X, int fix,
  * Mode: edit     -> edit.
  *       register -> abort.
  */
-void s_display_x_update_reg(s_display_x_t *display_x, n_t *X, s_err_t *err_out);
+void s_display_x_update_reg(s_display_x_t *display_x, n_t *X);
 
 #endif  // S_DISPLAY_X_H
