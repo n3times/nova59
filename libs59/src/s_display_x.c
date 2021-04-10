@@ -95,7 +95,7 @@ void s_display_x_edit_digit(s_display_x_t *display_x, int digit) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_MODE_DISPLAY) {
+  if (display_x->mode == DISPLAY_X_MODE_REG) {
     display_x->display[0] = '0' + digit;
     display_x->display[1] = '\0';
     display_x->mode = DISPLAY_X_MODE_EDIT_MANT;
@@ -148,7 +148,7 @@ void s_display_x_edit_dot(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
   char *d = display_x->display;
 
-  if (display_x->mode == DISPLAY_X_MODE_DISPLAY) {
+  if (display_x->mode == DISPLAY_X_MODE_REG) {
     display_x->display[0] = '0';
     display_x->display[1] = '.';
     display_x->display[2] = '\0';
@@ -221,7 +221,7 @@ void s_display_x_edit_ee(s_display_x_t *display_x) {
 void s_display_x_edit_iee(s_display_x_t *display_x) {
   CHECK_DISPLAY_EDIT(display_x);
 
-  if (display_x->mode == DISPLAY_X_MODE_DISPLAY) return;
+  if (display_x->mode == DISPLAY_X_MODE_REG) return;
 
   display_x->mode = DISPLAY_X_MODE_EDIT_MANT;
 
@@ -234,27 +234,27 @@ void s_display_x_edit_iee(s_display_x_t *display_x) {
 
 /******************************************************************************
  *
- *  SYNCHRONIZATION DISPLAY X <=> REGISTER X.
+ *  SYNCHRONIZATION DISPLAY X <=> REG_X X.
  *
  ******************************************************************************/
 
-void s_display_x_update_display(s_display_x_t *display_x, n_t X, int fix,
-                                n_format_t format, s_err_t *err_out) {
+void s_display_x_update_from_reg(s_display_x_t *display_x, n_t X, int fix,
+                                 n_format_t format, s_err_t *err_out) {
   n_err_t n_err;
   n_n2s(X, fix, format, display_x->display, &n_err);
   if (err_out) {
     *err_out = n_err ? true : false;
   }
-  display_x->mode = DISPLAY_X_MODE_DISPLAY;
+  display_x->mode = DISPLAY_X_MODE_REG;
 }
 
-void s_display_x_update_x(s_display_x_t *display_x, n_t *X, s_err_t *err_out) {
-  assert(display_x->mode != DISPLAY_X_MODE_DISPLAY);
+void s_display_x_update_reg(
+    s_display_x_t *display_x, n_t *X, s_err_t *err_out) {
+  assert(display_x->mode != DISPLAY_X_MODE_REG);
 
   n_err_t n_err;
   *X = n_s2n(display_x->display, &n_err);
   if (err_out) {
     *err_out = n_err ? true : false;
   }
-  display_x->mode = DISPLAY_X_MODE_DISPLAY;
 }

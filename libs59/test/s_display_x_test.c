@@ -114,7 +114,7 @@ int main() {
   printf("\n");
   s_display_x_t display_x;
   s_display_x_edit_clear(&display_x);
-  s_display_x_update_display(&display_x, n_make(1e45), 9, N_FLOAT, NULL);
+  s_display_x_update_from_reg(&display_x, n_make(1e45), 9, N_FLOAT, NULL);
   printf("%s\n", display_x.display);
   s_display_x_edit_ee(&display_x);
   s_display_x_edit_digit(&display_x, 9);
@@ -125,7 +125,8 @@ int main() {
   // Replace last visible digit of number.
   printf("\n");
   s_display_x_edit_clear(&display_x);
-  s_display_x_update_display(&display_x, n_make(12345.54321), 4, N_FLOAT, NULL);
+  s_display_x_update_from_reg(&display_x, n_make(12345.54321), 4, N_FLOAT,
+                              NULL);
   printf("%s\n", display_x.display);
   s_display_x_edit_ee(&display_x);
   printf("%s\n", display_x.display);
@@ -136,17 +137,17 @@ int main() {
   printf("\n");
   for (int i = 0; i <= 9; i++) {
     s_display_x_edit_clear(&display_x);
-    s_display_x_update_display(&display_x, N_PI, i, N_FLOAT, NULL);
+    s_display_x_update_from_reg(&display_x, N_PI, i, N_FLOAT, NULL);
     s_display_x_edit_ee(&display_x);
     s_display_x_edit_iee(&display_x);
     n_t X;
-    s_display_x_update_x(&display_x, &X, NULL);
+    s_display_x_update_reg(&display_x, &X, NULL);
     char str[N_PRINT_MAX_SIZE];
     printf("%s : %s\n", n_print(X, str), display_x.display);
   }
 
   printf("\n");
-  s_display_x_update_display(&display_x, n_make(-0.01), 1, N_FLOAT, NULL);
+  s_display_x_update_from_reg(&display_x, n_make(-0.01), 1, N_FLOAT, NULL);
   s_display_x_edit_chs(&display_x);
   printf("%s\n", display_x.display);
 
