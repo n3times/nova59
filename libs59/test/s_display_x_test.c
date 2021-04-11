@@ -4,19 +4,19 @@
 
 static void test(char *input) {
   s_display_x_t display_x;
-  s_display_x_edit_clear(&display_x);
+  s_display_x_edit_init(&display_x);
 
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_x_edit_clear(&display_x);
+      s_display_x_edit_init(&display_x);
     } else if (*c == '-') {
       s_display_x_edit_chs(&display_x);
     } else if (*c == '.') {
       s_display_x_edit_dot(&display_x);
     } else if (*c == 'e') {
-      s_display_x_edit_ee(&display_x);
+      s_display_x_mode_ee(&display_x);
     } else if (*c == 'i') {
-      s_display_x_edit_iee(&display_x);
+      s_display_x_mode_iee(&display_x);
     } else if (*c >= '0' && *c <= '9') {
       s_display_x_edit_digit(&display_x, *c - '0');
     }
@@ -113,10 +113,10 @@ int main() {
   // Edit number.
   printf("\n");
   s_display_x_t display_x;
-  s_display_x_edit_clear(&display_x);
+  s_display_x_edit_init(&display_x);
   s_display_x_update_from_reg(&display_x, n_make(1e45), 9, N_FLOAT);
   printf("%s\n", display_x.display);
-  s_display_x_edit_ee(&display_x);
+  s_display_x_mode_ee(&display_x);
   s_display_x_edit_digit(&display_x, 9);
   s_display_x_edit_dot(&display_x);
   s_display_x_edit_digit(&display_x, 7);
@@ -124,10 +124,10 @@ int main() {
 
   // Replace last visible digit of number.
   printf("\n");
-  s_display_x_edit_clear(&display_x);
+  s_display_x_edit_init(&display_x);
   s_display_x_update_from_reg(&display_x, n_make(12345.54321), 4, N_FLOAT);
   printf("%s\n", display_x.display);
-  s_display_x_edit_ee(&display_x);
+  s_display_x_mode_ee(&display_x);
   printf("%s\n", display_x.display);
   s_display_x_edit_digit(&display_x, 5);
   printf("%s\n", display_x.display);
@@ -135,10 +135,10 @@ int main() {
   // Only keep visible digits of pi.
   printf("\n");
   for (int i = 0; i <= 9; i++) {
-    s_display_x_edit_clear(&display_x);
+    s_display_x_edit_init(&display_x);
     s_display_x_update_from_reg(&display_x, N_PI, i, N_FLOAT);
-    s_display_x_edit_ee(&display_x);
-    s_display_x_edit_iee(&display_x);
+    s_display_x_mode_ee(&display_x);
+    s_display_x_mode_iee(&display_x);
     n_t X;
     s_display_x_update_reg(&display_x, &X);
     char str[N_PRINT_MAX_SIZE];

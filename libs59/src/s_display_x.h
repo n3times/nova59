@@ -8,7 +8,6 @@
 #define S_DISPLAY_X_H
 
 #include "n59.h"
-#include "s_err.h"
 
 
 /******************************************************************************
@@ -17,18 +16,23 @@
  *
  ******************************************************************************/
 
-// Describes what the display is showing.
+/** Describes what the display is showing. */
 typedef enum s_display_x_mode_e {
   DISPLAY_X_MODE_REG,        // register X.
   DISPLAY_X_MODE_EDIT_MANT,  // a number whose mantissa is being edited.
   DISPLAY_X_MODE_EDIT_EXP    // a number whose exponent is being edited.
 } s_display_x_mode_t;
 
-// The display showing register X or a number being edited.
+/** The display and the state necessary for editing and showing it. */
 typedef struct s_display_x_s {
-  char display[N_N2S_MAX_SIZE];  // display shows X or number being edited.
+  char display[N_N2S_MAX_SIZE];  // X or number being edited.
   bool blink;                    // whether the display is blinking.
   s_display_x_mode_t mode;       // how to interpret the display.
+
+  n_t x;                         // number being shown.
+  int fix;                       // current fix value.
+  bool ee;                       // current ee mode.
+  bool eng;                      // current eng mode.
 } s_display_x_t;
 
 
@@ -39,29 +43,38 @@ typedef struct s_display_x_s {
  ******************************************************************************/
 
 /**
- * Sets/resets display to '0'.
+ * Inits display.
  *
- * This function should be called:
- * - when TI-59 is turned on.
- * - when 'CLR' is pressed.
+ * This function should be called when TI-59 is turned on.
+ *
+ * Mode: n/a -> DISPLAY_X_MODE_EDIT_MANT.
+ */
+void s_display_x_edit_init(s_display_x_t *display_x);
+
+/**
+ * Resets display to '0'.
+ *
+ * This function should be called when 'CLR' is pressed on TI-59.
  *
  * Mode: * -> DISPLAY_X_MODE_EDIT_MANT.
  */
 void s_display_x_edit_clear(s_display_x_t *display_x);
 
 /**
- * Sets blink to false.
- * In addition, if mode is edit, resets display to '0'.
+ * Sets blink to false. In addition, if mode is edit, resets display to '0'.
  *
- * This function should be called, when 'CE' is pressed.
+ * This function should be called when 'CE' is pressed on TI-59.
  *
- * Mode: * -> DISPLAY_X_MODE_EDIT_MANT.
+ * Mode: edit     -> DISPLAY_X_MODE_EDIT_MANT.
+ *       register -> register.
  */
 void s_display_x_edit_clear_entry(s_display_x_t *display_x);
 
 /**
  * In edit mode, adds digit 'd' to display if possible.
  * In register mode, sets display to 'd'.
+ *
+ * This function should be called when a digit is pressed on TI-59.
  *
  * Mode: * -> edit.
  */
@@ -70,6 +83,8 @@ void s_display_x_edit_digit(s_display_x_t *display_x, int d);
 /**
  * In edit mode, adds '.' to display, if not already present.
  * In register mode, sets display to '0.'.
+ *
+ * This function should be called when '.' is pressed on TI-59.
  *
  * Mode: * -> DISPLAY_X_MODE_EDIT_MANT.
  */
@@ -88,30 +103,47 @@ void s_display_x_edit_dot(s_display_x_t *display_x);
  */
 void s_display_x_edit_chs(s_display_x_t *display_x);
 
+
+/******************************************************************************
+ *
+ *  MODES.
+ *
+ ******************************************************************************/
+
+/** Updates fix. */
+void s_display_x_mode_fix(s_display_x_t *d, int fix);
+
 /**
- * Adds exponent ' 00' if it is missing and there is enough space.
+ * Sets scientific mode, sets display to edit mode and possibly adds exponent.
  *
- * If ' 00' is added or exponent is already present, sets 'mode' to
- * DISPLAY_X_MODE_EDIT_EXP. Otherwise, sets 'mode' to DISPLAY_X_MODE_EDIT_MANT.
+ * If there is no exponent and there is enough space, adds ' 00'. If ' 00' is
+ * added or exponent is already present, sets mode to DISPLAY_X_MODE_EDIT_EXP.
+ * Otherwise, sets mode to DISPLAY_X_MODE_EDIT_MANT.
  *
- * This should be called when 'EE' is pressed on TI-59. A separate function
- * ('s_mode_ee') should be called to set the EE mode.
+ * This should be called when 'EE' is pressed on TI-59.
  *
  * Mode: * -> edit.
  */
-void s_display_x_edit_ee(s_display_x_t *display_x);
+void s_display_x_mode_ee(s_display_x_t *d);
 
 /**
- * In edit mode, sets 'mode' to DISPLAY_X_MODE_EDIT_MANT.
- * In register mode, does nothing.
+ * Unsets scientific mode.
  *
- * This should be called when 'INV EE' is pressed on TI-59. A separate function
- * (s_mode_iee) should be called to unset the EE mode.
+ * In edit mode, sets 'mode' to DISPLAY_X_MODE_EDIT_MANT. In register mode, does
+ * nothing.
+ *
+ * This should be called when 'INV EE' is pressed on TI-59.
  *
  * Mode: edit     -> DISPLAY_X_MODE_EDIT_MANT.
  *       register -> abort or noop.
  */
-void s_display_x_edit_iee(s_display_x_t *display_x);
+void s_display_x_mode_iee(s_display_x_t *d);
+
+/** Sets engineering notation. */
+void s_display_x_mode_eng(s_display_x_t *d);
+
+/** Unsets engineering notation. */
+void s_display_x_mode_ieng(s_display_x_t *d);
 
 
 /******************************************************************************
@@ -145,6 +177,9 @@ void s_display_x_edit_iee(s_display_x_t *display_x);
  */
 void s_display_x_update_from_reg(s_display_x_t *display_x,
                                  n_t X, int fix, n_format_t format);
+
+// Update display, blink. (?)
+void s_display_x_update_x(s_display_x_t *display_x, n_t X);
 
 /**
  * Updates register X using the value on the display and sets the blink flag to
