@@ -293,12 +293,10 @@ void s_display_x_mode_fix(s_display_x_t *d, int fix) {
  *
  ******************************************************************************/
 
-void s_display_x_update_from_reg(s_display_x_t *d,
-                                 n_t X, int fix, n_format_t format) {
-  n_err_t err;
-  n_n2s(X, fix, format, d->display, &err);
-  if (err) d->blink = true;
+void s_display_x_update_x(s_display_x_t *d, n_t X) {
   d->mode = DISPLAY_X_MODE_REG;
+  d->x = X;
+  update_display(d);
 }
 
 void s_display_x_update_reg(s_display_x_t *d, n_t *X) {

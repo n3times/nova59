@@ -23,16 +23,16 @@ typedef enum s_display_x_mode_e {
   DISPLAY_X_MODE_EDIT_EXP    // a number whose exponent is being edited.
 } s_display_x_mode_t;
 
-/** The display and the state necessary for editing and showing it. */
+/** The display state. */
 typedef struct s_display_x_s {
   char display[N_N2S_MAX_SIZE];  // X or number being edited.
   bool blink;                    // whether the display is blinking.
   s_display_x_mode_t mode;       // how to interpret the display.
 
   n_t x;                         // number being shown.
-  int fix;                       // current fix value.
-  bool ee;                       // current ee mode.
-  bool eng;                      // current eng mode.
+  int fix;                       // fix value.
+  bool ee;                       // ee mode.
+  bool eng;                      // eng notation.
 } s_display_x_t;
 
 
@@ -96,8 +96,8 @@ void s_display_x_edit_dot(s_display_x_t *display_x);
  * This function should be called when '+/-' is pressed on TI-59. A separate
  * function ('s_math_chs') should be called to change the sign of X.
  *
- * Do not call 's_display_x_update_from_reg' as we want to show '-0' and not
- * '0', for example.
+ * Do not call 's_display_x_update_x' as we want to show '-0' and not '0', for
+ * example.
  *
  * Mode: keeps mode.
  */
@@ -153,32 +153,20 @@ void s_display_x_mode_ieng(s_display_x_t *d);
  ******************************************************************************/
 
 /**
- * Updates display using the values of X, fix, format and sets the blink flag
- * to true if overflow.
+ * Updates display using the updated X.
  *
- * This function should be called when X, fix or format are modified, or when
- * the display may start blinking because of overflow, after a key stroke.
+ * This function should be called when X.
  *
- * Examples:
- * - 'lnx': math function, X modified.
- * - 'Eng': possible format change.
- * - 'Fix 0 9.99 EE 99 STO': 'Fix', possible overflow, 'Fix 0', fix modified,
- *   'STO', definitive overflow.
- * - 'RCL 59': possible overflow after 'RCL'. Then X is modified after 'RCL 59'.
- *
+ * Examples: 'lnx', 'RCL 59'.
  * Non examples:
- * - '.', 'EE' or '0': editing keys
- * - 'Deg', 'Lbl' or 'RST': keep display in edit mode.
+ * - editing keys: '.', 'EE' or '0'.
+ * - keys that keep display in edit mode: 'Deg', 'Lbl' or 'RST'.
  *
  * This function should not be called when calling 's_display_x_clear' or
  * 's_display_x_chs'.
  *
  * Mode: * -> register.
  */
-void s_display_x_update_from_reg(s_display_x_t *display_x,
-                                 n_t X, int fix, n_format_t format);
-
-// Update display, blink. (?)
 void s_display_x_update_x(s_display_x_t *display_x, n_t X);
 
 /**
@@ -192,7 +180,7 @@ void s_display_x_update_x(s_display_x_t *display_x, n_t X);
  * as 'lnx', 'STO' and 'CP'. On the other hand, keys such as 'Lbl', 'Deg' and
  * '+/-', do not end editing mode.
  *
- * If this method is called, 's_display_x_update_from_reg' should be called just
+ * If this method is called, 's_display_x_update_x' should be called just
  * after the key that ends editing mode is evaluated.
  *
  * Mode: edit     -> edit.
