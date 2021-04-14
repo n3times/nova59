@@ -16,20 +16,25 @@
  *
  ******************************************************************************/
 
-/** Describes what the display is showing. */
+/** Whether register X is being displayed or edited. */
 typedef enum s_display_x_mode_e {
-  DISPLAY_X_MODE_REG,        // register X.
-  DISPLAY_X_MODE_EDIT_MANT,  // a number whose mantissa is being edited.
-  DISPLAY_X_MODE_EDIT_EXP    // a number whose exponent is being edited.
+  DISPLAY_X_MODE_REG,        // register X is being displayed.
+  DISPLAY_X_MODE_EDIT_MANT,  // X's mantissa is being edited.
+  DISPLAY_X_MODE_EDIT_EXP    // X's exponent is being edited.
 } s_display_x_mode_t;
 
-/** The display state. */
+/**
+ * The display state.
+ *
+ * In register mode, 'display' is fully determined by x, fix, ee and eng.
+ * In edit mode, 'display' is updated by editing key strokes such as digits and
+ * '.'.
+ */
 typedef struct s_display_x_s {
   char display[N_N2S_MAX_SIZE];  // X or number being edited.
-  bool blink;                    // whether the display is blinking.
   s_display_x_mode_t mode;       // how to interpret the display.
-
-  n_t x;                         // number being shown.
+  bool blink;                    // whether the display is blinking.
+  n_t x;                         // in register mode, number being shown.
   int fix;                       // fix value.
   bool ee;                       // ee mode.
   bool eng;                      // eng notation.
@@ -52,7 +57,7 @@ typedef struct s_display_x_s {
 void s_display_x_edit_init(s_display_x_t *display_x);
 
 /**
- * Resets display to '0'.
+ * Resets display to '0', no blinking and in edit mode.
  *
  * This function should be called when 'CLR' is pressed on TI-59.
  *
@@ -93,11 +98,12 @@ void s_display_x_edit_dot(s_display_x_t *display_x);
 /**
  * Changes the sign of the mantissa or exponent.
  *
- * This function should be called when '+/-' is pressed on TI-59. A separate
- * function ('s_math_chs') should be called to change the sign of X.
+ * This function should be called when '+/-' is pressed on TI-59. In register
+ * mode a separate function ('s_math_chs') should also be called to change the
+ * sign of X.
  *
- * Do not call 's_display_x_update_x' as we want to show '-0' and not '0', for
- * example.
+ * Typically when a function modifies X, 's_display_x_update_x' should be called
+ * but not in this case, as we want to show '-0' and not '0', for example.
  *
  * Mode: keeps mode.
  */
@@ -110,7 +116,13 @@ void s_display_x_edit_chs(s_display_x_t *display_x);
  *
  ******************************************************************************/
 
-/** Updates fix. */
+/**
+ * Updates fix.
+ *
+ * Updates display.
+ *
+ * Mode * -> register.
+ */
 void s_display_x_mode_fix(s_display_x_t *d, int fix);
 
 /**
@@ -129,20 +141,31 @@ void s_display_x_mode_ee(s_display_x_t *d);
 /**
  * Unsets scientific mode.
  *
- * In edit mode, sets 'mode' to DISPLAY_X_MODE_EDIT_MANT. In register mode, does
- * nothing.
+ * In edit mode, sets 'mode' to DISPLAY_X_MODE_EDIT_MANT.
  *
  * This should be called when 'INV EE' is pressed on TI-59.
  *
  * Mode: edit     -> DISPLAY_X_MODE_EDIT_MANT.
- *       register -> abort or noop.
+ *       register -> register.
  */
 void s_display_x_mode_iee(s_display_x_t *d);
 
-/** Sets engineering notation. */
+/**
+ * Sets engineering notation, possibly updating display.
+ *
+ * This should be called when 'Eng' is pressed on TI-59.
+ *
+ * Mode: * -> register.
+ */
 void s_display_x_mode_eng(s_display_x_t *d);
 
-/** Unsets engineering notation. */
+/**
+ * Unsets engineering notation, possibly updating display.
+ *
+ * This should be called when 'INV Eng' is pressed on TI-59.
+ *
+ * Mode: * -> register.
+ */
 void s_display_x_mode_ieng(s_display_x_t *d);
 
 
@@ -153,14 +176,16 @@ void s_display_x_mode_ieng(s_display_x_t *d);
  ******************************************************************************/
 
 /**
- * Updates display using the updated X.
+ * Updates display using X.
  *
- * This function should be called when X.
+ * This function should be called when register X has been modified by a
+ * function.
  *
  * Examples: 'lnx', 'RCL 59'.
  * Non examples:
  * - editing keys: '.', 'EE' or '0'.
  * - keys that keep display in edit mode: 'Deg', 'Lbl' or 'RST'.
+ * - keys/operations that don't change X: 'STO 59', 'CP'
  *
  * This function should not be called when calling 's_display_x_clear' or
  * 's_display_x_chs'.
@@ -169,9 +194,13 @@ void s_display_x_mode_ieng(s_display_x_t *d);
  */
 void s_display_x_update_x(s_display_x_t *display_x, n_t X);
 
+void s_display_x_set_blink(s_display_x_t *display_x);
+
 /**
- * Updates register X using the value on the display and sets the blink flag to
- * true if overflow/underflow.
+ * Determines and returns the number on the display.
+ *
+ * In addition, updates 'display', 'X', 'blink' if overflow/underflow, and sets
+ * 'mode' to register.
  *
  * This function should be called when, and only when, the display is in edit
  * mode and the user is done editing it.
@@ -186,6 +215,6 @@ void s_display_x_update_x(s_display_x_t *display_x, n_t X);
  * Mode: edit     -> edit.
  *       register -> abort.
  */
-void s_display_x_update_reg(s_display_x_t *display_x, n_t *X);
+n_t s_display_x_resolve_edit(s_display_x_t *display_x);
 
 #endif  // S_DISPLAY_X_H

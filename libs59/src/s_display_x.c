@@ -299,10 +299,17 @@ void s_display_x_update_x(s_display_x_t *d, n_t X) {
   update_display(d);
 }
 
-void s_display_x_update_reg(s_display_x_t *d, n_t *X) {
+n_t s_display_x_resolve_edit(s_display_x_t *d) {
   assert(d->mode != DISPLAY_X_MODE_REG);
 
   n_err_t err;
-  *X = n_s2n(d->display, &err);
+  n_t X = n_s2n(d->display, &err);
   if (err) d->blink = true;
+
+  ///
+  d->x = X;
+  d->mode = DISPLAY_X_MODE_REG;
+  update_display(d);
+
+  return X;
 }

@@ -141,8 +141,7 @@ int main() {
     s_display_x_update_x(&display_x, N_PI);
     s_display_x_mode_ee(&display_x);
     s_display_x_mode_iee(&display_x);
-    n_t X;
-    s_display_x_update_reg(&display_x, &X);
+    n_t X = s_display_x_resolve_edit(&display_x);
     char str[N_PRINT_MAX_SIZE];
     printf("%s : %s\n", n_print(X, str), display_x.display);
   }
