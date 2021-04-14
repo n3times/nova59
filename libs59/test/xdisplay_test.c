@@ -1,28 +1,35 @@
-#include "s_display_x.h"
+#include "xdisplay.h"
 
+#include <assert.h>
 #include <stdio.h>
 
-static void test(char *input) {
-  s_display_x_t display_x;
-  s_display_x_edit_init(&display_x);
-
+static void input(xdisplay_t *d, char * input) {
   for (char *c = input; *c != '\0'; c++) {
     if (*c == 'k') {
-      s_display_x_edit_init(&display_x);
+      xdisplay_edit_init(d);
     } else if (*c == '-') {
-      s_display_x_edit_chs(&display_x);
+      xdisplay_edit_chs(d);
     } else if (*c == '.') {
-      s_display_x_edit_dot(&display_x);
+      xdisplay_edit_dot(d);
     } else if (*c == 'e') {
-      s_display_x_mode_ee(&display_x);
+      xdisplay_mode_ee(d);
     } else if (*c == 'i') {
-      s_display_x_mode_iee(&display_x);
+      xdisplay_mode_iee(d);
+    } else if (*c == 'E') {
+      xdisplay_mode_eng(d);
+    } else if (*c == 'I') {
+      xdisplay_mode_ieng(d);
     } else if (*c >= '0' && *c <= '9') {
-      s_display_x_edit_digit(&display_x, *c - '0');
+      xdisplay_edit_digit(d, *c - '0');
     }
   }
+}
 
-  printf("%s\n", display_x.display);
+static void test(char *chars) {
+  xdisplay_t d;
+  xdisplay_edit_init(&d);
+  input(&d, chars);
+  printf("%s\n", d.display);
 }
 
 int main() {
@@ -112,46 +119,58 @@ int main() {
 
   // Edit number.
   printf("\n");
-  s_display_x_t display_x;
-  s_display_x_edit_init(&display_x);
-  s_display_x_update_x(&display_x, n_make(1e45));
-  printf("%s\n", display_x.display);
-  s_display_x_mode_ee(&display_x);
-  s_display_x_edit_digit(&display_x, 9);
-  s_display_x_edit_dot(&display_x);
-  s_display_x_edit_digit(&display_x, 7);
-  printf("%s\n", display_x.display);
+  xdisplay_t d;
+  xdisplay_edit_init(&d);
+  xdisplay_update_x(&d, n_make(1e45));
+  printf("%s\n", d.display);
+  xdisplay_mode_ee(&d);
+  xdisplay_edit_digit(&d, 9);
+  xdisplay_edit_dot(&d);
+  xdisplay_edit_digit(&d, 7);
+  printf("%s\n", d.display);
 
   // Replace last visible digit of number.
   printf("\n");
-  s_display_x_edit_init(&display_x);
-  s_display_x_mode_fix(&display_x, 4);
-  s_display_x_update_x(&display_x, n_make(12345.54321));
-  printf("%s\n", display_x.display);
-  s_display_x_mode_ee(&display_x);
-  printf("%s\n", display_x.display);
-  s_display_x_edit_digit(&display_x, 5);
-  printf("%s\n", display_x.display);
+  xdisplay_edit_init(&d);
+  xdisplay_mode_fix(&d, 4);
+  xdisplay_update_x(&d, n_make(12345.54321));
+  printf("%s\n", d.display);
+  xdisplay_mode_ee(&d);
+  printf("%s\n", d.display);
+  xdisplay_edit_digit(&d, 5);
+  printf("%s\n", d.display);
 
   // Only keep visible digits of pi.
   printf("\n");
   for (int i = 0; i <= 9; i++) {
-    s_display_x_edit_init(&display_x);
-    s_display_x_mode_fix(&display_x, i);
-    s_display_x_update_x(&display_x, N_PI);
-    s_display_x_mode_ee(&display_x);
-    s_display_x_mode_iee(&display_x);
-    n_t X = s_display_x_resolve_edit(&display_x);
+    xdisplay_edit_init(&d);
+    xdisplay_mode_fix(&d, i);
+    xdisplay_update_x(&d, N_PI);
+    xdisplay_mode_ee(&d);
+    xdisplay_mode_iee(&d);
+    n_t X = xdisplay_resolve_edit(&d);
     char str[N_PRINT_MAX_SIZE];
-    printf("%s : %s\n", n_print(X, str), display_x.display);
+    printf("%s : %s\n", n_print(X, str), d.display);
   }
 
+  // '0 = +/-'.
   printf("\n");
-  s_display_x_edit_init(&display_x);
-  s_display_x_mode_fix(&display_x, 1);
-  s_display_x_update_x(&display_x, n_make(-0.01));
-  s_display_x_edit_chs(&display_x);
-  printf("%s\n", display_x.display);
+  xdisplay_edit_init(&d);
+  xdisplay_update_x(&d, N_0);
+  xdisplay_edit_chs(&d);
+  printf("%s\n", d.display);
+
+  // 'Fix 0 9.9 EE 99 lnx'.
+  printf("\n");
+  xdisplay_edit_init(&d);
+  xdisplay_mode_fix(&d, 0);
+  input(&d, "9.9e99");
+  n_t X = xdisplay_resolve_edit(&d);
+  n_err_t err;
+  X = n_ln(X, &err);
+  xdisplay_update_x(&d, X);
+  printf("%s\n", d.display);
+  assert(!d.blink);
 
   return 0;
 }

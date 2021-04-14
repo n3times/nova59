@@ -9,7 +9,7 @@
 
 #include "n59.h"
 #include "s_err.h"
-#include "s_display_x.h"
+#include "xdisplay.h"
 
 
 /******************************************************************************
