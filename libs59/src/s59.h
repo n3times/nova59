@@ -260,7 +260,7 @@ void s_math_pi(n_t *X);
 
 /******************************************************************************
  *
- *  MODES.
+ *  TRIG.
  *
  ******************************************************************************/
 
@@ -272,21 +272,6 @@ void s_mode_rad(n_trig_t *trig);
 
 /** trig = N_GRAD. */
 void s_mode_grad(n_trig_t *trig);
-
-/** fix = val. */
-void s_mode_fix(int *fix, int val);
-
-/** ee = true. */
-void s_mode_ee(bool *ee);
-
-/** ee = false. */
-void s_mode_iee(bool *ee);
-
-/** eng = true. */
-void s_mode_eng(bool *eng);
-
-/** eng = false. */
-void s_mode_ieng(bool *eng);
 
 
 /******************************************************************************

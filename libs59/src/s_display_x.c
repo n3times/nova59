@@ -73,6 +73,11 @@ static void insert_at_end_mant(char *start_mant, char c) {
   *end_mant = c;
 }
 
+/**
+ * Updates the display taking into account 'x', 'fix', 'ee' and 'eng'.
+ *
+ * In case of overflow, sets 'blink' to true;
+ */
 static void update_display(s_display_x_t *d) {
   n_format_t format = d->eng ? N_ENG : d->ee ? N_SCI : N_FLOAT;
   n_err_t err;
@@ -305,11 +310,6 @@ n_t s_display_x_resolve_edit(s_display_x_t *d) {
   n_err_t err;
   n_t X = n_s2n(d->display, &err);
   if (err) d->blink = true;
-
-  ///
-  d->x = X;
-  d->mode = DISPLAY_X_MODE_REG;
-  update_display(d);
 
   return X;
 }
