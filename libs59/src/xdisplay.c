@@ -17,8 +17,8 @@ static bool is_digit(char c) {
   return c >= '0' && c <= '9';
 }
 
-static bool check_xdisplay(xdisplay_t * xdisplay) {
-  char *d = xdisplay->display;
+static bool check_xdisplay(xdisplay_t * x) {
+  char *d = x->display;
 
   // Should not start with "0d" or "-0d".
   if (*d == '-') d += 1;
@@ -41,7 +41,7 @@ static bool check_xdisplay(xdisplay_t * xdisplay) {
   bool is_exp = *d != '\0';
   if (!is_exp) {
     if (digit_count > 10) return false;
-    if (xdisplay->mode == XDISPLAY_MODE_EDIT_EXP) return false;
+    if (x->mode == XDISPLAY_MODE_EDIT_EXP) return false;
     return true;
   }
 
@@ -81,7 +81,7 @@ static void insert_at_end_mant(char *start_mant, char c) {
 static void update_display(xdisplay_t *d) {
   n_format_t format = d->eng ? N_ENG : d->ee ? N_SCI : N_FLOAT;
   n_err_t err;
-  n_n2s(d->x, d->fix, format, d->display, &err);
+  n_n2s(d->reg_x, d->fix, format, d->display, &err);
   if (err) d->blink = true;
 }
 
@@ -109,26 +109,26 @@ void xdisplay_edit_clear(xdisplay_t *d) {
   d->display[1] = '\0';
   d->blink = false;
   d->mode = XDISPLAY_MODE_EDIT_MANT;
-  d->x = N_0;
+  d->reg_x = N_0;
   d->ee = false;
 
   CHECK_DISPLAY_EDIT(d);
 }
 
-void xdisplay_edit_digit(xdisplay_t *xdisplay, int digit) {
+void xdisplay_edit_digit(xdisplay_t *x, int digit) {
   CHECK_D(digit);
-  CHECK_DISPLAY_EDIT(xdisplay);
-  char *d = xdisplay->display;
+  CHECK_DISPLAY_EDIT(x);
+  char *d = x->display;
 
-  if (xdisplay->mode == XDISPLAY_MODE_REG) {
-    xdisplay->display[0] = '0' + digit;
-    xdisplay->display[1] = '\0';
-    xdisplay->mode = XDISPLAY_MODE_EDIT_MANT;
+  if (x->mode == XDISPLAY_MODE_REG) {
+    x->display[0] = '0' + digit;
+    x->display[1] = '\0';
+    x->mode = XDISPLAY_MODE_EDIT_MANT;
     return;
   }
 
   // Add digit to exponent.
-  if (xdisplay->mode == XDISPLAY_MODE_EDIT_EXP) {
+  if (x->mode == XDISPLAY_MODE_EDIT_EXP) {
     int len = strlen(d);
     d[len - 2] = d[len - 1];
     d[len - 1] = '0' + digit;
@@ -169,29 +169,29 @@ void xdisplay_edit_digit(xdisplay_t *xdisplay, int digit) {
   insert_at_end_mant(d, '0' + digit);
 }
 
-void xdisplay_edit_dot(xdisplay_t *xdisplay) {
-  CHECK_DISPLAY_EDIT(xdisplay);
-  char *d = xdisplay->display;
+void xdisplay_edit_dot(xdisplay_t *x) {
+  CHECK_DISPLAY_EDIT(x);
+  char *d = x->display;
 
-  if (xdisplay->mode == XDISPLAY_MODE_REG) {
-    xdisplay->display[0] = '0';
-    xdisplay->display[1] = '.';
-    xdisplay->display[2] = '\0';
-    xdisplay->mode = XDISPLAY_MODE_EDIT_MANT;
+  if (x->mode == XDISPLAY_MODE_REG) {
+    x->display[0] = '0';
+    x->display[1] = '.';
+    x->display[2] = '\0';
+    x->mode = XDISPLAY_MODE_EDIT_MANT;
     return;
   }
 
-  xdisplay->mode = XDISPLAY_MODE_EDIT_MANT;
+  x->mode = XDISPLAY_MODE_EDIT_MANT;
   char *dot = strchr(d, '.');
   if (dot) return;
   insert_at_end_mant(d, '.');
 }
 
-void xdisplay_edit_chs(xdisplay_t *xdisplay) {
-  CHECK_DISPLAY_EDIT(xdisplay);
-  char *d = xdisplay->display;
+void xdisplay_edit_chs(xdisplay_t *x) {
+  CHECK_DISPLAY_EDIT(x);
+  char *d = x->display;
 
-  if (xdisplay->mode == XDISPLAY_MODE_EDIT_EXP) {
+  if (x->mode == XDISPLAY_MODE_EDIT_EXP) {
     char *sign = d + strlen(d) - 3;
     *sign = *sign == '-' ? ' ' : '-';
   } else {
@@ -212,19 +212,19 @@ void xdisplay_edit_chs(xdisplay_t *xdisplay) {
  *
  ******************************************************************************/
 
-void xdisplay_mode_ee(xdisplay_t *xdisplay) {
-  CHECK_DISPLAY_EDIT(xdisplay);
-  char *d = xdisplay->display;
+void xdisplay_mode_ee(xdisplay_t *x) {
+  CHECK_DISPLAY_EDIT(x);
+  char *d = x->display;
 
-  xdisplay->ee = true;
+  x->ee = true;
 
-  if (xdisplay->mode == XDISPLAY_MODE_EDIT_EXP) return;
+  if (x->mode == XDISPLAY_MODE_EDIT_EXP) return;
 
   // Add exponent if missing.
 
   char *end_mant = get_end_mant(d);
   if (*end_mant != '\0') {
-    xdisplay->mode = XDISPLAY_MODE_EDIT_EXP;
+    x->mode = XDISPLAY_MODE_EDIT_EXP;
     return;
   }
 
@@ -246,22 +246,22 @@ void xdisplay_mode_ee(xdisplay_t *xdisplay) {
     insert_at_end_mant(d, ' ');
     insert_at_end_mant(d, '0');
     insert_at_end_mant(d, '0');
-    xdisplay->mode = XDISPLAY_MODE_EDIT_EXP;
+    x->mode = XDISPLAY_MODE_EDIT_EXP;
   } else {
-    xdisplay->mode = XDISPLAY_MODE_EDIT_MANT;
+    x->mode = XDISPLAY_MODE_EDIT_MANT;
   }
 }
 
-void xdisplay_mode_iee(xdisplay_t *xdisplay) {
-  CHECK_DISPLAY_EDIT(xdisplay);
+void xdisplay_mode_iee(xdisplay_t *x) {
+  CHECK_DISPLAY_EDIT(x);
 
-  xdisplay->ee = false;
+  x->ee = false;
 
-  if (xdisplay->mode == XDISPLAY_MODE_REG) return;
+  if (x->mode == XDISPLAY_MODE_REG) return;
 
-  xdisplay->mode = XDISPLAY_MODE_EDIT_MANT;
+  x->mode = XDISPLAY_MODE_EDIT_MANT;
 
-  char *d = xdisplay->display;
+  char *d = x->display;
   int len = strlen(d);
   if (len >= 3 && d[len - 3] == ' ' && d[len - 2] == '0' && d[len - 1] == '0') {
     d[len - 3] = '\0';
@@ -293,9 +293,9 @@ void xdisplay_mode_fix(xdisplay_t *d, int fix) {
  *
  ******************************************************************************/
 
-void xdisplay_update_x(xdisplay_t *d, n_t X) {
+void xdisplay_update_reg_x(xdisplay_t *d, n_t X) {
   d->mode = XDISPLAY_MODE_REG;
-  d->x = X;
+  d->reg_x = X;
   update_display(d);
 }
 
