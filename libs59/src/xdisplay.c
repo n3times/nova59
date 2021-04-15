@@ -338,6 +338,7 @@ n_t xdisplay_resolve_edit(xdisplay_t *x) {
   n_t X = n_s2n(x->display, &err);
   x->reg_x = X;
   if (err) x->blinking = true;
+  x->mode = XDISPLAY_MODE_REG;
 
   return X;
 }

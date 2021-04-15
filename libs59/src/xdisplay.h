@@ -16,7 +16,7 @@
  *
  ******************************************************************************/
 
-/** Whether register X is being displayed or edited. */
+/** Indicate whether register X is being displayed or edited. */
 typedef enum xdisplay_mode_e {
   XDISPLAY_MODE_REG,             // X is being displayed.
   XDISPLAY_MODE_EDIT_MANT,       // X's mantissa is being edited.
@@ -26,7 +26,7 @@ typedef enum xdisplay_mode_e {
 /** The display state. */
 typedef struct xdisplay_s {
   char display[N_N2S_MAX_SIZE];  // how X, or its editing, appears on display.
-  xdisplay_mode_t mode;          // how to interpret the display.
+  xdisplay_mode_t mode;          // whether X is being edited or displayed.
   bool blinking;                 // whether the display is blinking.
 
   // Data used to display X in register mode.
@@ -53,7 +53,7 @@ typedef struct xdisplay_s {
 void xdisplay_init(xdisplay_t *x);
 
 /**
- * Resets 'x' except for 'fix' and 'eng.
+ * Resets 'x' except for 'fix' and 'eng'.
  *
  * This function should be called when 'CLR' is pressed.
  *
@@ -119,9 +119,7 @@ void xdisplay_chs(xdisplay_t *x);
  ******************************************************************************/
 
 /**
- * Updates fix.
- *
- * Updates display.
+ * Sets fix and updates display.
  *
  * Mode * -> register.
  */
@@ -131,8 +129,8 @@ void xdisplay_fix(xdisplay_t *x, int fix);
  * Sets scientific mode. Additionally, sets display to edit mode and possibly
  * adds exponent.
  *
- * If there is no exponent and there is enough space, adds ' 00'. If ' 00' is
- * added or exponent is already present, sets mode to XDISPLAY_MODE_EDIT_EXP.
+ * If there is no exponent and there is enough space, adds exponent '00'. If
+ * exponent is added or is already present, sets mode to XDISPLAY_MODE_EDIT_EXP.
  * Otherwise, sets mode to XDISPLAY_MODE_EDIT_MANT.
  *
  * This should be called when 'EE' is pressed.
@@ -173,7 +171,7 @@ void xdisplay_ieng(xdisplay_t *x);
 
 /******************************************************************************
  *
- *  MODES.
+ * SYNCHRONIZATION WITH REGISTER X.
  *
  ******************************************************************************/
 
@@ -206,7 +204,8 @@ void xdisplay_blink(xdisplay_t *x);
 void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
 
 /**
- * Returns the new value of register X based on the number on the display.
+ * In edit mode, updates reg_x based on the number on the display and returns
+ * the new value of reg_x. In addition puts 'x' in register mode.
  *
  * This function should be called when the display is in edit mode and the user
  * is done editing it.
@@ -215,7 +214,7 @@ void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
  * as 'lnx', 'STO' and 'CP'. On the other hand, keys such as 'Lbl', 'Deg' and
  * '+/-', do not end editing mode.
  *
- * Note that this function does not change the state of 'x'. To do so, the
+ * Note that this function does not change the display itself. To do so, the
  * caller of this function needs to call 'xdisplay_update_reg_x'. For example
  * for 'lnx':
  *   X = xdisplay_resolve_edit(&x);
