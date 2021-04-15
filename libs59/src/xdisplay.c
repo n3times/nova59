@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <string.h>
 
-#define CHECK_DISPLAY_EDIT(d) { CHECK(d); assert(check_xdisplay(d)); }
+#define CHECK_XDISPLAY(x) { CHECK(x); assert(check_xdisplay(x)); }
 
 
 /******************************************************************************
@@ -78,11 +78,11 @@ static void insert_at_end_mant(char *start_mant, char c) {
  *
  * In case of overflow, sets 'blinking' to true;
  */
-static void update_display(xdisplay_t *d) {
-  n_format_t format = d->eng ? N_ENG : d->ee ? N_SCI : N_FLOAT;
+static void update_display(xdisplay_t *x) {
+  n_format_t format = x->eng ? N_ENG : x->ee ? N_SCI : N_FLOAT;
   n_err_t err;
-  n_n2s(d->reg_x, d->fix, format, d->display, &err);
-  if (err) d->blinking = true;
+  n_n2s(x->reg_x, x->fix, format, x->display, &err);
+  if (err) x->blinking = true;
 }
 
 
@@ -92,47 +92,52 @@ static void update_display(xdisplay_t *d) {
  *
  ******************************************************************************/
 
-void xdisplay_init(xdisplay_t *d) {
-  CHECK(d);
+void xdisplay_init(xdisplay_t *x) {
+  CHECK(x);
 
-  xdisplay_clear(d);
-  d->eng = false;
-  d->fix = 9;
+  x->display[0] = '0';
+  x->display[1] = '\0';
+  x->blinking = false;
+  x->mode = XDISPLAY_MODE_EDIT_MANT;
+  x->reg_x = N_0;
+  x->ee = false;
+  x->eng = false;
+  x->fix = 9;
 
-  CHECK_DISPLAY_EDIT(d);
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_clear(xdisplay_t *d) {
-  CHECK(d);
+void xdisplay_clear(xdisplay_t *x) {
+  CHECK_XDISPLAY(x);
 
-  d->display[0] = '0';
-  d->display[1] = '\0';
-  d->blinking = false;
-  d->mode = XDISPLAY_MODE_EDIT_MANT;
-  d->reg_x = N_0;
-  d->ee = false;
+  x->display[0] = '0';
+  x->display[1] = '\0';
+  x->blinking = false;
+  x->mode = XDISPLAY_MODE_EDIT_MANT;
+  x->reg_x = N_0;
+  x->ee = false;
 
-  CHECK_DISPLAY_EDIT(d);
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_clear_entry(xdisplay_t *d) {
-  CHECK(d);
+void xdisplay_clear_entry(xdisplay_t *x) {
+  CHECK_XDISPLAY(x);
 
-  d->blinking = false;
+  x->blinking = false;
 
-  if (d->mode != XDISPLAY_MODE_REG) {
-    d->display[0] = '0';
-    d->display[1] = '\0';
-    d->mode = XDISPLAY_MODE_EDIT_MANT;
-    d->reg_x = N_0;
+  if (x->mode != XDISPLAY_MODE_REG) {
+    x->display[0] = '0';
+    x->display[1] = '\0';
+    x->mode = XDISPLAY_MODE_EDIT_MANT;
+    x->reg_x = N_0;
   }
 
-  CHECK_DISPLAY_EDIT(d);
+  CHECK_XDISPLAY(x);
 }
 
 void xdisplay_digit(xdisplay_t *x, int digit) {
+  CHECK_XDISPLAY(x);
   CHECK_D(digit);
-  CHECK_DISPLAY_EDIT(x);
   char *d = x->display;
 
   if (x->mode == XDISPLAY_MODE_REG) {
@@ -185,7 +190,7 @@ void xdisplay_digit(xdisplay_t *x, int digit) {
 }
 
 void xdisplay_dot(xdisplay_t *x) {
-  CHECK_DISPLAY_EDIT(x);
+  CHECK_XDISPLAY(x);
   char *d = x->display;
 
   if (x->mode == XDISPLAY_MODE_REG) {
@@ -203,7 +208,7 @@ void xdisplay_dot(xdisplay_t *x) {
 }
 
 void xdisplay_chs(xdisplay_t *x) {
-  CHECK_DISPLAY_EDIT(x);
+  CHECK_XDISPLAY(x);
   char *d = x->display;
 
   if (x->mode == XDISPLAY_MODE_EDIT_EXP) {
@@ -218,10 +223,12 @@ void xdisplay_chs(xdisplay_t *x) {
       d[0] = '-';
     }
   }
+
+  CHECK_XDISPLAY(x);
 }
 
 void xdisplay_ee(xdisplay_t *x) {
-  CHECK_DISPLAY_EDIT(x);
+  CHECK_XDISPLAY(x);
   char *d = x->display;
 
   x->ee = true;
@@ -261,7 +268,7 @@ void xdisplay_ee(xdisplay_t *x) {
 }
 
 void xdisplay_iee(xdisplay_t *x) {
-  CHECK_DISPLAY_EDIT(x);
+  CHECK_XDISPLAY(x);
 
   x->ee = false;
 
@@ -274,43 +281,63 @@ void xdisplay_iee(xdisplay_t *x) {
   if (len >= 3 && d[len - 3] == ' ' && d[len - 2] == '0' && d[len - 1] == '0') {
     d[len - 3] = '\0';
   }
+
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_eng(xdisplay_t *d) {
-  d->eng = true;
-  d->mode = XDISPLAY_MODE_REG;
-  update_display(d);
+void xdisplay_eng(xdisplay_t *x) {
+  CHECK_XDISPLAY(x);
+
+  x->eng = true;
+  x->mode = XDISPLAY_MODE_REG;
+  update_display(x);
+
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_ieng(xdisplay_t *d) {
-  d->eng = false;
-  d->mode = XDISPLAY_MODE_REG;
-  update_display(d);
+void xdisplay_ieng(xdisplay_t *x) {
+  CHECK_XDISPLAY(x);
+
+  x->eng = false;
+  x->mode = XDISPLAY_MODE_REG;
+  update_display(x);
+
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_fix(xdisplay_t *d, int fix) {
-  d->fix = fix;
-  d->mode = XDISPLAY_MODE_REG;
-  update_display(d);
+void xdisplay_fix(xdisplay_t *x, int fix) {
+  CHECK_XDISPLAY(x);
+
+  x->fix = fix;
+  x->mode = XDISPLAY_MODE_REG;
+  update_display(x);
+
+  CHECK_XDISPLAY(x);
 }
 
-void xdisplay_blink(xdisplay_t *d) {
-  d->blinking = true;
+void xdisplay_blink(xdisplay_t *x) {
+  CHECK_XDISPLAY(x);
+
+  x->blinking = true;
 }
 
-void xdisplay_update_reg_x(xdisplay_t *d, n_t X) {
-  d->mode = XDISPLAY_MODE_REG;
-  d->reg_x = X;
-  update_display(d);
+void xdisplay_update_reg_x(xdisplay_t *x, n_t X) {
+  CHECK_XDISPLAY(x);
+
+  x->mode = XDISPLAY_MODE_REG;
+  x->reg_x = X;
+  update_display(x);
+
+  CHECK_XDISPLAY(x);
 }
 
-n_t xdisplay_resolve_edit(xdisplay_t *d) {
-  assert(d->mode != XDISPLAY_MODE_REG);
+n_t xdisplay_resolve_edit(xdisplay_t *x) {
+  assert(x->mode != XDISPLAY_MODE_REG);
 
   n_err_t err;
-  n_t X = n_s2n(d->display, &err);
-  d->reg_x = X;
-  if (err) d->blinking = true;
+  n_t X = n_s2n(x->display, &err);
+  x->reg_x = X;
+  if (err) x->blinking = true;
 
   return X;
 }

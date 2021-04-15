@@ -18,14 +18,14 @@
 
 /** Whether register X is being displayed or edited. */
 typedef enum xdisplay_mode_e {
-  XDISPLAY_MODE_REG,             // register X is being displayed.
+  XDISPLAY_MODE_REG,             // X is being displayed.
   XDISPLAY_MODE_EDIT_MANT,       // X's mantissa is being edited.
   XDISPLAY_MODE_EDIT_EXP         // X's exponent is being edited.
 } xdisplay_mode_t;
 
 /** The display state. */
 typedef struct xdisplay_s {
-  char display[N_N2S_MAX_SIZE];  // X, possibly being edited.
+  char display[N_N2S_MAX_SIZE];  // how X, or its editing, appears on display.
   xdisplay_mode_t mode;          // how to interpret the display.
   bool blinking;                 // whether the display is blinking.
 
@@ -39,7 +39,7 @@ typedef struct xdisplay_s {
 
 /******************************************************************************
  *
- *  FUNCTIONS.
+ *  INIT & CLEAR.
  *
  ******************************************************************************/
 
@@ -70,6 +70,12 @@ void xdisplay_clear(xdisplay_t *x);
  *       register -> register.
  */
 void xdisplay_clear_entry(xdisplay_t *x);
+
+/******************************************************************************
+ *
+ *  EDIT.
+ *
+ ******************************************************************************/
 
 /**
  * In edit mode, adds 'd' to display if possible.
@@ -106,6 +112,12 @@ void xdisplay_dot(xdisplay_t *x);
  */
 void xdisplay_chs(xdisplay_t *x);
 
+/******************************************************************************
+ *
+ *  MODES.
+ *
+ ******************************************************************************/
+
 /**
  * Updates fix.
  *
@@ -116,7 +128,8 @@ void xdisplay_chs(xdisplay_t *x);
 void xdisplay_fix(xdisplay_t *x, int fix);
 
 /**
- * Sets scientific mode, sets display to edit mode and possibly adds exponent.
+ * Sets scientific mode. Additionally, sets display to edit mode and possibly
+ * adds exponent.
  *
  * If there is no exponent and there is enough space, adds ' 00'. If ' 00' is
  * added or exponent is already present, sets mode to XDISPLAY_MODE_EDIT_EXP.
@@ -158,6 +171,12 @@ void xdisplay_eng(xdisplay_t *x);
  */
 void xdisplay_ieng(xdisplay_t *x);
 
+/******************************************************************************
+ *
+ *  MODES.
+ *
+ ******************************************************************************/
+
 /**
  * Sets 'blinking' to true.
  *
@@ -191,7 +210,7 @@ void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
  *
  * This function should be called when the display is in edit mode and the user
  * is done editing it.
- * 
+ *
  * The user is done editing the display when one of several keys is pressed such
  * as 'lnx', 'STO' and 'CP'. On the other hand, keys such as 'Lbl', 'Deg' and
  * '+/-', do not end editing mode.
