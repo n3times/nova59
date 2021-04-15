@@ -27,7 +27,7 @@ typedef enum xdisplay_mode_e {
 typedef struct xdisplay_s {
   char display[N_N2S_MAX_SIZE];  // X, possibly being edited.
   xdisplay_mode_t mode;          // how to interpret the display.
-  bool blink;                    // whether the display is blinking.
+  bool blinking;                 // whether the display is blinking.
 
   // Data used to display X in register mode.
   n_t reg_x;                     // register X.
@@ -53,7 +53,7 @@ typedef struct xdisplay_s {
 void xdisplay_init(xdisplay_t *x);
 
 /**
- * Resets display to '0' and all the state of 'x' except for 'fix' and 'eng.
+ * Resets 'x' except for 'fix' and 'eng.
  *
  * This function should be called when 'CLR' is pressed.
  *
@@ -62,7 +62,7 @@ void xdisplay_init(xdisplay_t *x);
 void xdisplay_clear(xdisplay_t *x);
 
 /**
- * Sets blink to false. In addition, if mode is edit, resets display to '0'.
+ * Sets 'blinking' to false. In addition, in edit mode, resets display to '0'.
  *
  * This function should be called when 'CE' is pressed.
  *
@@ -159,7 +159,7 @@ void xdisplay_eng(xdisplay_t *x);
 void xdisplay_ieng(xdisplay_t *x);
 
 /**
- * Sets 'blink' to true.
+ * Sets 'blinking' to true.
  *
  * This function should be called in case of error.
  *
@@ -170,7 +170,7 @@ void xdisplay_ieng(xdisplay_t *x);
 void xdisplay_blink(xdisplay_t *x);
 
 /**
- * Updates display's state based on X.
+ * Updates xdisplay state based on reg_x.
  *
  * This function should be called when register X has been modified.
  *
@@ -180,7 +180,7 @@ void xdisplay_blink(xdisplay_t *x);
  * - keys that keep display in edit mode: 'Deg', 'Lbl' or 'RST'.
  * - keys/operations that don't change X: 'STO 59', 'CP'
  *
- * This function should not be called when calling 'xdisplay_chs'.
+ * Note: this function should not be called when calling 'xdisplay_chs'.
  *
  * Mode: * -> register.
  */

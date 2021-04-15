@@ -170,7 +170,7 @@ int main() {
   X = n_ln(X, &err);
   xdisplay_update_reg_x(&x, X);
   printf("%s\n", x.display);
-  assert(!x.blink);
+  assert(!x.blinking);
 
   return 0;
 }

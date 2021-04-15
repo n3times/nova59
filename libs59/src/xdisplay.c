@@ -76,13 +76,13 @@ static void insert_at_end_mant(char *start_mant, char c) {
 /**
  * Updates the display taking into account 'x', 'fix', 'ee' and 'eng'.
  *
- * In case of overflow, sets 'blink' to true;
+ * In case of overflow, sets 'blinking' to true;
  */
 static void update_display(xdisplay_t *d) {
   n_format_t format = d->eng ? N_ENG : d->ee ? N_SCI : N_FLOAT;
   n_err_t err;
   n_n2s(d->reg_x, d->fix, format, d->display, &err);
-  if (err) d->blink = true;
+  if (err) d->blinking = true;
 }
 
 
@@ -107,10 +107,25 @@ void xdisplay_clear(xdisplay_t *d) {
 
   d->display[0] = '0';
   d->display[1] = '\0';
-  d->blink = false;
+  d->blinking = false;
   d->mode = XDISPLAY_MODE_EDIT_MANT;
   d->reg_x = N_0;
   d->ee = false;
+
+  CHECK_DISPLAY_EDIT(d);
+}
+
+void xdisplay_clear_entry(xdisplay_t *d) {
+  CHECK(d);
+
+  d->blinking = false;
+
+  if (d->mode != XDISPLAY_MODE_REG) {
+    d->display[0] = '0';
+    d->display[1] = '\0';
+    d->mode = XDISPLAY_MODE_EDIT_MANT;
+    d->reg_x = N_0;
+  }
 
   CHECK_DISPLAY_EDIT(d);
 }
@@ -280,7 +295,7 @@ void xdisplay_fix(xdisplay_t *d, int fix) {
 }
 
 void xdisplay_blink(xdisplay_t *d) {
-  d->blink = true;
+  d->blinking = true;
 }
 
 void xdisplay_update_reg_x(xdisplay_t *d, n_t X) {
@@ -294,7 +309,8 @@ n_t xdisplay_resolve_edit(xdisplay_t *d) {
 
   n_err_t err;
   n_t X = n_s2n(d->display, &err);
-  if (err) d->blink = true;
+  d->reg_x = X;
+  if (err) d->blinking = true;
 
   return X;
 }
