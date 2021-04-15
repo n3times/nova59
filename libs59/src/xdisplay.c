@@ -88,21 +88,21 @@ static void update_display(xdisplay_t *d) {
 
 /******************************************************************************
  *
- *  EDITING.
+ *  IMPLEMENTATION.
  *
  ******************************************************************************/
 
-void xdisplay_edit_init(xdisplay_t *d) {
+void xdisplay_init(xdisplay_t *d) {
   CHECK(d);
 
-  xdisplay_edit_clear(d);
+  xdisplay_clear(d);
   d->eng = false;
   d->fix = 9;
 
   CHECK_DISPLAY_EDIT(d);
 }
 
-void xdisplay_edit_clear(xdisplay_t *d) {
+void xdisplay_clear(xdisplay_t *d) {
   CHECK(d);
 
   d->display[0] = '0';
@@ -115,7 +115,7 @@ void xdisplay_edit_clear(xdisplay_t *d) {
   CHECK_DISPLAY_EDIT(d);
 }
 
-void xdisplay_edit_digit(xdisplay_t *x, int digit) {
+void xdisplay_digit(xdisplay_t *x, int digit) {
   CHECK_D(digit);
   CHECK_DISPLAY_EDIT(x);
   char *d = x->display;
@@ -169,7 +169,7 @@ void xdisplay_edit_digit(xdisplay_t *x, int digit) {
   insert_at_end_mant(d, '0' + digit);
 }
 
-void xdisplay_edit_dot(xdisplay_t *x) {
+void xdisplay_dot(xdisplay_t *x) {
   CHECK_DISPLAY_EDIT(x);
   char *d = x->display;
 
@@ -187,7 +187,7 @@ void xdisplay_edit_dot(xdisplay_t *x) {
   insert_at_end_mant(d, '.');
 }
 
-void xdisplay_edit_chs(xdisplay_t *x) {
+void xdisplay_chs(xdisplay_t *x) {
   CHECK_DISPLAY_EDIT(x);
   char *d = x->display;
 
@@ -205,14 +205,7 @@ void xdisplay_edit_chs(xdisplay_t *x) {
   }
 }
 
-
-/******************************************************************************
- *
- *  MODES.
- *
- ******************************************************************************/
-
-void xdisplay_mode_ee(xdisplay_t *x) {
+void xdisplay_ee(xdisplay_t *x) {
   CHECK_DISPLAY_EDIT(x);
   char *d = x->display;
 
@@ -252,7 +245,7 @@ void xdisplay_mode_ee(xdisplay_t *x) {
   }
 }
 
-void xdisplay_mode_iee(xdisplay_t *x) {
+void xdisplay_iee(xdisplay_t *x) {
   CHECK_DISPLAY_EDIT(x);
 
   x->ee = false;
@@ -268,39 +261,32 @@ void xdisplay_mode_iee(xdisplay_t *x) {
   }
 }
 
-void xdisplay_mode_eng(xdisplay_t *d) {
+void xdisplay_eng(xdisplay_t *d) {
   d->eng = true;
   d->mode = XDISPLAY_MODE_REG;
   update_display(d);
 }
 
-void xdisplay_mode_ieng(xdisplay_t *d) {
+void xdisplay_ieng(xdisplay_t *d) {
   d->eng = false;
   d->mode = XDISPLAY_MODE_REG;
   update_display(d);
 }
 
-void xdisplay_mode_fix(xdisplay_t *d, int fix) {
+void xdisplay_fix(xdisplay_t *d, int fix) {
   d->fix = fix;
   d->mode = XDISPLAY_MODE_REG;
   update_display(d);
 }
 
-
-/******************************************************************************
- *
- *  SYNCHRONIZATION DISPLAY X <=> REG_X X.
- *
- ******************************************************************************/
+void xdisplay_blink(xdisplay_t *d) {
+  d->blink = true;
+}
 
 void xdisplay_update_reg_x(xdisplay_t *d, n_t X) {
   d->mode = XDISPLAY_MODE_REG;
   d->reg_x = X;
   update_display(d);
-}
-
-void xdisplay_set_blink(xdisplay_t *d) {
-  d->blink = true;
 }
 
 n_t xdisplay_resolve_edit(xdisplay_t *d) {

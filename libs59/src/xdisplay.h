@@ -2,9 +2,6 @@
  * xdisplay.h
  *
  * In charge of displaying and editing register X.
- *
- * Holds all the state necessary to display register X including fix, ee and
- * eng.
  */
 
 #ifndef XDISPLAY_H
@@ -33,7 +30,7 @@ typedef struct xdisplay_s {
   bool blink;                    // whether the display is blinking.
 
   // Data used to display X in register mode.
-  n_t reg_x;                     // a copy of register X.
+  n_t reg_x;                     // register X.
   int fix;                       // fix value.
   bool ee;                       // ee mode.
   bool eng;                      // eng notation.
@@ -42,7 +39,7 @@ typedef struct xdisplay_s {
 
 /******************************************************************************
  *
- *  EDITING.
+ *  FUNCTIONS.
  *
  ******************************************************************************/
 
@@ -53,16 +50,16 @@ typedef struct xdisplay_s {
  *
  * Mode: n/a -> XDISPLAY_MODE_EDIT_MANT.
  */
-void xdisplay_edit_init(xdisplay_t *x);
+void xdisplay_init(xdisplay_t *x);
 
 /**
- * Resets display to '0' and all the state except for 'fix' and 'eng.
+ * Resets display to '0' and all the state of 'x' except for 'fix' and 'eng.
  *
  * This function should be called when 'CLR' is pressed.
  *
  * Mode: * -> XDISPLAY_MODE_EDIT_MANT.
  */
-void xdisplay_edit_clear(xdisplay_t *x);
+void xdisplay_clear(xdisplay_t *x);
 
 /**
  * Sets blink to false. In addition, if mode is edit, resets display to '0'.
@@ -72,17 +69,17 @@ void xdisplay_edit_clear(xdisplay_t *x);
  * Mode: edit     -> XDISPLAY_MODE_EDIT_MANT.
  *       register -> register.
  */
-void xdisplay_edit_clear_entry(xdisplay_t *x);
+void xdisplay_clear_entry(xdisplay_t *x);
 
 /**
- * In edit mode, adds 'digit' to display if possible.
- * In register mode, sets display to 'digit'.
+ * In edit mode, adds 'd' to display if possible.
+ * In register mode, sets display to 'd'.
  *
  * This function should be called when a digit is pressed.
  *
  * Mode: * -> edit.
  */
-void xdisplay_edit_digit(xdisplay_t *x, int digit);
+void xdisplay_digit(xdisplay_t *x, int d);
 
 /**
  * In edit mode, adds '.' to display, if not already present.
@@ -92,7 +89,7 @@ void xdisplay_edit_digit(xdisplay_t *x, int digit);
  *
  * Mode: * -> XDISPLAY_MODE_EDIT_MANT.
  */
-void xdisplay_edit_dot(xdisplay_t *x);
+void xdisplay_dot(xdisplay_t *x);
 
 /**
  * Changes the sign of the mantissa or exponent.
@@ -107,14 +104,7 @@ void xdisplay_edit_dot(xdisplay_t *x);
  *
  * Mode: unchanged.
  */
-void xdisplay_edit_chs(xdisplay_t *x);
-
-
-/******************************************************************************
- *
- *  MODES.
- *
- ******************************************************************************/
+void xdisplay_chs(xdisplay_t *x);
 
 /**
  * Updates fix.
@@ -123,7 +113,7 @@ void xdisplay_edit_chs(xdisplay_t *x);
  *
  * Mode * -> register.
  */
-void xdisplay_mode_fix(xdisplay_t *x, int fix);
+void xdisplay_fix(xdisplay_t *x, int fix);
 
 /**
  * Sets scientific mode, sets display to edit mode and possibly adds exponent.
@@ -136,7 +126,7 @@ void xdisplay_mode_fix(xdisplay_t *x, int fix);
  *
  * Mode: * -> edit.
  */
-void xdisplay_mode_ee(xdisplay_t *x);
+void xdisplay_ee(xdisplay_t *x);
 
 /**
  * Unsets scientific mode.
@@ -148,7 +138,7 @@ void xdisplay_mode_ee(xdisplay_t *x);
  * Mode: edit     -> XDISPLAY_MODE_EDIT_MANT.
  *       register -> register.
  */
-void xdisplay_mode_iee(xdisplay_t *x);
+void xdisplay_iee(xdisplay_t *x);
 
 /**
  * Sets engineering notation, possibly updating display.
@@ -157,7 +147,7 @@ void xdisplay_mode_iee(xdisplay_t *x);
  *
  * Mode: * -> register.
  */
-void xdisplay_mode_eng(xdisplay_t *x);
+void xdisplay_eng(xdisplay_t *x);
 
 /**
  * Unsets engineering notation, possibly updating display.
@@ -166,14 +156,18 @@ void xdisplay_mode_eng(xdisplay_t *x);
  *
  * Mode: * -> register.
  */
-void xdisplay_mode_ieng(xdisplay_t *x);
+void xdisplay_ieng(xdisplay_t *x);
 
-
-/******************************************************************************
+/**
+ * Sets 'blink' to true.
  *
- *  SYNCHRONIZATION DISPLAY X <=> REGISTER X.
+ * This function should be called in case of error.
  *
- ******************************************************************************/
+ * Examples: 'STO STO', '0 lnx'.
+ *
+ * Mode: unchanged.
+ */
+void xdisplay_blink(xdisplay_t *x);
 
 /**
  * Updates display's state based on X.
@@ -186,22 +180,11 @@ void xdisplay_mode_ieng(xdisplay_t *x);
  * - keys that keep display in edit mode: 'Deg', 'Lbl' or 'RST'.
  * - keys/operations that don't change X: 'STO 59', 'CP'
  *
- * This function should not be called when calling 'xdisplay_edit_chs'.
+ * This function should not be called when calling 'xdisplay_chs'.
  *
  * Mode: * -> register.
  */
 void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
-
-/**
- * Updates 'blink' flag.
- *
- * This function should be called in case of error.
- *
- * Examples: 'STO STO', '0 lnx'.
- *
- * Mode: unchanged.
- */
-void xdisplay_set_blink(xdisplay_t *x);
 
 /**
  * Returns the new value of register X based on the number on the display.
@@ -219,7 +202,7 @@ void xdisplay_set_blink(xdisplay_t *x);
  *   X = xdisplay_resolve_edit(&x);
  *   s_math_ln(&X, &err);
  *   xdisplay_update_reg_x(&x, X);
- *   if (err) xdisplay_set_blink(&x);
+ *   if (err) xdisplay_blink(&x);
  *
  * Mode: edit     -> edit.
  *       register -> abort.
