@@ -16,7 +16,7 @@
  *
  ******************************************************************************/
 
-/** Indicate whether register X is being displayed or edited. */
+/** Indicates whether register X is being displayed or edited. */
 typedef enum xdisplay_mode_e {
   XDISPLAY_MODE_REG,             // X is being displayed.
   XDISPLAY_MODE_EDIT_MANT,       // X's mantissa is being edited.
@@ -25,7 +25,7 @@ typedef enum xdisplay_mode_e {
 
 /** The display state. */
 typedef struct xdisplay_s {
-  char display[N_N2S_MAX_SIZE];  // how X, or its editing, appears on display.
+  char display[N_N2S_MAX_SIZE];  // string on the display, such as '1.2'.
   xdisplay_mode_t mode;          // whether X is being edited or displayed.
   bool blinking;                 // whether the display is blinking.
 
@@ -46,7 +46,7 @@ typedef struct xdisplay_s {
 /**
  * Inits display.
  *
- * This function should be called when TI-59 is turned on.
+ * Called when TI-59 is turned on.
  *
  * Mode: n/a -> XDISPLAY_MODE_EDIT_MANT.
  */
@@ -55,7 +55,7 @@ void xdisplay_init(xdisplay_t *x);
 /**
  * Resets 'x' except for 'fix' and 'eng'.
  *
- * This function should be called when 'CLR' is pressed.
+ * Called on 'CLR'.
  *
  * Mode: * -> XDISPLAY_MODE_EDIT_MANT.
  */
@@ -64,7 +64,7 @@ void xdisplay_clear(xdisplay_t *x);
 /**
  * Sets 'blinking' to false. In addition, in edit mode, resets display to '0'.
  *
- * This function should be called when 'CE' is pressed.
+ * Called on 'CE'.
  *
  * Mode: edit     -> XDISPLAY_MODE_EDIT_MANT.
  *       register -> register.
@@ -81,7 +81,7 @@ void xdisplay_clear_entry(xdisplay_t *x);
  * In edit mode, adds 'd' to display if possible.
  * In register mode, sets display to 'd'.
  *
- * This function should be called when a digit is pressed.
+ * Called on '0'-'9'.
  *
  * Mode: * -> edit.
  */
@@ -91,7 +91,7 @@ void xdisplay_digit(xdisplay_t *x, int d);
  * In edit mode, adds '.' to display, if not already present.
  * In register mode, sets display to '0.'.
  *
- * This function should be called when '.' is pressed.
+ * Called on '.'.
  *
  * Mode: * -> XDISPLAY_MODE_EDIT_MANT.
  */
@@ -100,13 +100,14 @@ void xdisplay_dot(xdisplay_t *x);
 /**
  * Changes the sign of the mantissa or exponent.
  *
- * This function should be called when '+/-' is pressed. In register mode a
- * separate function ('s_math_chs') should also be called to change the sign of
- * X.
+ * In register mode a separate function ('s_math_chs') should also be called to
+ * change the sign of X.
  *
  * Typically when a function modifies X, 'xdisplay_update_reg_x' should be
  * called but not in this case, as we want to show '-0' and not '0', for
  * example.
+ *
+ * Called on '+/-'.
  *
  * Mode: unchanged.
  */
@@ -121,6 +122,8 @@ void xdisplay_chs(xdisplay_t *x);
 /**
  * Sets fix and updates display.
  *
+ * Called on 'Fix d'.
+ *
  * Mode * -> register.
  */
 void xdisplay_fix(xdisplay_t *x, int fix);
@@ -133,7 +136,7 @@ void xdisplay_fix(xdisplay_t *x, int fix);
  * exponent is added or is already present, sets mode to XDISPLAY_MODE_EDIT_EXP.
  * Otherwise, sets mode to XDISPLAY_MODE_EDIT_MANT.
  *
- * This should be called when 'EE' is pressed.
+ * Called on 'EE'.
  *
  * Mode: * -> edit.
  */
@@ -144,7 +147,7 @@ void xdisplay_ee(xdisplay_t *x);
  *
  * In edit mode, sets 'mode' to XDISPLAY_MODE_EDIT_MANT.
  *
- * This should be called when 'INV EE' is pressed.
+ * Called on 'INV EE'.
  *
  * Mode: edit     -> XDISPLAY_MODE_EDIT_MANT.
  *       register -> register.
@@ -154,7 +157,7 @@ void xdisplay_iee(xdisplay_t *x);
 /**
  * Sets engineering notation, possibly updating display.
  *
- * This should be called when 'Eng' is pressed.
+ * Called on 'Eng'.
  *
  * Mode: * -> register.
  */
@@ -163,7 +166,7 @@ void xdisplay_eng(xdisplay_t *x);
 /**
  * Unsets engineering notation, possibly updating display.
  *
- * This should be called when 'INV Eng' is pressed.
+ * Called on 'INV Eng'.
  *
  * Mode: * -> register.
  */
