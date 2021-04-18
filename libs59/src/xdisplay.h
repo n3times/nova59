@@ -27,7 +27,8 @@ typedef enum xdisplay_mode_e {
 typedef struct xdisplay_s {
   char display[N_N2S_MAX_SIZE];  // string on the display, such as '1.2'.
   xdisplay_mode_t mode;          // whether X is being edited or displayed.
-  bool blinking;                 // whether the display is blinking.
+  bool overflow;                 // whether there is overflow.
+
   n_t reg_x;                     // register X.
   int fix;                       // fix value.
   bool ee;                       // ee mode.
@@ -60,7 +61,7 @@ void xdisplay_init(xdisplay_t *x);
 void xdisplay_clear(xdisplay_t *x);
 
 /**
- * Sets 'blinking' to false. In addition, in edit mode, resets display to '0'.
+ * In edit mode, resets display to '0'.
  *
  * Called on 'CE'.
  *
@@ -170,22 +171,12 @@ void xdisplay_eng(xdisplay_t *x);
  */
 void xdisplay_ieng(xdisplay_t *x);
 
+
 /******************************************************************************
  *
  * SYNCHRONIZATION WITH REGISTER X.
  *
  ******************************************************************************/
-
-/**
- * Sets 'blinking' to true.
- *
- * Called in case of error.
- *
- * Examples: 'STO STO', '0 lnx'.
- *
- * Mode: unchanged.
- */
-void xdisplay_blink(xdisplay_t *x);
 
 /**
  * Updates xdisplay state based on reg_x.
@@ -205,8 +196,9 @@ void xdisplay_blink(xdisplay_t *x);
 void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
 
 /**
- * In edit mode, updates reg_x based on the number on the display and returns
- * the new value of reg_x. In addition puts 'x' in register mode.
+ * In edit mode, updates 'reg_x' based on the number on the display and returns
+ * the new value of 'reg_x'. In addition puts 'x' in register mode and updates
+ * 'display' and 'overflow'.
  *
  * This function should be called when the display is in edit mode and the user
  * is done editing it.
@@ -215,17 +207,15 @@ void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
  * as 'lnx', 'STO' and 'CP'. On the other hand, keys such as 'Lbl', 'Deg' and
  * '+/-', do not end editing mode.
  *
- * Note that this function does not change the display itself. To do so, the
- * caller of this function needs to call 'xdisplay_update_reg_x'. For example
- * for 'lnx':
+ * For example for 'lnx':
  *   X = xdisplay_resolve_edit(&x);
  *   s_math_ln(&X, &err);
  *   xdisplay_update_reg_x(&x, X);
- *   if (err) xdisplay_blink(&x);
+ *   if (err) ...;
  *
- * Mode: edit     -> edit.
+ * Mode: edit     -> register.
  *       register -> abort.
  */
-n_t xdisplay_resolve_edit(xdisplay_t *x);
+n_t xdisplay_resolve_edit(xdisplay_t *x, n_err_t *err);
 
 #endif  // XDISPLAY_H

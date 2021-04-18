@@ -148,7 +148,7 @@ int main() {
     xdisplay_update_reg_x(&x, N_PI);
     xdisplay_ee(&x);
     xdisplay_iee(&x);
-    n_t X = xdisplay_resolve_edit(&x);
+    n_t X = xdisplay_resolve_edit(&x, NULL);
     char str[N_PRINT_MAX_SIZE];
     printf("%s : %s\n", n_print(X, str), x.display);
   }
@@ -165,12 +165,14 @@ int main() {
   xdisplay_init(&x);
   xdisplay_fix(&x, 0);
   input(&x, "9.9e99");
-  n_t X = xdisplay_resolve_edit(&x);
+  n_err_t s_err;
+  n_t X = xdisplay_resolve_edit(&x, &s_err);
+  assert(!s_err);
   n_err_t err;
   X = n_ln(X, &err);
   xdisplay_update_reg_x(&x, X);
   printf("%s\n", x.display);
-  assert(!x.blinking);
+  assert(!x.overflow);
 
   return 0;
 }
