@@ -28,8 +28,6 @@ typedef struct xdisplay_s {
   char display[N_N2S_MAX_SIZE];  // string on the display, such as '1.2'.
   xdisplay_mode_t mode;          // whether X is being edited or displayed.
   bool blinking;                 // whether the display is blinking.
-
-  // Data used to display X in register mode.
   n_t reg_x;                     // register X.
   int fix;                       // fix value.
   bool ee;                       // ee mode.
@@ -78,7 +76,7 @@ void xdisplay_clear_entry(xdisplay_t *x);
  ******************************************************************************/
 
 /**
- * In edit mode, adds 'd' to display if possible.
+ * In edit mode, adds 'd' to number on display if possible.
  * In register mode, sets display to 'd'.
  *
  * Called on '0'-'9'.
@@ -88,7 +86,7 @@ void xdisplay_clear_entry(xdisplay_t *x);
 void xdisplay_digit(xdisplay_t *x, int d);
 
 /**
- * In edit mode, adds '.' to display, if not already present.
+ * In edit mode, adds '.' to number on display, if not already present.
  * In register mode, sets display to '0.'.
  *
  * Called on '.'.
@@ -181,7 +179,7 @@ void xdisplay_ieng(xdisplay_t *x);
 /**
  * Sets 'blinking' to true.
  *
- * This function should be called in case of error.
+ * Called in case of error.
  *
  * Examples: 'STO STO', '0 lnx'.
  *
@@ -192,7 +190,7 @@ void xdisplay_blink(xdisplay_t *x);
 /**
  * Updates xdisplay state based on reg_x.
  *
- * This function should be called when register X has been modified.
+ * Called when register X has been modified.
  *
  * Examples: 'lnx', 'RCL 59'.
  * Non examples:
