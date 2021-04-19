@@ -179,7 +179,7 @@ void xdisplay_ieng(xdisplay_t *x);
  ******************************************************************************/
 
 /**
- * Updates xdisplay state based on reg_x.
+ * Sets 'reg_x', possibly updating display.
  *
  * Called when register X has been modified.
  *
@@ -196,9 +196,13 @@ void xdisplay_ieng(xdisplay_t *x);
 void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
 
 /**
- * In edit mode, updates 'reg_x' based on the number on the display and returns
- * the new value of 'reg_x'. In addition puts 'x' in register mode and updates
- * 'display' and 'overflow'.
+ * Resolves edit mode by determining reg_x based on the number on the display.
+ * The display is then updated based on the new value of reg_x.
+ * For example if display is '12 12' and fix is 9 then
+ * reg_x = { 1200000000000, 13 } and display becomes '1.2 13'.
+ *
+ * This operation can result in 2 errors. If the number on the display does
+ * not fit an n_t number ('99 99 or '0.9-99' for example).
  *
  * This function should be called when the display is in edit mode and the user
  * is done editing it.
@@ -216,6 +220,6 @@ void xdisplay_update_reg_x(xdisplay_t *x, n_t X);
  * Mode: edit     -> register.
  *       register -> abort.
  */
-n_t xdisplay_resolve_edit(xdisplay_t *x, n_err_t *err);
+void xdisplay_resolve_edit(xdisplay_t *x, n_err_t *err);
 
 #endif  // XDISPLAY_H

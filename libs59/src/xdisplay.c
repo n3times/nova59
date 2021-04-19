@@ -79,7 +79,9 @@ static void insert_at_end_mant(char *start_mant, char c) {
 static void update_display(xdisplay_t *x) {
   n_format_t format = x->eng ? N_ENG : x->ee ? N_SCI : N_FLOAT;
   n_err_t err;
+
   n_n2s(x->reg_x, x->fix, format, x->display, &err);
+  x->mode = XDISPLAY_MODE_REG;
   x->overflow = err;
 }
 
@@ -97,6 +99,7 @@ void xdisplay_init(xdisplay_t *x) {
   x->display[1] = '\0';
   x->mode = XDISPLAY_MODE_EDIT_MANT;
   x->overflow = false;
+
   x->reg_x = N_0;
   x->ee = false;
   x->eng = false;
@@ -112,6 +115,7 @@ void xdisplay_clear(xdisplay_t *x) {
   x->display[1] = '\0';
   x->mode = XDISPLAY_MODE_EDIT_MANT;
   x->overflow = false;
+
   x->reg_x = N_0;
   x->ee = false;
 
@@ -124,8 +128,9 @@ void xdisplay_clear_entry(xdisplay_t *x) {
   if (x->mode != XDISPLAY_MODE_REG) {
     x->display[0] = '0';
     x->display[1] = '\0';
-    x->overflow = false;
     x->mode = XDISPLAY_MODE_EDIT_MANT;
+    x->overflow = false;
+
     x->reg_x = N_0;
   }
 
@@ -286,7 +291,7 @@ void xdisplay_eng(xdisplay_t *x) {
   CHECK_XDISPLAY(x);
 
   x->eng = true;
-  x->mode = XDISPLAY_MODE_REG;
+
   update_display(x);
 
   CHECK_XDISPLAY(x);
@@ -296,7 +301,7 @@ void xdisplay_ieng(xdisplay_t *x) {
   CHECK_XDISPLAY(x);
 
   x->eng = false;
-  x->mode = XDISPLAY_MODE_REG;
+
   update_display(x);
 
   CHECK_XDISPLAY(x);
@@ -306,7 +311,7 @@ void xdisplay_fix(xdisplay_t *x, int fix) {
   CHECK_XDISPLAY(x);
 
   x->fix = fix;
-  x->mode = XDISPLAY_MODE_REG;
+
   update_display(x);
 
   CHECK_XDISPLAY(x);
@@ -316,19 +321,16 @@ void xdisplay_update_reg_x(xdisplay_t *x, n_t X) {
   CHECK_XDISPLAY(x);
 
   x->reg_x = X;
-  x->mode = XDISPLAY_MODE_REG;
+
   update_display(x);
 
   CHECK_XDISPLAY(x);
 }
 
-n_t xdisplay_resolve_edit(xdisplay_t *x, n_err_t *err) {
+void xdisplay_resolve_edit(xdisplay_t *x, n_err_t *err) {
   assert(x->mode != XDISPLAY_MODE_REG);
 
-  n_t X = n_s2n(x->display, err);
-  x->reg_x = X;
-  x->mode = XDISPLAY_MODE_REG;
-  update_display(x);
+  x->reg_x = n_s2n(x->display, err);
 
-  return X;
+  update_display(x);
 }
