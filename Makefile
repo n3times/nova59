@@ -9,4 +9,3 @@ debug:
 clean:
 	make clean -C libn59
 	make clean -C libs59
-	rm -rf libs

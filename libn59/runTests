@@ -1,9 +1,9 @@
 test () {
-  c=${i#test/}
+  c=${i#tests/}
   c=${c%.c}
-  gcc -Wall -Isrc/. -L../libs -ln59 test/$c.c
+  gcc -Wall -Iinclude/. -Llibs -ln59 tests/$c.c
   ./a.out > tmp
-  wc=`diff golden/$c.golden tmp | wc -l`
+  wc=`diff tests/golden/$c.golden tmp | wc -l`
   if [ $wc = 0 ]
   then
     echo "$c: PASS"
@@ -13,7 +13,7 @@ test () {
 }
 
 test_all () {
-  for i in test/*.c ;
+  for i in tests/*.c ;
   do
     test $i
     echo ""
