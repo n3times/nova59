@@ -1,16 +1,14 @@
-C library that supports common operations on TI-59 numbers.
-
-This library can be used to help implement a TI-59 emulator or, more generally,
-a scientific calculator.
-
-Operations supported:
+C library that supports common operations on TI-59 numbers:
 - arithmetic operators
 - math functions
 - conversions between numbers and doubles
 - conversions between numbers and strings 
 
+This library can be used to help implement a TI-59 emulator or, more generally,
+a scientific calculator.
+
 Build library: make
 Build library in debug mode: make debug
 
 Run tests: ./runTests
-Run app: ./runApp
+Run app: bin/app
