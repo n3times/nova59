@@ -17,7 +17,5 @@ app: lib
 	gcc -Iinclude -lncurses -Llibs -ln59 -Wall app/sample.c -o bin/app
 
 clean:
-	rm -f *.o
-	rm -f tmp a.out
 	rm -rf libs
 	rm -rf bin
